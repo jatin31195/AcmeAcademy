@@ -1,26 +1,34 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import { ProtectedRoute, PublicRoute } from "./routes/Routes";
+import Navbar from "./components/layout/Navbar";
 
 function App() {
+  const location = useLocation();
+  const hideNavbar = location.pathname === "/login" || location.pathname === "/signup";
+
   return (
-    <Routes>
-      {/* Public routes */}
-      <Route element={<PublicRoute />}>
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-      </Route>
+    <>
+      {!hideNavbar && <Navbar />}
 
-      {/* Protected routes */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/home" element={<Home />} />
-      </Route>
+      <Routes>
+        {/* Public routes */}
+        <Route element={<PublicRoute />}>
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+        </Route>
 
-      {/* Default/fallback */}
-      <Route path="*" element={<Signup />} />
-    </Routes>
+        {/* Protected routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/home" element={<Home />} />
+        </Route>
+
+        {/* Default/fallback */}
+        <Route path="*" element={<Signup />} />
+      </Routes>
+    </>
   );
 }
 
