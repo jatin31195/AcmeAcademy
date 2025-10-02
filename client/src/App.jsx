@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import { ProtectedRoute, PublicRoute } from "./routes/Routes";
 import Navbar from "./components/layout/Navbar";
+import About from "./pages/About";
 
 function App() {
   const location = useLocation();
@@ -23,6 +24,7 @@ function App() {
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
+          <Route path="/about" element={<About/>}/>
         </Route>
 
         {/* Default/fallback */}

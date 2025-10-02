@@ -7,7 +7,7 @@ import { getMe } from "./src/utils/me.js";
 const app = express();
 
 app.use(cors({
-  origin: 'https://54c618dfa4a8.ngrok-free.app',
+  origin: ['https://54c618dfa4a8.ngrok-free.app','http://localhost:5173'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));

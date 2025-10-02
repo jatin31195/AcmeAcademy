@@ -25,10 +25,10 @@ export const loginUser = async (req, res) => {
     const { user, accessToken, refreshToken } = await userService.loginUser({ email, password });
 
     const cookieOptions = {
-      httpOnly: true,
-      secure:process.env.NODE_ENV === "production", 
-      sameSite: "None", 
-    };
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production" ? true : false, 
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", 
+};
 
     res
       .cookie("accessToken", accessToken, { ...cookieOptions, maxAge: 24 * 60 * 60 * 1000 })
