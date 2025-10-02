@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import { ProtectedRoute, PublicRoute } from "./routes/Routes";
 import Navbar from "./components/layout/Navbar";
 import About from "./pages/About";
+import Footer from "./components/layout/Footer";
 
 function App() {
   const location = useLocation();
@@ -30,6 +31,7 @@ function App() {
         {/* Default/fallback */}
         <Route path="*" element={<Signup />} />
       </Routes>
+      {!hideNavbar&&<Footer/>}
     </>
   );
 }
