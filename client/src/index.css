@@ -6,6 +6,8 @@
 /* -----------------------------
    Theme Tokens (Colors, Fonts, Radius, Shadows)
 ------------------------------- */
+
+
 @theme {
   /* Colors */
   --color-border: hsl(220 13% 91%);
@@ -80,6 +82,30 @@
 @layer components {
   .animate-fade-in { animation: fade-in 0.6s ease-out; }
   .animate-float { animation: float 6s ease-in-out infinite; }
+
+ .scroll-slide {
+  opacity: 0;
+  transform: translateX(-50px); /* slide from left by default */
+  transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+}
+
+
+/* Slide from left */
+.scroll-slide.left {
+  transform: translateX(-100%);
+}
+
+/* Slide from right */
+.scroll-slide.right {
+  transform: translateX(100%);
+}
+
+/* When visible */
+.scroll-slide.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
 }
 /* -----------------------------
    Base Styles
@@ -192,7 +218,7 @@
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
     --gradient-hero:linear-gradient(135deg, #0072CE, #66CCFF);
-
+    --gradient-text: linear-gradient(to right, #2563eb, #9333ea, #ec4899); 
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.8) 0%, hsl(220 13% 95% / 0.4) 100%);
     --gradient-glass: linear-gradient(145deg, hsl(0 0% 100% / 0.1) 0%, hsl(220 13% 95% / 0.05) 100%);
 
@@ -328,15 +354,21 @@
     backdrop-filter: blur(20px);
     border: 1px solid hsl(var(--border));
   }
-
-  
-  /* Gradient text */
-  .gradient-text {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .gradient-hero{
+    background: var(--gradient-hero);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
   }
+  
+  .gradient-text {
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
 
   /* Hero gradient background */
   .hero-gradient {

@@ -1,14 +1,27 @@
+import { useEffect } from "react";
 import { Users, Award, BookOpen, Target, Heart, Lightbulb } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import KP from "../assets/images/kartikey-pandey.png";
+import AK from "../assets/images/aman-khan.png";
+import SM from "../assets/images/satish-sir-image.png";
+import PP from "../assets/images/pritesh-pandey.png";
+
+const GradientIcon = ({ Icon, className = "" }) => (
+  <Icon
+    className={`mx-auto mb-4 ${className}`}
+    stroke="url(#gradient-hero)"
+    strokeWidth={2}
+  />
+);
 
 const About = () => {
   const achievements = [
     { icon: Users, label: "Students Selected", value: "1000+" },
     { icon: Award, label: "Success Rate", value: "95%" },
     { icon: BookOpen, label: "Exams Covered", value: "NIMCET, CUET, JMI & more" },
-    { icon: Target, label: "Years Experience", value: "10+" }
+    { icon: Target, label: "Years Experience", value: "10+" },
   ];
 
   const values = [
@@ -16,20 +29,38 @@ const About = () => {
       icon: Lightbulb,
       title: "Vision",
       description:
-        "To create highly competent MCA professionals by imparting quality education, instilling integrity, and nurturing confidence."
+        "To create highly competent MCA professionals by imparting quality education, instilling integrity, and nurturing confidence.",
     },
     {
       icon: Heart,
+      title: "Care",
+      description: "Every student is important to us. We provide personalized attention and care.",
+    },
+    {
+      icon: Target,
       title: "Mission",
       description:
-        "To provide real exam-level guidance, transform average students into achievers, and ensure consistent results through practice and perseverance."
-    }
+        "To provide real exam-level guidance, transform average students into achievers, and ensure consistent results through practice and perseverance.",
+    },
   ];
 
   const milestones = [
-    { year: "2015", event: "Academy Founded", description: "Started under the guidance of Kartikey Pandey (NIT Raipur, Ph.D. Scholar)" },
-    { year: "2018", event: "Nationwide Reach", description: "Became preferred choice for MCA aspirants across India" },
-    { year: "2022", event: "1000+ Selections", description: "Students selected in NITs, DU, JNU, BHU, JMI, HCU, IET Lucknow & more" }
+    {
+      year: "2015",
+      event: "Academy Founded",
+      description: "Started under the guidance of Kartikey Pandey (NIT Raipur, Ph.D. Scholar)",
+    },
+    {
+      year: "2018",
+      event: "Nationwide Reach",
+      description: "Became preferred choice for MCA aspirants across India",
+    },
+    {
+      year: "2022",
+      event: "1000+ Selections",
+      description:
+        "Students selected in NITs, DU, JNU, BHU, JMI, HCU, IET Lucknow & more",
+    },
   ];
 
   const faculty = [
@@ -39,101 +70,122 @@ const About = () => {
       qualification: "MCA (NIT Raipur), Ph.D. Scholar",
       experience: "10+ Years",
       specialization: "Mathematics & Reasoning",
-      image: "KP"
+      image: KP,
     },
     {
       name: "Mr. Aman Khan",
       designation: "Computer Fundamentals Mentor",
       qualification: "MCA (NIT Raipur), Ph.D. Scholar",
       specialization: "Computer Science & Programming",
-      image: "AK"
+      image: AK,
     },
     {
       name: "Mr. Satish Mishra",
       designation: "English Mentor",
       qualification: "Retd. Group Captain, Indian Air Force",
       specialization: "English & Communication",
-      image: "SM"
+      image: SM,
     },
     {
       name: "Mr. Pritesh Pandey",
       designation: "Logical Reasoning Mentor",
       qualification: "B.E., 5+ Years Teaching Experience",
       specialization: "Reasoning & Problem Solving",
-      image: "PP"
-    }
+      image: PP,
+    },
   ];
 
+  useEffect(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("show");
+        } else {
+          entry.target.classList.remove("show"); // Remove when leaving viewport
+        }
+      });
+    },
+    { threshold: 0.2 } // Trigger when 20% visible
+  );
+
+  document.querySelectorAll(".scroll-slide").forEach((el) => observer.observe(el));
+
+  return () => observer.disconnect();
+}, []);
+
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
+      {/* SVG Gradient for icons */}
+      <svg width="0" height="0">
+        <defs>
+          <linearGradient id="gradient-hero" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#0072CE" />
+            <stop offset="100%" stopColor="#66CCFF" />
+          </linearGradient>
+        </defs>
+      </svg>
+
       {/* Hero Section */}
-      <section className="py-30 hero-gradient">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-white mb-6">
-            About
-            <span className="block text-gray-800">ACME Academy</span>
+      <section className="relative py-30 hero-gradient overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 opacity-20 blur-3xl transform rotate-45 scale-150"></div>
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-5xl md:text-6xl font-bold text-white drop-shadow-lg mb-6 animate-fade-in">
+            About <span className="block text-gray-800">ACME Academy</span>
           </h1>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
-            India’s Most Trusted MCA Entrance Academy – empowering aspirants with
-            quality education, expert mentors, and proven results.
+          <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-12 animate-fade-in delay-200">
+            India’s Most Trusted MCA Entrance Academy – empowering aspirants with quality education, expert mentors, and proven results.
           </p>
+          <Button
+            size="lg"
+            className="bg-gradient-to-r from-blue-600 to-pink-600 text-white px-10 py-4 rounded-full shadow-xl hover:scale-105 hover:shadow-2xl transition-all duration-500"
+          >
+            Get Started
+          </Button>
         </div>
       </section>
 
-      {/* Mission & Vision + Achievements */}
-      <section className="py-16">
+      {/* Achievements */}
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-heading font-bold mb-6">
-                Our
-                <span className="text-3xl font-bold text-transparent bg-clip-text drop-shadow-md transition-all duration-500 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600"> Vision & Mission</span>
-              </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                Our vision is to produce competent MCA professionals who lead with
-                knowledge, confidence, and integrity.  
-              </p>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Our mission is to deliver exam-focused guidance, strengthen fundamentals,
-                and help every student – whether average or advanced – achieve their MCA dreams.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-6">
-              {achievements.map((achievement, index) => (
-                <Card key={index} className="glass text-center hover-glow transition-all duration-300 hover:scale-105">
-                  <CardContent className="p-6">
-                    <achievement.icon className="h-10 w-10 text-primary mx-auto mb-4" />
-                    <div className="text-2xl font-bold text-foreground mb-1">{achievement.value}</div>
-                    <div className="text-sm text-muted-foreground">{achievement.label}</div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+            {achievements.map((ach, idx) => (
+              <Card
+                key={idx}
+                className="glass p-8 text-center shadow-xl hover:scale-105 hover-glow transition-all duration-500"
+              >
+                <GradientIcon Icon={ach.icon} className="h-12 w-12 mb-4" />
+                <h3 className="text-3xl font-bold text-gray-900 mb-2">{ach.value}</h3>
+                <p className="text-gray-500">{ach.label}</p>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Core Values */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-heading font-bold mb-4">
-              Our Core
-              <span className="text-3xl font-bold text-transparent bg-clip-text drop-shadow-md transition-all duration-500 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600"> Values</span>
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              The principles that guide everything we do
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-8">
-            {values.map((value, index) => (
-              <Card key={index} className="glass hover-glow transition-all duration-300 hover:scale-105">
+          <h2 className="text-4xl font-bold text-center mb-12">
+            Our{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+              Core Values
+            </span>
+          </h2>
+          <div className="grid md:grid-cols-3 gap-16">
+            {values.map((value, idx) => (
+              <Card
+                key={idx}
+                className="glass p-6 hover:scale-105 hover-glow transition-all duration-500"
+              >
                 <CardHeader className="text-center">
-                  <value.icon className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <CardTitle className="gradient-text">{value.title}</CardTitle>
+                  <GradientIcon Icon={value.icon} className="h-14 w-14 mb-4" />
+                  <CardTitle className="text-2xl text-black font-bold text-center">{value.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground text-center">{value.description}</p>
+                  <p className="text-gray-600 text-center">{value.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -141,34 +193,33 @@ const About = () => {
         </div>
       </section>
 
-      {/* Journey Timeline */}
-      <section className="py-16">
+      {/* Milestones */}
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-heading font-bold mb-4">
-              Our
-              <span className="text-3xl font-bold text-transparent bg-clip-text drop-shadow-md transition-all duration-500 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600"> Journey</span>
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Key milestones of our growth and success
-            </p>
-          </div>
-
+          <h2 className="text-4xl font-bold text-center mb-12 animate-fade-in">
+            Our{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+              Journey
+            </span>
+          </h2>
           <div className="relative">
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-gradient-to-b from-primary to-accent"></div>
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-blue-400 via-purple-400 to-pink-400 rounded-full animate-pulse-slow"></div>
             <div className="space-y-12">
-              {milestones.map((milestone, index) => (
-                <div key={index} className={`flex items-center ${index % 2 === 0 ? "justify-start" : "justify-end"}`}>
-                  <Card className={`glass w-full max-w-md hover-glow transition-all duration-300 hover:scale-105 ${index % 2 === 0 ? "mr-8" : "ml-8"}`}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="border-primary/20">{milestone.year}</Badge>
-                        <div className="w-4 h-4 bg-primary rounded-full "></div>
-                      </div>
-                      <CardTitle className="text-xl font-bold text-transparent bg-clip-text drop-shadow-md transition-all duration-500 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">{milestone.event}</CardTitle>
-                    </CardHeader>
+              {milestones.map((ms, idx) => (
+                <div
+                  key={idx}
+                  className={`flex items-center ${idx % 2 === 0 ? "justify-start" : "justify-end"}`}
+                >
+                  <Card
+                    className={`glass max-w-md p-6 shadow-xl scroll-slide ${
+                      idx % 2 === 0 ? "left" : "right"
+                    }`}
+                    style={{ transitionDelay: `${idx * 200}ms` }}
+                  >
+                    <Badge variant="outline" className="mb-4 border-blue-300">{ms.year}</Badge>
+                    <CardTitle className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">{ms.event}</CardTitle>
                     <CardContent>
-                      <p className="text-muted-foreground">{milestone.description}</p>
+                      <p className="text-gray-600">{ms.description}</p>
                     </CardContent>
                   </Card>
                 </div>
@@ -179,32 +230,34 @@ const About = () => {
       </section>
 
       {/* Faculty */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-heading font-bold mb-4">
-              Expert
-              <span className="text-3xl font-bold text-transparent bg-clip-text drop-shadow-md transition-all duration-500 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600"> Faculty</span>
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Learn from experienced mentors and professionals
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {faculty.map((member, index) => (
-              <Card key={index} className="glass hover-glow transition-all duration-300 hover:scale-105">
-                <CardContent className="p-6 text-center">
-                  <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 text-primary-foreground text-2xl font-bold">
-                    {member.image}
-                  </div>
-                  <h3 className="font-heading font-semibold mb-1">{member.name}</h3>
-                  <p className="text-sm text-primary font-medium mb-2">{member.designation}</p>
-                  <p className="text-xs text-muted-foreground mb-2">{member.qualification}</p>
-                  {member.experience && (
-                    <Badge variant="secondary" className="mb-3 text-xs">{member.experience}</Badge>
-                  )}
-                  <p className="text-xs text-muted-foreground">{member.specialization}</p>
-                </CardContent>
+          <h2 className="text-4xl font-bold text-center mb-12">
+            Our{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+              Experts
+            </span>
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
+            {faculty.map((fac, idx) => (
+              <Card
+                key={idx}
+                className="glass p-8 text-center shadow-2xl hover:scale-105 hover-glow transition-all duration-500"
+              >
+                <div className="w-28 h-28 rounded-full mx-auto mb-6 overflow-hidden border-4 border-gradient-to-r from-blue-400 via-purple-500 to-pink-500 shadow-lg">
+                  <img
+                    src={fac.image}
+                    alt={fac.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h3 className="font-bold text-xl mb-2">{fac.name}</h3>
+                <p className="text-blue-600 font-medium mb-2">{fac.designation}</p>
+                <p className="text-gray-500 text-sm mb-2">{fac.qualification}</p>
+                {fac.experience && (
+                  <Badge variant="secondary" className="mb-2">{fac.experience}</Badge>
+                )}
+                <p className="text-gray-500 text-sm">{fac.specialization}</p>
               </Card>
             ))}
           </div>
@@ -212,23 +265,31 @@ const About = () => {
       </section>
 
       {/* CTA */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Card className="glass p-8">
-            <CardContent className="p-0">
-              <h3 className="text-2xl font-heading font-bold mb-4">
-                Join Our
-                <span className="text-2xl font-bold text-transparent bg-clip-text drop-shadow-md transition-all duration-500 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600"> Success Story</span>
+      <section className="py-20">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <Card className="glass p-10 shadow-xl hover:scale-105 transition-all duration-500">
+            <CardContent>
+              <h3 className="text-3xl font-bold mb-6">
+                Join Our{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+                  Success Story
+                </span>
               </h3>
-              <p className="text-muted-foreground mb-6">
-                Become part of ACME Academy’s legacy of excellence and achieve your MCA dreams
-                with proven methodology and expert guidance.
+              <p className="text-gray-600 mb-8">
+                Become part of ACME Academy’s legacy of excellence and achieve your MCA dreams with proven methodology and expert guidance.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="hover-glow">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-600 to-pink-600 text-white px-10 py-4 rounded-full shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-500"
+                >
                   Start Your Journey
                 </Button>
-                <Button size="lg" variant="outline">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-gray-400 text-gray-600 hover:border-blue-600 hover:text-blue-600 transition-all duration-500"
+                >
                   Contact Us
                 </Button>
               </div>
