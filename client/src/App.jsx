@@ -6,6 +6,8 @@ import { ProtectedRoute, PublicRoute } from "./routes/Routes";
 import Navbar from "./components/layout/Navbar";
 import About from "./pages/About";
 import Footer from "./components/layout/Footer";
+import PYQ from "./pages/PYQ";
+import PdfReader from "./pages/PDFReader";
 
 function App() {
   const location = useLocation();
@@ -20,6 +22,8 @@ function App() {
         <Route element={<PublicRoute />}>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/pyq" element={<PYQ />} />
+  <Route path="/pyq/:id" element={<PdfReader />} />
         </Route>
 
         {/* Protected routes */}
