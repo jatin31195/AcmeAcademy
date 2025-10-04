@@ -7,7 +7,7 @@ import KP from "../assets/images/kartikey-pandey.png";
 import AK from "../assets/images/aman-khan.png";
 import SM from "../assets/images/satish-sir-image.png";
 import PP from "../assets/images/pritesh-pandey.png";
-
+import SK from "../assets/images/sohail-sir.jpg"
 const GradientIcon = ({ Icon, className = "" }) => (
   <Icon
     className={`mx-auto mb-4 ${className}`}
@@ -92,6 +92,13 @@ const About = () => {
       qualification: "B.E., 5+ Years Teaching Experience",
       specialization: "Reasoning & Problem Solving",
       image: PP,
+    },
+    {
+      name: "Mr. Sohail Sir",
+      designation: "Reasoning & Quantitative Aptitude Mentor",
+      qualification: "SSC CGL Qualified, 8+ Years Teaching Experience",
+      specialization: "Reasoning & Problem Solving",
+      image: SK,
     },
   ];
 
