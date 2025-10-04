@@ -22,10 +22,10 @@ function App() {
         <Route element={<PublicRoute />}>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/pyq" element={<PYQ />} />
-  <Route path="/pyq/:id" element={<PdfReader />} />
+         
         </Route>
-
+         <Route path="/pyq" element={<PYQ />} />
+  <Route path="/pyq/:id" element={<PdfReader />} />
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />

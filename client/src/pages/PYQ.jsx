@@ -1,48 +1,60 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Search, Calendar, Eye, Filter } from "lucide-react";
+import { FileText, Search, Calendar } from "lucide-react";
 
 const PYQ = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedExam, setSelectedExam] = useState("all");
   const [selectedYear, setSelectedYear] = useState("all");
+  const [pyqs, setPyqs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
 
-  const pyqData = [
-    {
-      id: 1,
-      exam: "NIMCET",
-      year: "2024",
-      title: "NIMCET 2024 Question Paper",
-      description: "Complete question paper with answer key",
-      pdfUrl: "https://your-cdn.com/nimcet2024.pdf",
-      fileSize: "2.5 MB",
-      difficulty: "Medium",
-      questions: 120
-    },
-    {
-      id: 2,
-      exam: "CUET-PG",
-      year: "2024",
-      title: "CUET-PG MCA 2024 Question Paper",
-      description: "Latest CUET-PG MCA question paper",
-      pdfUrl: "https://your-cdn.com/cuetpg2024.pdf",
-      fileSize: "3.1 MB",
-      difficulty: "Hard",
-      questions: 100
-    }
-  ];
+  // Fetch PYQs from backend
+  useEffect(() => {
+    const fetchPYQs = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/pyqs/");
+        const data = await res.json();
+        setPyqs(data);
+      } catch (err) {
+        console.error("Error fetching PYQs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPYQs();
+  }, []);
+
+  // Intersection Observer for scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add("show");
+          else entry.target.classList.remove("show");
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    document.querySelectorAll(".scroll-slide").forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   const exams = ["all", "NIMCET", "CUET-PG", "MAH-CET", "JMI MCA", "BIT MCA", "VIT MCA", "DU MCA"];
   const years = ["all", "2024", "2023", "2022", "2021", "2020"];
 
-  const filteredPYQ = pyqData.filter(pyq => {
-    const matchesSearch = pyq.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         pyq.exam.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filter PYQs based on search, exam, year
+  const filteredPYQ = pyqs.filter((pyq) => {
+    const matchesSearch =
+      pyq.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pyq.exam.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesExam = selectedExam === "all" || pyq.exam === selectedExam;
     const matchesYear = selectedYear === "all" || pyq.year === selectedYear;
     return matchesSearch && matchesExam && matchesYear;
@@ -50,17 +62,23 @@ const PYQ = () => {
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
-      case "Easy": return "bg-green-500/10 text-green-600 border-green-500/20";
-      case "Medium": return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
-      case "Hard": return "bg-red-500/10 text-red-600 border-red-500/20";
-      default: return "bg-muted";
+      case "Easy":
+        return "bg-green-500/10 text-green-600 border-green-500/20";
+      case "Medium":
+        return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
+      case "Hard":
+        return "bg-red-500/10 text-red-600 border-red-500/20";
+      default:
+        return "bg-muted";
     }
   };
 
+  if (loading) return <div className="text-center py-20">Loading question papers...</div>;
+
   return (
-    <div className="min-h-screen pt-20">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
       {/* Header */}
-      <section className="py-16 hero-gradient">
+      <section className="relative py-40 hero-gradient overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Previous Year <span className="gradient-text">Questions</span>
@@ -113,8 +131,8 @@ const PYQ = () => {
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPYQ.map((pyq) => (
             <Card
-              key={pyq.id}
-              onClick={() => navigate(`/pyq/${pyq.id}`)}
+              key={pyq._id} // Assuming MongoDB _id
+              onClick={() => navigate(`/pyq/${pyq._id}`)}
               className="glass hover-glow cursor-pointer transition-all duration-300 hover:scale-105"
             >
               <CardHeader>

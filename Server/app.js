@@ -3,11 +3,11 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoute from './src/routes/authRoute.js';
 import { getMe } from "./src/utils/me.js";
-
+import pyqRoute from './src/routes/pyqRoute.js'
 const app = express();
 
 app.use(cors({
-  origin: ['https://54c618dfa4a8.ngrok-free.app','http://localhost:5173'],
+  origin: ['https://7a40b29474d2.ngrok-free.app','http://localhost:5173'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
@@ -17,7 +17,7 @@ app.use(express.json());
 
 app.use("/api/users", authRoute);
 app.use("/api/users/me", getMe);
-
+app.use("/api/pyqs",pyqRoute);
 app.get("/", (req, res) => {
   res.send("ACME Academy Backend is running!");
 });
