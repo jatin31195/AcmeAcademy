@@ -8,10 +8,16 @@ import About from "./pages/About";
 import Footer from "./components/layout/Footer";
 import PYQ from "./pages/PYQ";
 import PdfReader from "./pages/PDFReader";
+import ExamPattern from "./pages/ExamPattern";
+import Nimcet2025 from "./components/ExamPattern/Nimcet2025";
+import Courses from "./pages/Courses";
+import Contact from "./pages/Contact";
+import Results from "./pages/Results";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   const location = useLocation();
-  const hideNavbar = location.pathname === "/login" || location.pathname === "/signup";
+  const hideNavbar = location.pathname === "/login" || location.pathname === "/signup"||location.pathname === "/acme-courses";
 
   return (
     <>
@@ -26,10 +32,16 @@ function App() {
         </Route>
          <Route path="/pyq" element={<PYQ />} />
   <Route path="/pyq/:id" element={<PdfReader />} />
+   <Route path="/exam-pattern" element={<ExamPattern />} />
+   <Route path="/exams-pattern/nimcet-2025" element={<Nimcet2025 />}/>
+   <Route path="/acme-courses" element={<Courses/>} />
+   <Route path="/contact-acme-academy" element={<Contact/>}/>
+    <Route path="/acme-academy-results" element={<Results/>}/>
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
           <Route path="/about" element={<About/>}/>
+          <Route path="/dashboard" element={<Dashboard/>}/>
         </Route>
 
         {/* Default/fallback */}
