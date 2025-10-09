@@ -23,7 +23,7 @@ const Navbar = () => {
     { name: "Home", path: "/home" },
     { name: "About", path: "/about" },
     { name: "Courses", path: "/acme-courses" },
-    { name: "Open Library", path: "/library" },
+    { name: "Open Library", path: "/acme-academy-open-library" },
     { name: "PYQ", path: "/pyq" },
     { name: "Exam Pattern", path: "/exam-pattern" },
     { name: "Results", path: "/acme-academy-results" },
