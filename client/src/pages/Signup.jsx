@@ -243,6 +243,18 @@ const Signup = () => {
                   {loading && <CgSpinner className="animate-spin" />}
                   <span>Send OTP</span>
                 </button>
+                <div className="mt-4 text-center">
+  <p className="text-gray-400">
+    Already have an account?{" "}
+    <span
+      onClick={() => navigate("/login")}
+      className="text-emerald-500 hover:underline cursor-pointer"
+    >
+      Login
+    </span>
+  </p>
+</div>
+
               </div>
             </>
           ) : (
