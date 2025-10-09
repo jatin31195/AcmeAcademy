@@ -23,7 +23,7 @@ const ExamPattern = () => {
       <section className="py-30 hero-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-heading font-bold text-white mb-6">
-            Exam <span className="block gradient-text">Patterns</span>
+            Exam <span className="text-5xl md:text-6xl font-bold block text-gray-800">Patterns</span>
           </h1>
           <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
             Detailed exam patterns, marking schemes, and section-wise analysis for all major MCA entrance examinations to help you prepare strategically.

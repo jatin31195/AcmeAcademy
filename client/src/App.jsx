@@ -14,10 +14,16 @@ import Courses from "./pages/Courses";
 import Contact from "./pages/Contact";
 import Results from "./pages/Results";
 import Dashboard from "./pages/Dashboard";
+import OpenLibrary from "./pages/OpenLibrary";
+import LibraryContent from "./pages/LibraryContent";
+import AcmePlayer from "./pages/AcmePlayer";
+import Test from "./pages/Test";
+import TestResult from "./pages/TestResult";
 
 function App() {
   const location = useLocation();
-  const hideNavbar = location.pathname === "/login" || location.pathname === "/signup"||location.pathname === "/acme-courses";
+  const hideNavbar =location.pathname === "/"|| location.pathname === "/login" || location.pathname === "/signup"||location.pathname === "/acme-courses"||location.pathname.startsWith("/acme-player")||location.pathname.startsWith("/acme-test")
+  ||location.pathname.startsWith("/acme-test-result");
 
   return (
     <>
@@ -37,6 +43,11 @@ function App() {
    <Route path="/acme-courses" element={<Courses/>} />
    <Route path="/contact-acme-academy" element={<Contact/>}/>
     <Route path="/acme-academy-results" element={<Results/>}/>
+    <Route path="/acme-academy-open-library" element={<OpenLibrary/>} />
+    <Route path="/acme-academy-open-library/:id" element={<LibraryContent/>} />
+    <Route path="/acme-player" element={<AcmePlayer/>} />
+    <Route path="/acme-test/:testId" element={<Test/>} />
+    <Route path="/acme-test-result" element={<TestResult/>}/>
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
@@ -45,7 +56,7 @@ function App() {
         </Route>
 
         {/* Default/fallback */}
-        <Route path="*" element={<Signup />} />
+        <Route path="*" element={<Login />} />
       </Routes>
       {!hideNavbar&&<Footer/>}
     </>
