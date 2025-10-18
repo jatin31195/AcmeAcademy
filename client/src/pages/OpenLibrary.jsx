@@ -1,88 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import { BookOpen, Search, Filter, ArrowRight } from "lucide-react";
 
 const OpenLibrary = () => {
+  const [courses, setCourses] = useState([]); 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedExam, setSelectedExam] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const resources = [
-    {
-      id: 7,
-      title: "Complete NIMCET Course",
-      category: "Complete Course",
-      exam: "NIMCET",
-      description:
-        "Full NIMCET preparation with Mathematics, English, Computer Fundamentals, and Logical Reasoning - All topics with notes, lectures, assignments, and tests",
-      topicsCount: 120,
-      type: "Course",
-    },
-    {
-      id: 1,
-      title: "Complete Mathematics Guide for NIMCET",
-      category: "Books",
-      exam: "NIMCET",
-      description: "Comprehensive mathematics preparation covering all topics",
-      topicsCount: 45,
-      type: "PDF",
-    },
-    {
-      id: 2,
-      title: "Computer Science Fundamentals",
-      category: "Notes",
-      exam: "All Exams",
-      description: "Basic computer science concepts and programming",
-      topicsCount: 38,
-      type: "PDF",
-    },
-    {
-      id: 3,
-      title: "CUET-PG MCA Preparation Guide",
-      category: "Guides",
-      exam: "CUET-PG",
-      description: "Complete preparation strategy and tips",
-      topicsCount: 52,
-      type: "PDF",
-    },
-    {
-      id: 4,
-      title: "Logical Reasoning Practice Sets",
-      category: "Practice Sets",
-      exam: "All Exams",
-      description: "200+ logical reasoning questions with solutions",
-      topicsCount: 28,
-      type: "PDF",
-    },
-    {
-      id: 5,
-      title: "MAH-CET MCA Mathematics Solutions",
-      category: "Solutions",
-      exam: "MAH-CET",
-      description: "Detailed solutions for mathematics problems",
-      topicsCount: 42,
-      type: "PDF",
-    },
-    {
-      id: 6,
-      title: "English Vocabulary Builder",
-      category: "Books",
-      exam: "All Exams",
-      description: "Essential vocabulary for entrance exams",
-      topicsCount: 35,
-      type: "PDF",
-    },
-  ];
-
-  const categories = ["all", "Books", "Notes", "Guides", "Practice Sets", "Solutions"];
+  const categories = ["all", "Books", "Notes", "Guides", "Practice Sets", "Solutions", "Complete Course", "Free Course"];
   const exams = ["all", "NIMCET", "CUET-PG", "MAH-CET", "JMI MCA", "BIT MCA", "All Exams"];
 
-  const filteredResources = resources.filter((resource) => {
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get("http://localhost:5000/api/courses");
+        setCourses(res.data);
+      } catch (err) {
+        setError("Failed to load courses. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []);
+
+  
+  const filteredResources = courses.filter((course) => {
     const matchesSearch =
-      resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      resource.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || resource.category === selectedCategory;
-    const matchesExam = selectedExam === "all" || resource.exam === selectedExam;
+      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (course.description && course.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesCategory = selectedCategory === "all" || course.category === selectedCategory;
+    const matchesExam = selectedExam === "all" || course.exam === selectedExam;
     return matchesSearch && matchesCategory && matchesExam;
   });
 
@@ -153,38 +107,45 @@ const OpenLibrary = () => {
       {/* Resources Grid */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredResources.map((resource) => (
-              <Link
-                key={resource.id}
-                to={`/acme-academy-open-library/${resource.id}`}
-                state={{ meta: resource }}
-              >
-                <div className="rounded-xl shadow-lg bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105 p-6 h-full flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-start justify-between mb-2">
-                      <h2 className="text-lg font-semibold text-indigo-600">{resource.title}</h2>
-                      <span className="text-xs px-2 py-1 border rounded">{resource.type}</span>
+          {loading ? (
+            <div className="text-center py-20">
+              <div className="animate-spin h-10 w-10 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading courses...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12 text-red-500 font-medium">{error}</div>
+          ) : filteredResources.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredResources.map((course) => (
+                <Link
+                  key={course._id}
+                  to={`/acme-academy-open-library/${course._id}`}
+                  state={{ meta: course }}
+                >
+                  <div className="rounded-xl shadow-lg bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105 p-6 h-full flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start justify-between mb-2">
+                        <h2 className="text-lg font-semibold text-indigo-600">{course.title}</h2>
+                        <span className="text-xs px-2 py-1 border rounded">{course.type}</span>
+                      </div>
+                      <div className="flex gap-2 mb-3">
+                        <span className="text-xs bg-gray-200 px-2 py-1 rounded">{course.category}</span>
+                        <span className="text-xs border px-2 py-1 rounded">{course.exam}</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-4">{course.description}</p>
                     </div>
-                    <div className="flex gap-2 mb-3">
-                      <span className="text-xs bg-gray-200 px-2 py-1 rounded">{resource.category}</span>
-                      <span className="text-xs border px-2 py-1 rounded">{resource.exam}</span>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">{course.topicsCount || 0} Topics</span>
+                      <div className="flex items-center gap-2 text-indigo-600 font-medium">
+                        Start Learning
+                        <ArrowRight className="h-4 w-4" />
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-4">{resource.description}</p>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">{resource.topicsCount} Topics</span>
-                    <div className="flex items-center gap-2 text-indigo-600 font-medium">
-                      Start Learning
-                      <ArrowRight className="h-4 w-4" />
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {filteredResources.length === 0 && (
+                </Link>
+              ))}
+            </div>
+          ) : (
             <div className="text-center py-12">
               <BookOpen className="h-16 w-16 mx-auto mb-4 text-gray-400" />
               <h3 className="text-xl font-semibold mb-2">No resources found</h3>
