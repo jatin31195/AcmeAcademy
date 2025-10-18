@@ -8,8 +8,9 @@ import {
   getTestForUser,
   submitTest,
   getUserTestHistory,
+  getUserTestResult,
 } from "../controllers/testController.js";
-
+import { verifyUser } from "../middlewares/authMiddleware.js";
 const router = express.Router();
 const upload = multer({ storage: cloudinaryStorage });
 
@@ -23,12 +24,12 @@ router.patch("/:testId/add-questions", addQuestionsToTest);
 router.post("/upload-solution", upload.single("file"), uploadSolutionImage);
 
 // Fetch test (without solutions)
-router.get("/:id", getTestForUser);
+router.get("/:id",verifyUser, getTestForUser);
 
 // Submit a test
-router.post("/:id/submit", submitTest);
+router.post("/:id/submit",verifyUser, submitTest);
 
 // Get user's past attempts
-router.get("/:userId/:testId/history", getUserTestHistory);
-
+router.get("/:userId/:testId/history",verifyUser, getUserTestHistory);
+router.get("/:testId/result", verifyUser, getUserTestResult);
 export default router;

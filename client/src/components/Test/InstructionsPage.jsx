@@ -5,8 +5,24 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-const InstructionsPage = ({ questions, instructionsRead, setInstructionsRead, onStart }) => {
-  const [step, setStep] = useState(1); 
+const InstructionsPage = ({ test, instructionsRead, setInstructionsRead, onStart }) => {
+  const [step, setStep] = useState(1);
+  
+  if (!test || !test.questions) 
+  return <div className="p-10 text-center">Loading test info...</div>;
+
+
+ const totalQuestions = test?.questions?.length || 0;
+const totalSections = test?.sections?.length || 0;
+
+
+  const handleStart = () => {
+    // Trigger fullscreen (must be in user click)
+    document.documentElement.requestFullscreen().catch(() => {});
+
+    // Start the test
+    onStart();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center py-10 px-4">
@@ -43,7 +59,11 @@ const InstructionsPage = ({ questions, instructionsRead, setInstructionsRead, on
                     <li>Use navigation buttons to move between questions.</li>
                     <li>“Save & Next” saves answer and moves forward.</li>
                     <li>“Mark for Review” flags a question for later.</li>
-                    <li><span className="text-red-600 font-semibold">+4 for correct, -1 for wrong</span>.</li>
+                    <li>
+                      <span className="text-red-600 font-semibold">
+                        +{test.sections[0].marks} for correct, -{test.sections[0].negativeMarks} for wrong
+                      </span>
+                    </li>
                   </ul>
                 </div>
 
@@ -76,16 +96,17 @@ const InstructionsPage = ({ questions, instructionsRead, setInstructionsRead, on
                 <div className="space-y-2 bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
                   <h3 className="font-bold text-lg sm:text-xl text-primary">Exam Info:</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-sm sm:text-base">
-                    <Info label="Total Questions" value={questions.length} />
-                    <Info label="Duration" value="30 minutes" />
-                    <Info label="Section" value="Mathematics" />
-                    <Info label="Max Marks" value={questions.length * 4} />
+                    <Info label="Total Questions" value={totalQuestions} />
+                    <Info label="Duration (minutes)" value={test.durationMinutes} />
+                    <Info label="Section" value={test.sections.map(s => s.title).join(", ")} />
+                    <Info label="Max Marks" value={totalQuestions * test.sections[0].marks} />
                   </div>
                 </div>
 
                 <Button
-                  onClick={onStart}
+                  onClick={handleStart}
                   className="w-full py-4 sm:py-5 text-base sm:text-lg font-semibold"
+                  disabled={!instructionsRead}
                 >
                   Start Test
                 </Button>

@@ -2,7 +2,7 @@ import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-
+ import axios from "axios";
 const QuestionPalette = ({
   questions = [],
   currentQuestion = 0,
@@ -12,39 +12,30 @@ const QuestionPalette = ({
   handleSubmit = () => {},
   questionStatus = {},
   answers = {},
+  testId, // ✅ receive testId here
 }) => {
   const navigate = useNavigate();
 
-  const onSubmit = () => {
-    // Evaluate the result
-    let correct = 0;
-    let incorrect = 0;
-    let unattempted = 0;
+  const onSubmit = async () => {
+    try {
+      // Map answers to array of objects for backend
+      const payload = Object.entries(answers).map(([question, answer]) => ({
+        question,
+        answer,
+      }));
 
-    questions.forEach((q) => {
-      const userAnswer = answers[q.id];
-      if (userAnswer === undefined) {
-        unattempted++;
-      } else if (userAnswer === q.correctAnswer) {
-        correct++;
-      } else {
-        incorrect++;
-      }
-    });
+      const response = await axios.post(
+        `http://localhost:5000/api/tests/${testId}/submit`, // ✅ use actual testId
+        { answers: payload },
+        { withCredentials: true } // needed to send JWT cookie
+      );
 
-    const positiveMarks = correct * 4;
-    const negativeMarks = incorrect;
-    const totalScore = positiveMarks - negativeMarks;
-    const percentage = (totalScore / (questions.length * 4)) * 100;
-
-    // Navigate to result page with state
-    navigate("/acme-test-result", {
-      state: {
-        questions,
-        answers,
-        stats: { correct, incorrect, unattempted, positiveMarks, negativeMarks, totalScore, percentage },
-      },
-    });
+      localStorage.setItem("testResults", JSON.stringify(response.data));
+      navigate("/acme-test-result");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit test. Please try again.");
+    }
   };
 
   return (

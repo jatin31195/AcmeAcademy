@@ -27,6 +27,7 @@
     "@tailwindcss/vite": "^4.1.13",
     "avatar": "^0.1.0",
     "axios": "^1.12.2",
+    "better-react-mathjax": "^2.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",

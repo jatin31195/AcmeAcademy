@@ -298,25 +298,25 @@ export default function LibraryContent() {
                                 </a>
                               )}
 
-                              {topic.locked?.test ? (
-                                <a
-                                  href="https://acmea.courses.store/"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 text-muted-foreground text-sm rounded"
-                                >
-                                  <Lock className="h-4 w-4" />
-                                  Free Test (Locked)
-                                </a>
-                              ) : (
-                                <Link
-                                  to={topic.links.test || "#"}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded hover:bg-slate-100 text-sm transition-all"
-                                >
-                                  <Play className="h-4 w-4 text-blue-600" />
-                                  Free Test
-                                </Link>
-                              )}
+                              {/* Free Test Link / Locked */}
+{topic.tests && topic.tests.length > 0 ? (
+  <Link
+    to={`/acme-test/${topic.tests[0]}`} // navigate to the test page by test id
+    className="inline-flex items-center gap-1 px-3 py-1.5 rounded hover:bg-slate-100 text-sm transition-all"
+  >
+    <Play className="h-4 w-4 text-blue-600" />
+    Free Test
+  </Link>
+) : (
+  <button
+    disabled
+    className="inline-flex items-center gap-1 px-3 py-1.5 text-muted-foreground text-sm rounded cursor-not-allowed"
+  >
+    <Lock className="h-4 w-4" />
+    Free Test (Locked)
+  </button>
+)}
+
                             </div>
                           </div>
 

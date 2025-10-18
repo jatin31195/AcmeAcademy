@@ -29,7 +29,10 @@ app.use("/api/tests",testRoute );
 app.get("/", (req, res) => {
   res.send("ACME Academy Backend is running!");
 });
-
+app.use(cors({
+  origin: "http://localhost:5173", 
+  credentials: true,             
+}));
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: "Something went wrong!" });
