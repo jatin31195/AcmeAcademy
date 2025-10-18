@@ -4,6 +4,9 @@ import cookieParser from "cookie-parser";
 import authRoute from './src/routes/authRoute.js';
 import { getMe } from "./src/utils/me.js";
 import pyqRoute from './src/routes/pyqRoute.js'
+import courseRoutes from "./src/routes/courseRoutes.js";
+import subjectRoutes from "./src/routes/subjectRoutes.js";
+import topicRoutes from "./src/routes/topicRoutes.js";
 const app = express();
 
 app.use(cors({
@@ -18,6 +21,9 @@ app.use(express.json());
 app.use("/api/users", authRoute);
 app.use("/api/users/me", getMe);
 app.use("/api/pyqs",pyqRoute);
+app.use("/api/courses", courseRoutes);
+app.use("/api/subjects", subjectRoutes);
+app.use("/api/topics", topicRoutes);
 app.get("/", (req, res) => {
   res.send("ACME Academy Backend is running!");
 });
