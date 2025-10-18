@@ -8,6 +8,12 @@ const userSchema = new mongoose.Schema({
   dob: { type: Date, required: true },
   phone: { type: String, required: true, unique: true },
   whatsapp: { type: String },
+  testAttempts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "UserTestAttempt",
+      },
+    ],
 }, { timestamps: true });
 
 export default mongoose.model("User", userSchema);

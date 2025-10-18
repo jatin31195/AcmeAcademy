@@ -11,8 +11,8 @@ const topicSchema = new mongoose.Schema({
     notes: { type: String },
     lecture: { type: String },
     assignment: { type: String },
-    test: { type: String },
   },
+  tests: [{ type: mongoose.Schema.Types.ObjectId, ref: "Test" }],
 });
 
 export default mongoose.model("Topic", topicSchema);
