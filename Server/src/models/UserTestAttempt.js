@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const answerSchema = new mongoose.Schema({
-  question: { type: mongoose.Schema.Types.ObjectId, ref: "Test.questions" },
+  question: { type: mongoose.Schema.Types.ObjectId, required: true },
   answer: { type: String },
   marksObtained: { type: Number, default: 0 },
 });
