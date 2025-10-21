@@ -36,7 +36,7 @@ client/dist/
 
 # dotenv
 client/.env
-server/.env
+Server/.env
 # Logs
 client/npm-debug.log*
 client/yarn-debug.log*
