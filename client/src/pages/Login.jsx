@@ -35,7 +35,7 @@ const Login = () => {
 
       toast.success("Welcome back!");
       login({ _id: data.userId, username: data.username, email }); // set context
-      navigate("/dashboard");
+      navigate("/home");
     } catch (err) {
       toast.error(err.message || "Server error");
     } finally {
