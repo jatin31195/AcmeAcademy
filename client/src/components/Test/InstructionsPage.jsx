@@ -1,136 +1,200 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const InstructionsPage = ({ test, instructionsRead, setInstructionsRead, onStart }) => {
+const InstructionsPage = ({
+  test,
+  instructionsRead,
+  setInstructionsRead,
+  onStart,
+  username,
+}) => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  
-  if (!test || !test.questions) 
-  return <div className="p-10 text-center">Loading test info...</div>;
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
+  if (!test)
+    return <div className="p-10 text-center">Loading test info...</div>;
 
- const totalQuestions = test?.questions?.length || 0;
-const totalSections = test?.sections?.length || 0;
-
+  const totalQuestions = test?.totalQuestions || 0;
+  const totalMarks = test?.totalMarks || 0;
+  const totalDuration = test?.totalDurationMinutes || 0;
 
   const handleStart = () => {
-    // Trigger fullscreen (must be in user click)
     document.documentElement.requestFullscreen().catch(() => {});
-
-    // Start the test
     onStart();
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center py-10 px-4">
-      <div className="w-full max-w-4xl">
-        <Card className="border-2 shadow-xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6">
-            <CardTitle className="text-2xl sm:text-3xl font-bold text-center">Exam Instructions</CardTitle>
-            <p className="text-center mt-1 text-sm sm:text-base text-blue-100">
-              Please read all instructions carefully. The exam will auto-submit when time ends.
-            </p>
-          </CardHeader>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <div className="border-b px-6 py-4 flex items-center justify-between">
+        <h1 className="text-lg font-medium">
+          {test?.title || "Untitled Test"} | {test?.examCode || "ACME Practice Test"}
+        </h1>
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
 
-          <CardContent className="pt-4 px-4 max-h-[calc(100vh-160px)] overflow-y-auto space-y-4">
+      {/* Main Content */}
+      <div className="flex flex-1">
+        <div className="flex-1 p-8">
+          <div className="max-w-3xl">
+            {/* Step 1 – General Instructions */}
             {step === 1 && (
-              <div className="space-y-4">
-                {/* Legend */}
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <h3 className="font-semibold mb-2 text-base sm:text-lg">Question Status Legend:</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                    <Legend color="bg-cyan-400" label="Not Visited" />
-                    <Legend color="bg-gray-800" label="Not Answered" />
-                    <Legend color="bg-green-500" label="Answered" />
-                    <Legend color="bg-pink-500" label="Marked for Review" />
-                    <Legend color="bg-purple-500" label="Answered & Marked" />
-                  </div>
-                </div>
-
-                {/* General Instructions */}
-                <div className="space-y-2">
-                  <h3 className="font-bold text-lg sm:text-xl text-primary">General Instructions:</h3>
-                  <ul className="list-disc list-inside space-y-1 text-sm sm:text-base text-muted-foreground">
-                    <li>Test has a countdown timer and auto-submits at the end.</li>
-                    <li>Palette shows question status.</li>
-                    <li>Use navigation buttons to move between questions.</li>
-                    <li>“Save & Next” saves answer and moves forward.</li>
-                    <li>“Mark for Review” flags a question for later.</li>
-                    <li>
-                      <span className="text-red-600 font-semibold">
-                        +{test.sections[0].marks} for correct, -{test.sections[0].negativeMarks} for wrong
-                      </span>
+              <>
+                <h2 className="text-2xl font-bold mb-6">General Instructions</h2>
+                <ul className="space-y-3 text-sm text-gray-700">
+                  {[
+                    "This is a timed test; the running time is displayed on the top left corner of the screen.",
+                    "The bar above the question text displays question numbers. You can move to any question by clicking its number.",
+                    "Each question shows its number, text, and respective options.",
+                    "You can mark questions for review and revisit them later.",
+                    "Clicking an option selects or deselects it.",
+                    "Bottom-left: move to previous question.",
+                    "Bottom-right: move to next question.",
+                    "You can jump between sections (if allowed) using the bottom dropdown.",
+                    "You can submit the test anytime using the Submit button on the top-right.",
+                    "Before submission, a confirmation popup shows total, answered, and reviewed questions.",
+                    "Test must be completed in one attempt. Once submitted, it cannot be reattempted.",
+                    "Do not close or change the test screen while attempting.",
+                    "If the app is closed or screen is changed more than three times, the test auto-submits.",
+                    "After completion, a summary screen appears with section details & solutions.",
+                    "If something goes wrong, contact your tutor immediately.",
+                  ].map((text, i) => (
+                    <li key={i} className="flex gap-3">
+                      <span className="text-gray-400 font-bold">●</span>
+                      <span>{text}</span>
                     </li>
-                  </ul>
-                </div>
+                  ))}
+                </ul>
 
-                {/* Checkbox */}
-                <div className="flex items-start space-x-2 sm:space-x-3 bg-amber-50 p-3 rounded-lg border-2 border-amber-200">
+                <div className="mt-8 flex items-start space-x-3 bg-amber-50 p-4 rounded-lg border-2 border-amber-200 max-w-xl">
                   <Checkbox
                     id="instructions"
                     checked={instructionsRead}
                     onCheckedChange={(checked) => setInstructionsRead(checked)}
                     className="mt-1"
                   />
-                  <Label htmlFor="instructions" className="text-sm sm:text-base font-medium cursor-pointer">
+                  <Label
+                    htmlFor="instructions"
+                    className="text-sm font-medium cursor-pointer"
+                  >
                     I have read and understood the instructions.
                   </Label>
                 </div>
-
-                <Button
-                  onClick={() => setStep(2)}
-                  className="w-full py-4 sm:py-5 text-base sm:text-lg font-semibold"
-                  disabled={!instructionsRead}
-                >
-                  Next
-                </Button>
-              </div>
+              </>
             )}
 
+            {/* Step 2 – Test Summary */}
             {step === 2 && (
-              <div className="space-y-4">
-                {/* Exam Info */}
-                <div className="space-y-2 bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
-                  <h3 className="font-bold text-lg sm:text-xl text-primary">Exam Info:</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-sm sm:text-base">
-                    <Info label="Total Questions" value={totalQuestions} />
-                    <Info label="Duration (minutes)" value={test.durationMinutes} />
-                    <Info label="Section" value={test.sections.map(s => s.title).join(", ")} />
-                    <Info label="Max Marks" value={totalQuestions * test.sections[0].marks} />
-                  </div>
+              <>
+                <div className="flex items-center gap-6 mb-8 text-sm">
+                  <span>
+                    📋 <strong>{totalQuestions}</strong> Question(s)
+                  </span>
+                  <span>
+                    ⏱️ <strong>{totalDuration}</strong> minutes
+                  </span>
+                  <span>
+                    ⭐ <strong>{totalMarks}</strong> marks
+                  </span>
                 </div>
 
-                <Button
-                  onClick={handleStart}
-                  className="w-full py-4 sm:py-5 text-base sm:text-lg font-semibold"
-                  disabled={!instructionsRead}
-                >
-                  Start Test
-                </Button>
-              </div>
+                <h2 className="text-xl font-bold mb-6">Test Sections</h2>
+
+                {test.sections?.map((section, idx) => (
+                  <div
+                    key={section._id || idx}
+                    className="border rounded-lg p-6 mb-8"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold flex-shrink-0">
+                        {idx + 1}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg mb-2">
+                          {section.title}
+                        </h3>
+                        <div className="flex gap-6 text-sm text-gray-600">
+                          <span>⏱️ {section.numQuestions || 0} Questions</span>
+                          <span>💯 {(section.marksPerQuestion || 0) * (section.numQuestions || 0)} Marks</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border">
+                  <Checkbox
+                    checked={agreedToTerms}
+                    onCheckedChange={(checked) => setAgreedToTerms(checked)}
+                    className="mt-1"
+                  />
+                  <label
+                    className="text-sm text-gray-700 cursor-pointer"
+                    onClick={() => setAgreedToTerms(!agreedToTerms)}
+                  >
+                    I have read and understood the instructions. I agree that in
+                    case of not adhering to the instructions, I shall be liable
+                    to be debarred from this test and/or disciplinary action,
+                    which may include a ban from future tests.
+                  </label>
+                </div>
+              </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="w-80 border-l bg-gray-50 p-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-red-500 text-white flex items-center justify-center font-bold text-lg">
+              {username?.slice(0, 2).toUpperCase()}
+            </div>
+            <span className="font-semibold">{username}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Navigation */}
+      <div className="border-t px-8 py-4 flex justify-between">
+        {step === 2 ? (
+          <Button
+            variant="outline"
+            onClick={() => setStep(1)}
+            className="px-8 border-cyan-500 text-cyan-500 hover:bg-cyan-50"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+          </Button>
+        ) : (
+          <div />
+        )}
+
+        {step === 1 ? (
+          <Button
+            onClick={() => setStep(2)}
+            disabled={!instructionsRead}
+            className="bg-cyan-500 hover:bg-cyan-600 text-white px-8"
+          >
+            Next <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            onClick={handleStart}
+            disabled={!agreedToTerms}
+            className="bg-green-500 hover:bg-green-600 text-white px-8"
+          >
+            Attempt Test <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   );
 };
-
-const Legend = ({ color, label }) => (
-  <div className="flex items-center gap-2 text-sm sm:text-base">
-    <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full ${color}`}></div>
-    <span>{label}</span>
-  </div>
-);
-
-const Info = ({ label, value }) => (
-  <div className="flex items-center gap-2 text-sm sm:text-base">
-    <Badge variant="secondary" className="text-xs sm:text-sm">{label}</Badge>
-    <span className="font-semibold">{value}</span>
-  </div>
-);
 
 export default InstructionsPage;

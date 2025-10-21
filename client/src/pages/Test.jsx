@@ -1,18 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-
+import { Info, ChevronLeft, ChevronRight, MoreVertical } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import InstructionsPage from "../components/Test/InstructionsPage";
-import TimerHeader from "../components/Test/TimerHeader";
-import QuestionCard from "../components/Test/QuestionCard";
-import QuestionPalette from "../components/Test/QuestionPalette";
-
-import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/AuthContext";
+import { InlineMath } from "react-katex";
+import "katex/dist/katex.min.css";
 
 const Test = () => {
   const { user } = useAuth();
-  const studentId = user?._id;
   const { testId } = useParams();
   const navigate = useNavigate();
 
@@ -23,30 +20,22 @@ const Test = () => {
   const [testStarted, setTestStarted] = useState(false);
   const [questionStatus, setQuestionStatus] = useState({});
   const [instructionsRead, setInstructionsRead] = useState(false);
-  const [sections, setSections] = useState([]);
   const [currentSection, setCurrentSection] = useState("");
 
- 
+  // Fetch test
   useEffect(() => {
-  const fetchTest = async () => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/tests/${testId}`,{
-         withCredentials: true,
-      });
-      setTestData(res.data);
-
-      // Safe handling
-      const secs = res.data.sections || [];
-      setSections(secs.map(s => s.title));
-      setCurrentSection(secs.length > 0 ? secs[0].title : "");
-      setTimeLeft(res.data.durationMinutes * 60);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  fetchTest();
-}, [testId]);
-
+    const fetchTest = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/tests/${testId}`, { withCredentials: true });
+        setTestData(res.data);
+        setCurrentSection(res.data.sections?.[0]?.title || "");
+        setTimeLeft(res.data.totalDurationMinutes * 60);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchTest();
+  }, [testId]);
 
   // Timer
   useEffect(() => {
@@ -64,7 +53,7 @@ const Test = () => {
     }
   }, [testStarted, timeLeft]);
 
-  // Mark question visited
+  // Mark visited
   useEffect(() => {
     if (testStarted && testData) {
       const currentQ = testData.questions[currentQuestion];
@@ -78,7 +67,7 @@ const Test = () => {
         },
       }));
     }
-  }, [currentQuestion, testStarted, testData]);
+  }, [currentQuestion, testStarted, testData, answers]);
 
   // Tab switch detection
   useEffect(() => {
@@ -97,137 +86,318 @@ const Test = () => {
     document.documentElement.requestFullscreen().catch(() => {});
   }, []);
 
-  // Answer handlers
-  const handleAnswer = (questionId, answerIndex) => {
-    setAnswers(prev => ({ ...prev, [questionId]: answerIndex }));
-    setQuestionStatus(prev => ({
-      ...prev,
-      [questionId]: { ...prev[questionId], answered: true, visited: true },
-    }));
-  };
+  // Handlers
+  const handleAnswer = (questionId, selectedOption) => {
+  setAnswers(prev => ({ ...prev, [questionId]: selectedOption }));
+  setQuestionStatus(prev => ({
+    ...prev,
+    [questionId]: { ...prev[questionId], answered: true, visited: true },
+  }));
+};
 
-  const handleMarkForReview = () => {
-    const currentQ = testData.questions[currentQuestion];
-    setQuestionStatus(prev => ({
-      ...prev,
-      [currentQ._id]: { ...prev[currentQ._id], markedForReview: !prev[currentQ._id]?.markedForReview, visited: true },
-    }));
-  };
-
-  const handleClearResponse = () => {
-    const currentQ = testData.questions[currentQuestion];
-    const newAnswers = { ...answers };
-    delete newAnswers[currentQ._id];
-    setAnswers(newAnswers);
-    setQuestionStatus(prev => ({
-      ...prev,
-      [currentQ._id]: { ...prev[currentQ._id], answered: false, visited: true },
-    }));
-  };
-
-  const handleSaveAndNext = () => {
-    if (currentQuestion < testData.questions.length - 1) setCurrentQuestion(currentQuestion + 1);
-  };
 
   const handleMarkForReviewAndNext = () => {
-    handleMarkForReview();
+    const currentQ = testData.questions[currentQuestion];
+    setQuestionStatus(prev => ({
+      ...prev,
+      [currentQ._id]: {
+        ...prev[currentQ._id],
+        markedForReview: true,
+        visited: true,
+        answered: answers[currentQ._id] !== undefined,
+      },
+    }));
     handleSaveAndNext();
   };
 
-  // Submit test to backend
-  const handleSubmit = async () => {
-    try {
-      const payload = {
-        userId: studentId,
-        answers,
-        questionStatus,
-      };
-      await axios.post(`http://localhost:5000/api/tests/${testId}/submit`, payload,{
-        withCredentials: true,
-      });
-      navigate("/acme-test-result");
-    } catch (err) {
-      console.error(err);
+  const handleSaveAndNext = () => {
+    if (currentQuestion < testData.questions.length - 1) {
+      setCurrentQuestion(q => q + 1);
     }
   };
 
-  const formatTime = (s) => {
+  const handleSubmit = async () => {
+    try {
+      const formattedAnswers = Object.entries(answers).map(([questionId, answer]) => ({
+  question: questionId,
+  answer, 
+}));
+      console.log("Submitting answers:", formattedAnswers);
+      await axios.post(
+        `http://localhost:5000/api/tests/${testId}/submit`,
+        { answers: formattedAnswers, questionStatus },
+        { withCredentials: true }
+      );
+
+      navigate(`/acme-test-result/${testId}`);
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+    }
+  };
+
+  const formatTime = s => {
     const m = Math.floor(s / 60);
     const sec = s % 60;
     return `${m}:${sec.toString().padStart(2, "0")} min`;
   };
 
-  const getQuestionStatusColor = (id) => {
-    const s = questionStatus[id];
-    const isAnswered = answers[id] !== undefined;
-    if (!s?.visited) return "bg-cyan-400 hover:bg-cyan-500";
-    if (isAnswered && s?.markedForReview) return "bg-purple-500";
-    if (s?.markedForReview) return "bg-pink-500";
-    if (isAnswered) return "bg-green-500";
-    return "bg-gray-800";
+  const getQuestionStatusColor = id => {
+    const status = questionStatus[id];
+    const answered = answers[id] !== undefined;
+
+    if (!status?.visited) return "bg-white border-2 border-gray-300 text-gray-700";
+    if (answered && status?.markedForReview) return "bg-purple-600 text-white";
+    if (status?.markedForReview) return "bg-purple-400 text-white";
+    if (answered) return "bg-green-500 text-white";
+    return "bg-red-500 text-white";
   };
+
+  const statusCounts = {
+  notAnswered: Object.values(questionStatus).filter(q => q.visited && !q.answered).length,
+  marked: Object.values(questionStatus).filter(q => q.markedForReview).length,
+  answered: Object.values(questionStatus).filter(q => q.answered).length,
+  notVisited: Object.values(questionStatus).filter(q => !q.visited).length,
+  answeredAndMarked: Object.values(questionStatus).filter(q => q.answered && q.markedForReview).length,
+};
 
   if (!testData) return <div>Loading...</div>;
   if (!testStarted)
     return (
       <InstructionsPage
-  test={testData} 
-  instructionsRead={instructionsRead}
-  setInstructionsRead={setInstructionsRead}
-  onStart={() => setTestStarted(true)}
-/>
-
+        test={testData}
+        instructionsRead={instructionsRead}
+        setInstructionsRead={setInstructionsRead}
+        onStart={() => setTestStarted(true)}
+        username={user?.username || "Student"}
+      />
     );
 
+  const currentQ = testData.questions[currentQuestion];
+  const questions = testData.questions;
+  const renderWithMath = text => {
+    if (!text) return "No question text";
+    const parts = text.split(/(\$[^$]+\$)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith("$") && part.endsWith("$")) {
+        const math = part.slice(1, -1).trim();
+        return <InlineMath key={i} math={math} />;
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      <TimerHeader timeLeft={timeLeft} formatTime={formatTime} />
-      <div className="flex min-h-screen">
-        {/* Left Side - Question */}
-        <div className="flex-1 p-6">
-          {/* Sections */}
-          <div className="mb-4 flex gap-2">
-            {sections && sections.length > 0 && sections.map((sec) => (
-  <Badge
-    key={sec}
-    className={`px-3 py-1 cursor-pointer ${
-      sec === currentSection ? "bg-blue-600 text-white" : "bg-gray-200"
-    }`}
-    onClick={() => setCurrentSection(sec)}
-  >
-    {sec}
-  </Badge>
-))}
-
+      <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <div className="border-b px-4 py-3 flex items-center justify-between flex-wrap">
+        <h1 className="text-base font-medium">
+          Probability (APT-2603) | ACME Practice Test
+        </h1>
+        <div className="flex items-center gap-4 mt-2 md:mt-0">
+          <button className="flex items-center gap-2 text-cyan-500 text-sm hover:underline">
+            <Info className="h-4 w-4" /> Test Instructions
+          </button>
+          <div className="text-sm font-medium">
+            Time Left:{" "}
+            <span className={timeLeft < 300 ? "text-red-500" : ""}>
+              {formatTime(timeLeft)}
+            </span>
           </div>
-
-          <QuestionCard
-            question={testData.questions[currentQuestion]}
-            questionIndex={currentQuestion}
-            totalQuestions={testData.questions.length}
-            answer={answers[testData.questions[currentQuestion]._id]}
-            onAnswer={handleAnswer}
-            onMarkForReviewAndNext={handleMarkForReviewAndNext}
-            onClearResponse={handleClearResponse}
-            onSaveAndNext={handleSaveAndNext}
-          />
-        </div>
-
-        {/* Right Side - Palette */}
-        <div className="hidden lg:block w-80 border-l border-gray-200 dark:border-gray-700">
-          <QuestionPalette
-  questions={testData.questions}
-  currentQuestion={currentQuestion}
-  onSelect={setCurrentQuestion}
-  getQuestionStatusColor={getQuestionStatusColor}
-  studentName={user?.username || "Student"}
-  handleSubmit={handleSubmit}
-  questionStatus={questionStatus}
-  answers={answers}
-  testId={testData._id} 
-/>
         </div>
       </div>
+
+      {/* Section Navigator */}
+      <div className="border-b flex items-center justify-between px-4 py-2 bg-cyan-500 text-white">
+        <ChevronLeft className="h-5 w-5 cursor-pointer" />
+        <span className="text-sm font-medium">{currentSection}</span>
+        <ChevronRight className="h-5 w-5 cursor-pointer" />
+      </div>
+
+      {/* Main Content */}
+      <div className="flex flex-1 flex-col md:flex-row overflow-hidden gap-4">
+        {/* Main Question Area */}
+        <div className="flex-1 p-4 md:p-6 overflow-auto">
+          <div className="mb-4 flex items-center justify-between flex-wrap">
+            <h2 className="text-lg font-semibold">
+              Question-{currentQuestion + 1}
+            </h2>
+            <div className="flex items-center gap-2 mt-2 md:mt-0 flex-wrap">
+              <span className="text-sm">
+                Marking Scheme:{" "}
+                <span className="text-green-600 font-semibold">+4</span>{" "}
+                <span className="text-red-600 font-semibold">-1</span>
+              </span>
+              <Button
+                variant={
+                  questionStatus[currentQ._id]?.markedForReview
+                    ? "default"
+                    : "outline"
+                }
+                size="sm"
+                onClick={handleMarkForReviewAndNext}
+                className={
+                  questionStatus[currentQ._id]?.markedForReview
+                    ? "bg-cyan-500 hover:bg-cyan-600"
+                    : "border-cyan-500 text-cyan-500 hover:bg-cyan-50"
+                }
+              >
+                👁️{" "}
+                {questionStatus[currentQ._id]?.markedForReview
+                  ? "Marked"
+                  : "Mark for Review"}
+              </Button>
+              <Button variant="ghost" size="icon">
+                <MoreVertical className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Question Text */}
+          <div className="bg-gray-50 p-4 md:p-6 rounded-lg mb-4 text-gray-800 leading-relaxed">
+  {renderWithMath(currentQ.question || currentQ.text)}
+</div>
+
+         {/* Options */}
+<div className="space-y-2">
+{currentQ.options.map((option, index) => (
+  <label
+    key={index}
+    className={`flex items-start gap-3 p-3 rounded cursor-pointer transition-colors ${
+      answers[currentQ._id] === option
+        ? "bg-green-100 border border-green-500"
+        : "bg-white border hover:bg-gray-50"
+    }`}
+  >
+    <input
+      type="radio"
+      name={`question-${currentQ._id}`}
+      checked={answers[currentQ._id] === option}
+      onChange={() => handleAnswer(currentQ._id, option)}
+      className="mt-1"
+    />
+    <span className="flex-1 text-gray-700">
+      {renderWithMath(option)}
+    </span>
+  </label>
+))}
+
+</div>
+
+        </div>
+
+        {/* Right Sidebar */}
+   <div className="w-full md:w-80 border-l bg-gray-50 p-4 md:p-6 overflow-auto flex-shrink-0">
+  {/* 🧑 User Info */}
+  <div className="flex items-center gap-3 mb-6">
+    <div className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center font-bold">
+      {user?.username?.[0]?.toUpperCase() || "U"}
+    </div>
+    <span className="font-semibold text-sm">{user?.username || "Student"}</span>
+  </div>
+
+  {/* 🟢 Question Status Legend (2 per row) */}
+  <h4 className="font-semibold text-sm mb-2 text-gray-700">Question Status</h4>
+  <div className="grid grid-cols-2 gap-3 text-xs mb-6">
+    {/* Not Visited */}
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <div className="w-5 h-5 rounded-full bg-white border-2 border-gray-300"></div>
+        <span>Not Visited</span>
+      </div>
+      <span className="font-bold text-gray-700">{statusCounts.notVisited || 0}</span>
+    </div>
+
+    {/* Not Answered */}
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <div className="w-5 h-5 rounded-full bg-red-500"></div>
+        <span>Not Answered</span>
+      </div>
+      <span className="font-bold text-gray-700">{statusCounts.notAnswered || 0}</span>
+    </div>
+
+    {/* Answered */}
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <div className="w-5 h-5 rounded-full bg-green-500"></div>
+        <span>Answered</span>
+      </div>
+      <span className="font-bold text-gray-700">{statusCounts.answered || 0}</span>
+    </div>
+
+    {/* Marked for Review */}
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <div className="w-5 h-5 rounded-md bg-purple-400"></div>
+        <span>Marked for Review</span>
+      </div>
+      <span className="font-bold text-gray-700">{statusCounts.marked || 0}</span>
+    </div>
+
+    {/* Answered & Marked for Review */}
+    <div className="flex items-center justify-between col-span-2">
+      <div className="flex items-center gap-2">
+        <div className="w-5 h-5 rotate-45 bg-purple-600"></div>
+        <span>Answered & Marked</span>
+      </div>
+      <span className="font-bold text-gray-700">{statusCounts.answeredAndMarked || 0}</span>
+    </div>
+  </div>
+
+  {/* 🧮 Question Palette */}
+  <h3 className="font-bold text-center mb-3">{currentSection}</h3>
+  <div className="grid grid-cols-5 gap-2 mb-6">
+    {questions.map((q, index) => (
+      <button
+        key={q._id}
+        onClick={() =>
+          setCurrentQuestion(questions.findIndex((x) => x._id === q._id))
+        }
+        className={`w-10 h-10 rounded flex items-center justify-center text-sm font-semibold transition-all duration-200 ${getQuestionStatusColor(q._id)}`}
+      >
+        {index + 1}
+      </button>
+    ))}
+  </div>
+</div>
+
+      </div>
+
+      {/* Footer */}
+     {/* Footer */}
+<div className="border-t px-4 py-4 flex items-center justify-between flex-wrap gap-2">
+  <Button
+    variant="outline"
+    onClick={() =>
+      currentQuestion > 0 && setCurrentQuestion(currentQuestion - 1)
+    }
+    disabled={currentQuestion === 0}
+    className="border-cyan-500 text-cyan-500 hover:bg-cyan-50"
+  >
+    <ChevronLeft className="mr-2 h-4 w-4" />
+    Previous
+  </Button>
+
+  <div className="flex gap-2 flex-wrap">
+  
+
+    <Button
+      variant="outline"
+      onClick={handleSaveAndNext}
+      className="border-cyan-500 text-cyan-500 hover:bg-cyan-50"
+    >
+      Save & Next <ChevronRight className="ml-2 h-4 w-4" />
+    </Button>
+
+    <Button
+      onClick={handleSubmit}
+      className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 md:px-8"
+    >
+      Submit Test
+    </Button>
+  </div>
+</div>
+
     </div>
   );
 };

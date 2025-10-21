@@ -2,6 +2,7 @@ import Test from "../models/Test.js";
 import UserTestAttempt from "../models/UserTestAttempt.js";
 import User from "../models/User.js";
 
+// Create Test
 export const createTest = async (req, res) => {
   try {
     const test = await Test.create(req.body);
@@ -11,6 +12,7 @@ export const createTest = async (req, res) => {
   }
 };
 
+// Add Questions to Test
 export const addQuestionsToTest = async (req, res) => {
   try {
     const { testId } = req.params;
@@ -30,6 +32,7 @@ export const addQuestionsToTest = async (req, res) => {
   }
 };
 
+// Upload solution image
 export const uploadSolutionImage = async (req, res) => {
   try {
     res.json({ url: req.file.path });
@@ -38,10 +41,11 @@ export const uploadSolutionImage = async (req, res) => {
   }
 };
 
+// Get test for user (hide solutions)
 export const getTestForUser = async (req, res) => {
   try {
     const test = await Test.findById(req.params.id)
-      .select("-questions.solution") 
+      .select("-questions.solution")
       .populate("topic", "title");
     if (!test) return res.status(404).json({ message: "Test not found" });
 
@@ -51,10 +55,11 @@ export const getTestForUser = async (req, res) => {
   }
 };
 
+// Submit test (string-based answers)
 export const submitTest = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { answers } = req.body;
+    const { answers } = req.body; // [{ question: "...", answer: "..." }]
     const testId = req.params.id;
 
     const previousAttempts = await UserTestAttempt.find({ user: userId, test: testId });
@@ -64,42 +69,66 @@ export const submitTest = async (req, res) => {
     const test = await Test.findById(testId);
     if (!test) return res.status(404).json({ message: "Test not found" });
 
-    let score = 0;
-    const markedAnswers = answers.map((ans) => {
-      const question = test.questions.id(ans.question);
-      if (!question) return ans;
+    let totalScore = 0;
 
-      const section = test.sections.find(
-        (s) => s._id.toString() === question.section.toString()
-      );
-      const marks = section?.marksPerQuestion || 1;
-      const negativeMarks = section?.negativeMarks || 0;
+    const markedAnswers = answers.map(ans => {
+      const question = test.questions.find(q => q._id.toString() === ans.question.toString());
+      if (!question) return { ...ans, marksObtained: 0 };
+
+      const section = test.sections.find(s => s._id.toString() === question.section?.toString());
+      const marks = section?.marksPerQuestion ?? 1;
+      const negativeMarks = section?.negativeMarks ?? 0;
+
+      const userAns = ans.answer?.toString().trim();
+      const correctAns = question.correctAnswer?.toString().trim();
 
       let marksObtained = 0;
-      if (ans.answer === question.correctAnswer) marksObtained = marks;
-      else if (ans.answer && ans.answer !== question.correctAnswer) marksObtained = -negativeMarks;
+      if (userAns && userAns === correctAns) {
+        marksObtained = marks;
+      } else if (userAns) {
+        marksObtained = -negativeMarks;
+      } else {
+        marksObtained = 0;
+      }
 
-      score += marksObtained;
+      totalScore += marksObtained;
       return { ...ans, marksObtained };
     });
+
+    const attemptNumber = previousAttempts.length + 1;
+
+    // Total possible marks = sum of marksPerQuestion * numQuestions for all sections
+    const totalPossibleMarks = test.sections.reduce(
+      (acc, s) => acc + s.numQuestions * s.marksPerQuestion,
+      0
+    );
 
     const attempt = await UserTestAttempt.create({
       user: userId,
       test: testId,
       answers: markedAnswers,
-      score,
-      attemptNumber: previousAttempts.length + 1,
+      score: totalScore,
+      attemptNumber,
       isSubmitted: true,
+      submittedAt: new Date(),
+      totalPossibleMarks,
     });
 
     await User.findByIdAndUpdate(userId, { $push: { testAttempts: attempt._id } });
 
-    res.json({ message: "Test submitted successfully", score, attempt });
+    res.json({
+      message: "Test submitted successfully",
+      score: totalScore,
+      totalPossibleMarks,
+      attempt,
+    });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
 
+// User test history
 export const getUserTestHistory = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -115,50 +144,106 @@ export const getUserTestHistory = async (req, res) => {
   }
 };
 
+// User test result
+// User test result (fixed with section-based scoring)
 export const getUserTestResult = async (req, res) => {
   try {
     const userId = req.user._id;
     const { testId } = req.params;
 
+    // Populate both test and answers
     const attempt = await UserTestAttempt.findOne({
       user: userId,
       test: testId,
       isSubmitted: true,
     })
       .sort({ submittedAt: -1 })
-      .populate("answers.question");
+      .populate({
+        path: "answers.question",
+      })
+      .populate({
+        path: "test",
+        select: "questions sections title totalMarks totalQuestions",
+      });
 
     if (!attempt) return res.status(404).json({ message: "No submitted attempt found" });
 
-    let correct = 0;
-    let incorrect = 0;
-    let unattempted = 0;
+    let correct = 0,
+      incorrect = 0,
+      unattempted = 0,
+      totalScore = 0,
+      positiveMarks = 0,
+      negativeMarks = 0;
 
-    attempt.answers.forEach((ans) => {
-      if (ans.marksObtained > 0) correct++;
-      else if (ans.marksObtained < 0) incorrect++;
-      else unattempted++;
+    const markedAnswers = attempt.answers.map(ans => {
+      const question = attempt.test.questions?.find(
+        q => q._id.toString() === ans.question._id.toString()
+      );
+      if (!question) return { ...ans, marksObtained: 0 };
+
+      const section = attempt.test.sections?.find(
+        s => s._id.toString() === question.section?.toString()
+      );
+
+      const marks = section?.marksPerQuestion ?? 1;
+      const negMarks = section?.negativeMarks ?? 0;
+
+      const userAns = ans.answer?.toString().trim();
+      const correctAns = question.correctAnswer?.toString().trim();
+
+      let marksObtained = 0;
+
+      if (userAns && userAns === correctAns) {
+        marksObtained = marks;
+        correct++;
+        positiveMarks += marksObtained;
+      } else if (userAns) {
+        marksObtained = -negMarks;
+        incorrect++;
+        negativeMarks += -marksObtained; // store positive value
+      } else {
+        marksObtained = 0;
+        unattempted++;
+      }
+
+      totalScore += marksObtained;
+      return { ...ans, marksObtained };
     });
 
-    const positiveMarks = correct > 0 ? attempt.answers.filter(a => a.marksObtained > 0).reduce((acc, a) => acc + a.marksObtained, 0) : 0;
-    const negativeMarks = incorrect > 0 ? attempt.answers.filter(a => a.marksObtained < 0).reduce((acc, a) => acc - a.marksObtained, 0) : 0;
-    const totalScore = attempt.score || (positiveMarks - negativeMarks);
-    const maxMarks = attempt.answers.reduce((acc, a) => acc + (a.marksObtained > 0 ? a.marksObtained : 4), 0);
-    const percentage = (totalScore / maxMarks) * 100;
+    // Calculate max possible marks from the test sections
+    const maxMarks = attempt.test.sections?.reduce(
+      (acc, s) => acc + s.numQuestions * s.marksPerQuestion,
+      0
+    );
+
+    const percentage = maxMarks > 0 ? (totalScore / maxMarks) * 100 : 0;
 
     res.json({
-      testId: attempt.test,
+      testId: attempt.test._id,
+      testTitle: attempt.test.title,
       userId: attempt.user,
       attemptNumber: attempt.attemptNumber,
       submittedAt: attempt.submittedAt,
-      answers: attempt.answers,
-      stats: { correct, incorrect, unattempted, positiveMarks, negativeMarks, totalScore, percentage },
+      answers: markedAnswers,
+      stats: {
+        correct,
+        incorrect,
+        unattempted,
+        positiveMarks,
+        negativeMarks,
+        totalScore,
+        maxMarks,
+        percentage,
+      },
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server Error" });
   }
 };
 
+
+// Update solution for a question
 export const updateQuestionSolution = async (req, res) => {
   try {
     const { testId, questionId } = req.params;

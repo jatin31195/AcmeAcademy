@@ -17,16 +17,16 @@ const router = express.Router();
 const upload = multer({ storage: cloudinaryStorage });
 
 // Create a new test
-router.post("/", verifyUser, createTest);
+router.post("/", createTest);
 
 // Add questions later (incremental upload)
-router.patch("/:testId/add-questions", verifyUser, addQuestionsToTest);
+router.patch("/:testId/add-questions", addQuestionsToTest);
 
 // Upload a solution image to Cloudinary
-router.post("/upload-solution", verifyUser, upload.single("file"), uploadSolutionImage);
+router.post("/upload-solution", upload.single("file"), uploadSolutionImage);
 
 // Update solution for a question
-router.patch("/:testId/questions/:questionId/solution", verifyUser, updateQuestionSolution);
+router.patch("/:testId/questions/:questionId/solution", updateQuestionSolution);
 
 // Fetch test (without solutions)
 router.get("/:id", verifyUser, getTestForUser);
