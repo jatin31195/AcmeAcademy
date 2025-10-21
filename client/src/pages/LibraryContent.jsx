@@ -114,10 +114,10 @@ export default function LibraryContent() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
     
-      <section className="relative py-10 hero-gradient overflow-hidden">
+      <section className="relative py-30 hero-gradient overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link to="/acme-academy-open-library">
-            <Button variant="ghost" className="mb-6">
+            <Button variant="ghost" className="mb-6 pointer-cursor">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Library
             </Button>
@@ -151,9 +151,9 @@ export default function LibraryContent() {
     >
       <AccordionTrigger className="text-left px-6 py-3 hover:bg-gradient-to-r from-blue-50 to-indigo-50 transition-all cursor-pointer">
         <div className="flex items-center gap-4 w-full">
-          <span className="text-2xl">{section.emoji}</span>
+          <span className="text-2xl no-underline">{section.emoji}</span>
           <div>
-            <p className="text-lg font-semibold text-gray-800">{section.title}</p>
+            <p className="text-lg font-semibold text-gray-800 no-underline">{section.title}</p>
             <p className="text-sm text-muted-foreground">{section.groups.length} topic groups</p>
           </div>
           <Badge variant="secondary" className="ml-auto text-sm">
@@ -177,7 +177,7 @@ export default function LibraryContent() {
                 transition={{ duration: 0.4 }}
               >
                 <Card
-                  className={`rounded-xl border transition-all duration-300 shadow-sm hover:shadow-lg ${
+                  className={`no-underline rounded-xl border transition-all duration-300 shadow-sm hover:shadow-lg ${
                     groupCompleted === group.topics.length && group.topics.length > 0
                       ? "border-green-400"
                       : "border-slate-200"
@@ -197,6 +197,7 @@ export default function LibraryContent() {
                         variant={expandedGroup[groupKey] ? "default" : "outline"}
                         size="sm"
                         onClick={() => toggleGroupExpanded(groupKey)}
+                        className="no-underline"
                       >
                         {expandedGroup[groupKey] ? "Hide Topics" : "Show Topics"}
                       </Button>
