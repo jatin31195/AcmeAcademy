@@ -47,13 +47,14 @@ function App() {
     <Route path="/acme-academy-open-library" element={<OpenLibrary/>} />
     <Route path="/acme-academy-open-library/:id" element={<LibraryContent/>} />
     <Route path="/acme-player" element={<AcmePlayer/>} />
-    <Route path="/acme-test/:testId" element={<Test/>} />
-    <Route path="/acme-test-result/:testId" element={<TestResult/>}/>
+   
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
           <Route path="/about" element={<About/>}/>
           <Route path="/dashboard" element={<Dashboard/>}/>
+           <Route path="/acme-test/:testId" element={<Test/>} />
+    <Route path="/acme-test-result/:testId" element={<TestResult/>}/>
         </Route>
 
         {/* Default/fallback */}
