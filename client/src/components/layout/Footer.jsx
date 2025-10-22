@@ -11,7 +11,7 @@ const Footer = () => {
 
   const quickLinks = [
     { label: "About Us", path: "/about" },
-    { label: "Open Library", path: "/library" },
+    { label: "Acme Library", path: "/library" },
     { label: "PYQ Papers", path: "/pyq" },
     { label: "Exam Pattern", path: "/exam-pattern" },
     { label: "Results", path: "/results" },
@@ -63,23 +63,29 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h4 className="text-base font-heading font-semibold text-foreground mb-6 uppercase tracking-wide">
-              Quick Links
-            </h4>
-            <ul className="space-y-3">
-              {quickLinks.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    to={link.path}
-                    className="text-base text-muted-foreground hover:text-primary transition-colors duration-200"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Quick Links */}
+<div>
+  <h4 className="text-base font-heading font-semibold text-foreground mb-6 uppercase tracking-wide">
+    Quick Links
+  </h4>
+  <ul className="space-y-3">
+    {quickLinks.map((link) => (
+      <li key={link.label}>
+        <Link
+          to={link.path}
+          className="text-base text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2"
+        >
+          {/* Add logo only for Acme Library */}
+          {link.label === "Acme Library" && (
+            <img src={logo} alt="ACME" className="h-4 w-auto" />
+          )}
+          {link.label}
+        </Link>
+      </li>
+    ))}
+  </ul>
+</div>
+
 
           {/* Exams */}
           <div>
@@ -107,30 +113,30 @@ const Footer = () => {
             </h4>
             <div className="space-y-5">
               {/* Raipur Center */}
-              {/* Raipur Center */}
-<div>
-  <h5 className="text-base font-medium text-foreground mb-3">Raipur Center</h5>
-  <div className="space-y-3">
-    <a
-      href="https://maps.app.goo.gl/d7TJY2bcB8nB3WHQ8"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-start space-x-2 hover:text-primary transition-colors"
-    >
-      <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-      <p className="text-base text-muted-foreground">
-        ACME Building, behind Kota Stadium, Kota, Raipur, Chhattisgarh 492010
-      </p>
-    </a>
-    <a
-      href="tel:+918109977628"
-      className="flex items-center space-x-2 hover:text-primary transition-colors"
-    >
-      <Phone className="h-5 w-5 text-primary" />
-      <p className="text-base text-muted-foreground">+91 8109977628</p>
-    </a>
-  </div>
-</div>
+            
+            <div>
+              <h5 className="text-base font-medium text-foreground mb-3">Raipur Center</h5>
+              <div className="space-y-3">
+                <a
+                  href="https://maps.app.goo.gl/d7TJY2bcB8nB3WHQ8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start space-x-2 hover:text-primary transition-colors"
+                >
+                  <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <p className="text-base text-muted-foreground">
+                    ACME Building, behind Kota Stadium, Kota, Raipur, Chhattisgarh 492010
+                  </p>
+                </a>
+                <a
+                  href="tel:+918109977628"
+                  className="flex items-center space-x-2 hover:text-primary transition-colors"
+                >
+                  <Phone className="h-5 w-5 text-primary" />
+                  <p className="text-base text-muted-foreground">+91 8109977628</p>
+                </a>
+              </div>
+            </div>
 
 
               {/* Kanpur Center */}
