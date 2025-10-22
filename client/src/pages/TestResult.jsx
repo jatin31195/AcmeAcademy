@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/AuthContext";
 import SolutionView from "@/components/Test/SolutionView";
 
@@ -23,53 +23,13 @@ const TestResult = () => {
           `http://localhost:5000/api/tests/${testId}/result`,
           { withCredentials: true }
         );
-
-        const data = res.data;
-        if (!data || !data.answers || !data.stats) {
-          console.error("Invalid response:", data);
-          return;
-        }
-
-        const answerMap = {};
-        data.answers.forEach((ansArrayItem) => {
-          ansArrayItem.__parentArray.forEach((ans) => {
-            answerMap[ans.question] = ans.answer;
-          });
-        });
-
-        const questions = data.answers?.[0]?.$__parent?.test?.questions || [];
-
-        setResults({
-  title: data.answers?.[0]?.$__parent?.test?.title || data.testTitle || "Test",
-  timeSpent: data.stats.totalTimeSpent || 0,
-  answers: data.answers.map(ansArrayItem => ansArrayItem.__parentArray).flat(), // array of {question, answer}
-  correct: data.stats.correct,
-  incorrect: data.stats.incorrect,
-  unattempted: data.stats.unattempted,
-  totalScore: data.stats.totalScore,
-  sections: [
-    {
-      name:
-        data.answers?.[0]?.$__parent?.test?.sections?.[0]?.title || "Section 1",
-      questions:
-        data.answers?.[0]?.$__parent?.test?.questions?.map((q) => ({
-          _id: q._id,
-          text: q.text || q.question,
-          options: q.options,
-          correctAnswer: q.correctAnswer,
-          explanation: q.explanation,
-        })) || [],
-    },
-  ],
-});
-
+        setResults(res.data);
       } catch (err) {
         console.error("Error fetching test result:", err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchResult();
   }, [user, testId]);
 
@@ -82,85 +42,88 @@ const TestResult = () => {
 
   if (!results) return null;
 
-  const formatTimeSpent = (seconds) => {
+  const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins} minutes, ${secs} seconds`;
+    return `${mins}m ${secs}s`;
   };
 
-  const accuracy =
-    results.correct + results.incorrect > 0
-      ? ((results.correct / (results.correct + results.incorrect)) * 100).toFixed(0)
-      : 0;
+  const { stats } = results;
 
-  // ✅ Show Solution / Review Screen
+  // ✅ When user clicks "View Solutions"
   if (showSolutions) {
-    return <SolutionView
-      results={results}
-      sections={results.sections} // pass sections here
-      currentSectionIndex={currentSectionIndex}
-      setCurrentSectionIndex={setCurrentSectionIndex}
-      onExit={() => setShowSolutions(false)}
-    />
+    return (
+      <SolutionView
+        results={results}
+        sections={results.sections}
+        currentSectionIndex={currentSectionIndex}
+        setCurrentSectionIndex={setCurrentSectionIndex}
+        onExit={() => setShowSolutions(false)}
+      />
+    );
   }
 
-  // SUMMARY VIEW
-  return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-8">
+
+return (
+  <div className="min-h-screen bg-white p-8 relative">
+
+    <div className="absolute top-4 left-4">
+      <Button
+        onClick={() => navigate("/acme-academy-open-library")}
+        variant="outline"
+        className="border-gray-400 text-gray-600 hover:bg-gray-50"
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back
+      </Button>
+    </div>
+
+    <div className="flex items-center justify-center min-h-screen">
       <div className="max-w-2xl w-full">
+        {/* HEADER */}
         <div className="flex justify-between items-start mb-8">
           <h1 className="text-lg font-medium">
-            {results.title} | {results.category}
+            {results.testTitle}
+            {results.category ? ` | ${results.category}` : ""}
           </h1>
-          <Button variant="outline" className="border-cyan-500 text-cyan-500">
+          <Button
+            variant="outline"
+            className="border-cyan-500 text-cyan-500"
+          >
             <Download className="h-4 w-4 mr-2" />
             Download Pdf
           </Button>
         </div>
 
+        {/* SCORE CARD */}
         <div className="bg-white border-2 rounded-lg p-12 text-center">
-          <p className="text-gray-500 text-sm mb-2">SCORE</p>
-          <h2 className="text-6xl font-bold text-cyan-500 mb-2">{results.totalScore}</h2>
-          <p className="text-gray-500 mb-2">OUT OF 100</p>
+          <p className="text-gray-500 text-sm mb-2">TOTAL SCORE</p>
+          <h2 className="text-6xl font-bold text-cyan-500 mb-2">
+            {results.totalScore}
+          </h2>
+          <p className="text-gray-500 mb-2">OUT OF {results.totalMarks}</p>
           <p className="text-orange-500 text-sm mb-8">
-            ⏱️ {formatTimeSpent(results.timeSpent)}
+            ⏱️ {formatTime(results.totalTimeTaken)}
           </p>
 
-          <p className="text-gray-500 text-sm mb-8">{accuracy}% ACCURACY</p>
+          <p className="text-gray-600 text-sm mb-8">
+            Accuracy:{" "}
+            <span className="font-semibold text-cyan-600">{results.accuracy}%</span>
+          </p>
 
+          {/* STATS */}
           <div className="space-y-4 mb-8">
             {[
-              {
-                color: "bg-purple-400",
-                label: "Total Questions",
-                value: results.sections?.[0]?.questions?.length || 0
-,
-                symbol: "?",
-              },
-              {
-                color: "bg-green-500",
-                label: "Correct Answers",
-                value: results.correct,
-                symbol: "✓",
-              },
-              {
-                color: "bg-red-500",
-                label: "Incorrect Answers",
-                value: results.incorrect,
-                symbol: "✕",
-              },
-              {
-                color: "bg-gray-400",
-                label: "Unattempted Questions",
-                value: results.unattempted,
-                symbol: "○",
-              },
-            ].map((item, index) => (
-              <div key={index} className="flex items-center justify-between py-3 border-b">
+              { color: "bg-purple-400", label: "Total Questions", value: results.questions?.length || 0, symbol: "?" },
+              { color: "bg-green-500", label: "Correct Answers", value: stats.correct, symbol: "✓" },
+              { color: "bg-red-500", label: "Incorrect Answers", value: stats.incorrect, symbol: "✕" },
+              { color: "bg-gray-400", label: "Unattempted Questions", value: stats.unattempted, symbol: "○" },
+              { color: "bg-blue-400", label: "Positive Marks", value: stats.positiveMarks, symbol: "+" },
+              { color: "bg-orange-400", label: "Negative Marks", value: stats.negativeMarks, symbol: "-" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center justify-between py-3 border-b">
                 <div className="flex items-center gap-3">
-                  <div
-                    className={`w-8 h-8 rounded-full ${item.color} text-white flex items-center justify-center`}
-                  >
+                  <div className={`w-8 h-8 rounded-full ${item.color} text-white flex items-center justify-center`}>
                     {item.symbol}
                   </div>
                   <span className="font-semibold">{item.label}</span>
@@ -174,12 +137,14 @@ const TestResult = () => {
             onClick={() => setShowSolutions(true)}
             className="w-full bg-white hover:bg-gray-50 text-cyan-500 border-2 border-cyan-500 py-6 text-lg font-semibold"
           >
-            View Solutions
+            View Detailed Solutions
           </Button>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default TestResult;
