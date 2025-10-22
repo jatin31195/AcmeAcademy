@@ -18,6 +18,10 @@ const Test = () => {
   const [questionStatus, setQuestionStatus] = useState({});
   const [instructionsRead, setInstructionsRead] = useState(false);
   const [currentSection, setCurrentSection] = useState("");
+  const [questionStartTime, setQuestionStartTime] = useState(null);
+  const [questionTimeTaken, setQuestionTimeTaken] = useState({});
+  const [testStartTime, setTestStartTime] = useState(null);
+
   useEffect(() => {
   if (!user) {
     navigate("/login");
@@ -68,6 +72,18 @@ const Test = () => {
     }
   }, [currentQuestion, testStarted, testData, answers]);
 
+  const recordTimeForCurrentQuestion = () => {
+  if (questionStartTime && testData?.questions[currentQuestion]) {
+    const qId = testData.questions[currentQuestion]._id;
+    const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000); 
+    setQuestionTimeTaken(prev => ({
+      ...prev,
+      [qId]: (prev[qId] || 0) + timeSpent,
+    }));
+    setQuestionStartTime(Date.now()); 
+  }
+};
+
   const handleAnswer = (questionId, selectedOption) => {
     setAnswers(prev => ({ ...prev, [questionId]: selectedOption }));
     setQuestionStatus(prev => ({
@@ -77,6 +93,7 @@ const Test = () => {
   };
 
   const handleMarkForReviewAndNext = () => {
+    recordTimeForCurrentQuestion();
     const currentQ = testData.questions[currentQuestion];
     setQuestionStatus(prev => ({
       ...prev,
@@ -91,27 +108,38 @@ const Test = () => {
   };
 
   const handleSaveAndNext = () => {
+    recordTimeForCurrentQuestion();
     if (currentQuestion < testData.questions.length - 1) {
       setCurrentQuestion(q => q + 1);
     }
   };
 
   const handleSubmit = async () => {
-    try {
-      const formattedAnswers = Object.entries(answers).map(([questionId, answer]) => ({
-        question: questionId,
-        answer,
-      }));
-      await axios.post(
-        `http://localhost:5000/api/tests/${testId}/submit`,
-        { answers: formattedAnswers, questionStatus },
-        { withCredentials: true }
-      );
-      navigate(`/acme-test-result/${testId}`);
-    } catch (err) {
-      console.error(err.response?.data || err.message);
-    }
-  };
+  try {
+    recordTimeForCurrentQuestion(); 
+    const totalTimeTaken = Math.floor((Date.now() - testStartTime) / 1000);
+    const formattedAnswers = Object.entries(answers).map(([questionId, answer]) => ({
+      question: questionId,
+      answer,
+      timeTaken: questionTimeTaken[questionId] || 0, 
+    }));
+
+    await axios.post(
+      `http://localhost:5000/api/tests/${testId}/submit`,
+      {
+        answers: formattedAnswers,
+        questionStatus,
+        totalTimeTaken,
+      },
+      { withCredentials: true }
+    );
+
+    navigate(`/acme-test-result/${testId}`);
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+  }
+};
+
 
   const formatTime = (s) => {
     const m = Math.floor(s / 60);
@@ -145,7 +173,11 @@ const Test = () => {
         test={testData}
         instructionsRead={instructionsRead}
         setInstructionsRead={setInstructionsRead}
-        onStart={() => setTestStarted(true)}
+        onStart={() => {
+          setTestStarted(true);
+          setTestStartTime(Date.now());
+          setQuestionStartTime(Date.now());
+        }}
         username={user?.username || "Student"}
       />
     );

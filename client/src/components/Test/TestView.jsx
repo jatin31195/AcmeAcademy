@@ -74,7 +74,7 @@ const TestView = ({
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Header */}
+  
       <div className="border-b px-4 py-3 flex items-center justify-between flex-wrap">
         <h1 className="text-base font-medium">
           {testData.title || "Practice Test"} | {testData.category || "General"}
@@ -92,7 +92,7 @@ const TestView = ({
         </div>
       </div>
 
-      {/* Section Navigator */}
+   
       <div className="border-b flex items-center justify-between px-4 py-2 bg-cyan-500 text-white">
         <ChevronLeft className="h-5 w-5 cursor-pointer" />
         <span className="text-sm font-medium">{currentSection}</span>
@@ -225,9 +225,10 @@ const TestView = ({
       <div className="border-t px-4 py-4 flex items-center justify-between flex-wrap gap-2">
         <Button
           variant="outline"
-          onClick={() =>
-            currentQuestion > 0 && setCurrentQuestion(currentQuestion - 1)
-          }
+          onClick={() => {
+            recordTimeForCurrentQuestion();
+            if (currentQuestion > 0) setCurrentQuestion(currentQuestion - 1);
+            }}
           disabled={currentQuestion === 0}
           className="border-cyan-500 text-cyan-500 hover:bg-cyan-50"
         >
