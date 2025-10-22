@@ -54,7 +54,7 @@ function App() {
           <Route path="/about" element={<About/>}/>
           <Route path="/dashboard" element={<Dashboard/>}/>
            <Route path="/acme-test/:testId" element={<Test/>} />
-    <Route path="/acme-test-result/:testId" element={<TestResult/>}/>
+    <Route path="/acme-test-result/:testId/result" element={<TestResult/>}/>
         </Route>
 
         {/* Default/fallback */}
