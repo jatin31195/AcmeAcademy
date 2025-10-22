@@ -15,14 +15,14 @@ pids
 *.pid.lock
 
 # Node modules
-server/node_modules/
+Server/node_modules/
 
 # dotenv
-server/.env
+Server/.env
 
 # Build output
-server/dist
-server/build
+Server/dist
+Server/build
 
 # ===============================
 # React / Frontend
