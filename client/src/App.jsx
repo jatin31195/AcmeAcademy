@@ -20,6 +20,8 @@ import AcmePlayer from "./pages/AcmePlayer";
 import Test from "./pages/Test";
 import TestResult from "./pages/TestResult";
 import 'katex/dist/katex.min.css';
+import FreeCourses from "./pages/FreeCourses";
+import PracticeSets from "./pages/PracticeSets";
 
 function App() {
   const location = useLocation();
@@ -47,7 +49,9 @@ function App() {
     <Route path="/acme-academy-open-library" element={<OpenLibrary/>} />
     <Route path="/acme-academy-open-library/:id" element={<LibraryContent/>} />
     <Route path="/acme-player" element={<AcmePlayer/>} />
-   
+    <Route path="/acme-free-courses" element={<FreeCourses/>} />
+<Route path="/acme-practice-sets" element={<PracticeSets />} />
+
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />

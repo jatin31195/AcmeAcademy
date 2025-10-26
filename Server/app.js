@@ -8,6 +8,8 @@ import courseRoutes from "./src/routes/courseRoutes.js";
 import subjectRoutes from "./src/routes/subjectRoutes.js";
 import topicRoutes from "./src/routes/topicRoutes.js";
 import testRoute from "./src/routes/testRoute.js"
+import questionRoutes from "./src/routes/questionRoute.js";
+
 const app = express();
 
 app.use(cors({
@@ -26,6 +28,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/topics", topicRoutes);
 app.use("/api/tests",testRoute );
+app.use("/api/questions", questionRoutes);
 app.get("/", (req, res) => {
   res.send("ACME Academy Backend is running!");
 });
