@@ -25,8 +25,19 @@ import PracticeSets from "./pages/PracticeSets";
 
 function App() {
   const location = useLocation();
-  const hideNavbar =location.pathname === "/"|| location.pathname === "/login" || location.pathname === "/signup"||location.pathname === "/acme-courses"||location.pathname.startsWith("/acme-player")||location.pathname.startsWith("/acme-test")
-  ||location.pathname.startsWith("/acme-test-result");
+
+
+  const hideNavbar =
+    location.pathname === "/" ||
+    location.pathname === "/login" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/acme-courses" ||
+    location.pathname.startsWith("/acme-player") ||
+    location.pathname.startsWith("/acme-test") ||
+    location.pathname.startsWith("/acme-test-result");
+
+  
+  const hideFooter = hideNavbar || location.pathname === "/acme-practice-sets";
 
   return (
     <>
@@ -37,36 +48,38 @@ function App() {
         <Route element={<PublicRoute />}>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-         
         </Route>
-         <Route path="/pyq" element={<PYQ />} />
-  <Route path="/pyq/:id" element={<PdfReader />} />
-   <Route path="/exam-pattern" element={<ExamPattern />} />
-   <Route path="/exams-pattern/nimcet-2025" element={<Nimcet2025 />}/>
-   <Route path="/acme-courses" element={<Courses/>} />
-   <Route path="/contact-acme-academy" element={<Contact/>}/>
-    <Route path="/acme-academy-results" element={<Results/>}/>
-    <Route path="/acme-academy-open-library" element={<OpenLibrary/>} />
-    <Route path="/acme-academy-open-library/:id" element={<LibraryContent/>} />
-    <Route path="/acme-player" element={<AcmePlayer/>} />
-    <Route path="/acme-free-courses" element={<FreeCourses/>} />
-<Route path="/acme-practice-sets" element={<PracticeSets />} />
+
+        <Route path="/pyq" element={<PYQ />} />
+        <Route path="/pyq/:id" element={<PdfReader />} />
+        <Route path="/exam-pattern" element={<ExamPattern />} />
+        <Route path="/exams-pattern/nimcet-2025" element={<Nimcet2025 />} />
+        <Route path="/acme-courses" element={<Courses />} />
+        <Route path="/contact-acme-academy" element={<Contact />} />
+        <Route path="/acme-academy-results" element={<Results />} />
+        <Route path="/acme-academy-open-library" element={<OpenLibrary />} />
+        <Route path="/acme-academy-open-library/:id" element={<LibraryContent />} />
+        <Route path="/acme-player" element={<AcmePlayer />} />
+        <Route path="/acme-free-courses" element={<FreeCourses />} />
+        <Route path="/acme-practice-sets" element={<PracticeSets />} />
 
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
-          <Route path="/about" element={<About/>}/>
-          <Route path="/dashboard" element={<Dashboard/>}/>
-           <Route path="/acme-test/:testId" element={<Test/>} />
-    <Route path="/acme-test-result/:testId/result" element={<TestResult/>}/>
+          <Route path="/about" element={<About />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/acme-test/:testId" element={<Test />} />
+          <Route path="/acme-test-result/:testId" element={<TestResult />} />
         </Route>
 
         {/* Default/fallback */}
         <Route path="*" element={<Login />} />
       </Routes>
-      {!hideNavbar&&<Footer/>}
+
+      {!hideFooter && <Footer />}
     </>
   );
 }
+
 
 export default App;
