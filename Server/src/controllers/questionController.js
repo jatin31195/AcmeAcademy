@@ -83,8 +83,16 @@ export const addQuestion = async (req, res) => {
 export const getQuestionBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    const question = await Question.findOne({ slug });
-    if (!question) return res.status(404).json({ error: "Question not found" });
+    let question = await Question.findOne({ slug });
+    if (!question) {
+      question = await Question.findOne({
+        question: { $regex: new RegExp(`^${slug}$`, "i") }
+      });
+    }
+
+    if (!question)
+      return res.status(404).json({ error: "Question not found" });
+
     res.json(question);
   } catch (err) {
     console.error(err);
@@ -93,11 +101,12 @@ export const getQuestionBySlug = async (req, res) => {
 };
 
 
+
 export const getTopicsBySubject = async (req, res) => {
   const { subject } = req.params;
   try {
     const topics = await Question.distinct("topic", { subject });
-    res.json({ subject, topics });
+    res.json(topics);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server Error" });
