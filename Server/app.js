@@ -9,9 +9,14 @@ import subjectRoutes from "./src/routes/subjectRoutes.js";
 import topicRoutes from "./src/routes/topicRoutes.js";
 import testRoute from "./src/routes/testRoute.js"
 import questionRoutes from "./src/routes/questionRoute.js";
-
+import prerender from "prerender-node";
 const app = express();
 
+app.use(
+  prerender
+    .set("prerenderToken", "yd8IUbtERM5oQKILMuBo")
+    .set("protocol", "https")
+);
 app.use(cors({
   origin: ['https://7a40b29474d2.ngrok-free.app','http://localhost:5173'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
