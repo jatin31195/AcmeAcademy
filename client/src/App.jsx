@@ -22,6 +22,7 @@ import TestResult from "./pages/TestResult";
 import 'katex/dist/katex.min.css';
 import FreeCourses from "./pages/FreeCourses";
 import PracticeSets from "./pages/PracticeSets";
+import QuestionSEOPage from "./pages/QuestionSEOPage";
 
 function App() {
   const location = useLocation();
@@ -62,6 +63,7 @@ function App() {
         <Route path="/acme-player" element={<AcmePlayer />} />
         <Route path="/acme-free-courses" element={<FreeCourses />} />
         <Route path="/acme-practice-sets" element={<PracticeSets />} />
+        <Route path="/questions/:slug" element={<QuestionSEOPage/>} />
 
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
