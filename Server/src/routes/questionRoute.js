@@ -7,7 +7,7 @@ router.get("/", questionController.getAllQuestions);
 router.get("/subjects", questionController.getAllSubjects);
 router.get("/subjects/:subject/topics", questionController.getTopicsBySubject);
 router.get("/topic/:topic", questionController.getQuestionsByTopic);
-router.get("/slug/:slug", questionController.getQuestionBySlug);
+router.get("/q/slug/:slug", questionController.getQuestionBySlug);
 router.post("/", questionController.addQuestion);
 router.post("/:id/discussion", questionController.addDiscussion);
 
