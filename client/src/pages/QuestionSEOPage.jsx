@@ -9,7 +9,7 @@ const QuestionSEOPage = () => {
 
   useEffect(() => {
     const fetchQuestion = async () => {
-      const res = await axios.get(`http://localhost:5000/api/questions/slug/${slug}`);
+      const res = await axios.get(`http://localhost:5000/api/questions/q/slug/${slug}`);
       setQuestion(res.data);
     };
     fetchQuestion();

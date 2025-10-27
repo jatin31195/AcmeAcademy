@@ -8,54 +8,68 @@ const discussionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const subQuestionSchema = new mongoose.Schema({
-  question: { type: String, required: true },
-  options: [String],
-  answer: String,
-  solutionText: String,
-  solutionVideo: String,
-   solutionImage:String,
-  image: String,
-  tags: [String],
-  topic: String,
-  subQuestions: [
-    new mongoose.Schema(
-      {
-        question: { type: String, required: true },
-        options: [String],
-        answer: String,
-        solutionText: String,
-        solutionVideo: String,
-        solutionImage:String,
-        image: String,
-        tags: [String],
-        topic: String,
-      },
-      { _id: false }
-    ),
-  ],
-}, { _id: false });
+const optionSchema = new mongoose.Schema(
+  {
+    text: { type: String },
+    image: { type: String },
+  },
+  { _id: false }
+);
 
 
-const questionSchema = new mongoose.Schema({
-  question: { type: String, required: true },
-  options: [String],
-  answer: String,
-  solutionText: String,
-  solutionVideo: String,
-  solutionImage:String,
-  image: String,
-  tags: [String],
-  subject: { type: String, required: true }, 
-  topic: { type: String, required: true },  
-  section: { type: String },                
-  slug: { type: String, index: true, unique: true, sparse: true },
-  discussion: [discussionSchema],
-  subQuestions: [subQuestionSchema],
-}, { timestamps: true });
+const subQuestionSchema = new mongoose.Schema(
+  {
+    question: { type: String, required: true },
+    options: { type: [mongoose.Schema.Types.Mixed], default: [] }, // ✅ backward compatible
+    answer: String,
+    solutionText: String,
+    solutionVideo: String,
+    solutionImage: String,
+    image: String,
+    tags: [String],
+    topic: String,
+    subQuestions: [
+      new mongoose.Schema(
+        {
+          question: { type: String, required: true },
+          options: { type: [mongoose.Schema.Types.Mixed], default: [] }, // ✅ nested compatible
+          answer: String,
+          solutionText: String,
+          solutionVideo: String,
+          solutionImage: String,
+          image: String,
+          tags: [String],
+          topic: String,
+        },
+        { _id: false }
+      ),
+    ],
+  },
+  { _id: false }
+);
+
+const questionSchema = new mongoose.Schema(
+  {
+    question: { type: String, required: true },
+    options: { type: [mongoose.Schema.Types.Mixed], default: [] },
+    answer: String,
+    solutionText: String,
+    solutionVideo: String,
+    solutionImage: String,
+    image: String,
+    tags: [String],
+    subject: { type: String, required: true },
+    topic: { type: String, required: true },
+    section: { type: String },
+    slug: { type: String, index: true, unique: true, sparse: true },
+    discussion: [discussionSchema],
+    subQuestions: [subQuestionSchema],
+  },
+  { timestamps: true }
+);
 
 
-questionSchema.pre("save", function(next) {
+questionSchema.pre("save", function (next) {
   if (!this.slug && this.question) {
     this.slug = slugifyQuestion(this);
   }
