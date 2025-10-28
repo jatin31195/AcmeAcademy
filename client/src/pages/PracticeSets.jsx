@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import QuestionDetails from "@/components/PracticeSets/QuestionDetail";
 import { Helmet } from "react-helmet-async";
+
 const QUESTIONS_PER_PAGE = 5;
 
 const PracticeSets = () => {
@@ -30,69 +31,92 @@ const PracticeSets = () => {
   const [showSolution, setShowSolution] = useState({});
   const [loading, setLoading] = useState(false);
 
- useEffect(() => {
-  const fetchSubjects = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/questions/subjects");
-      const subjectsData = res.data;
+ 
+  useEffect(() => {
+    const initFetch = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/questions/subjects");
+        const subjectsData = res.data || [];
 
-      setSubjects(subjectsData);
-      if (subjectsData.length > 0) {
-        // Auto load first subject
+        if (!subjectsData.length) return;
+        setSubjects(subjectsData);
+
+        
         const firstSubject = subjectsData[0];
         setSelectedSubject(firstSubject);
-        fetchTopics(firstSubject);
+
+        
+        const topicRes = axios.get(
+          `http://localhost:5000/api/questions/subjects/${encodeURIComponent(firstSubject)}/topics`
+        );
+
+        const topicsDataRes = await topicRes;
+        const topicsData = Array.isArray(topicsDataRes.data)
+          ? topicsDataRes.data
+          : topicsDataRes.data.topics;
+
+        if (topicsData?.length) {
+          const firstTopic = topicsData[0];
+          setSelectedTopic({ name: firstTopic });
+
+          
+          setExpandedSubjects((prev) => ({
+            ...prev,
+            [firstSubject]: topicsData,
+          }));
+
+          // Fetch first topic’s questions right away
+          fetchQuestions(firstSubject, firstTopic);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching initial data:", err);
+      }
+    };
+
+    initFetch();
+  }, []);
+
+  const fetchTopics = async (subject) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/questions/subjects/${encodeURIComponent(subject)}/topics`
+      );
+      const topicsData = Array.isArray(res.data) ? res.data : res.data.topics;
+
+      if (topicsData?.length > 0) {
+        const firstTopic = topicsData[0];
+        setSelectedTopic({ name: firstTopic });
+        setExpandedSubjects((prev) => ({ ...prev, [subject]: topicsData }));
+        
+        fetchQuestions(subject, firstTopic);
       }
     } catch (err) {
-      console.error("Error fetching subjects:", err);
+      console.error("Error fetching topics:", err);
     }
   };
 
-  fetchSubjects();
-}, []);
+  const fetchQuestions = async (subject, topicName) => {
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `http://localhost:5000/api/questions/subjects/${encodeURIComponent(subject)}/topics/${encodeURIComponent(topicName)}`
+      );
 
-const fetchTopics = async (subject) => {
-  try {
-    const res = await axios.get(
-  `http://localhost:5000/api/questions/subjects/${encodeURIComponent(subject)}/topics`
-);
-const topicsData = Array.isArray(res.data) ? res.data : res.data.topics; 
-
-
-    if (topicsData && topicsData.length > 0) {
-      const firstTopic = topicsData[0];
-      setSelectedTopic({ name: firstTopic });
-      fetchQuestions(firstTopic);
+      setQuestions(res.data || []);
+      setCurrentPage(1);
+      setSelectedOptions({});
+    } catch (err) {
+      console.error("Error fetching questions:", err);
+    } finally {
+      setLoading(false);
     }
-
-    setExpandedSubjects((prev) => ({
-      ...prev,
-      [subject]: topicsData,
-    }));
-  } catch (err) {
-    console.error("Error fetching topics:", err);
-  }
-};
-
-
-const fetchQuestions = async (topicName) => {
-  try {
-    const res = await axios.get(`http://localhost:5000/api/questions/topic/${topicName}`);
-    const questionsData = res.data;
-    setQuestions(questionsData);
-    setCurrentPage(1);
-    setSelectedOptions({});
-  } catch (err) {
-    console.error("Error fetching questions:", err);
-  }
-};
-
+  };
 
   const filteredQuestions = questions.filter((q) =>
-    q.question.toLowerCase().includes((searchTerm || "").toLowerCase())
+    q.question?.toLowerCase().includes((searchTerm || "").toLowerCase())
   );
 
-  // 🔹 Flatten questions + subquestions
+ 
   const expandedQuestions = [];
   filteredQuestions.forEach((q) => {
     expandedQuestions.push({ ...q, isSub: false, parentId: null });
@@ -146,24 +170,25 @@ const fetchQuestions = async (topicName) => {
     return "";
   };
 
-  const toggleSubject = (subjectName) => {
-    setExpandedSubjects((prev) => ({
-      ...prev,
-      [subjectName]: !prev[subjectName],
-    }));
+  const toggleSubject = async (subjectName) => {
+    const isExpanded = expandedSubjects[subjectName];
+    if (isExpanded) {
+      setExpandedSubjects((prev) => ({ ...prev, [subjectName]: false }));
+    } else {
+      await fetchTopics(subjectName);
+    }
   };
 
   return (
     <>
-    <Helmet>
+      <Helmet>
         <title>Practice Sets | ACME Academy</title>
-        <meta name="description" content="Practice reasoning, maths, computer, English, JEE, NIMCET and more questions with detailed solutions at ACME Academy." />
-        <meta name="keywords" content="reasoning questions, maths practice, computer aptitude, english grammar, nimcet preparation, jee practice sets" />
-        <meta property="og:title" content="Practice Sets | ACME Academy" />
-        <meta property="og:description" content="Daily practice sets for reasoning, maths, computer science, English, JEE, NIMCET, and more." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://yourdomain.com/acme-practice-sets" />
+        <meta
+          name="description"
+          content="Practice reasoning, maths, computer, English, JEE, NIMCET and more questions with detailed solutions at ACME Academy."
+        />
       </Helmet>
+
       <div className="hero-gradient py-8 w-full"></div>
       <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 relative flex">
         <Button className="sm:hidden ml-4" onClick={() => setSidebarOpen(true)}>
@@ -197,51 +222,45 @@ const fetchQuestions = async (topicName) => {
           </div>
 
           {subjects.map((subject) => (
-  <div key={subject} className="mb-3">
-    <div
-      className={`flex justify-between items-center cursor-pointer p-3 rounded-lg transition-all duration-200
-        ${
-          expandedSubjects[subject]
-            ? "bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 shadow-inner"
-            : "hover:bg-gray-100"
-        }`}
-      onClick={() => {
-        if (!expandedSubjects[subject]) fetchTopics(subject);
-        toggleSubject(subject);
-      }}
-    >
-      <span className="font-semibold text-gray-800">{subject}</span>
-      <span className="text-gray-500">
-        {expandedSubjects[subject] ? <ChevronDown /> : <ChevronRight />}
-      </span>
-    </div>
+            <div key={subject} className="mb-3">
+              <div
+                className={`flex justify-between items-center cursor-pointer p-3 rounded-lg transition-all duration-200 ${
+                  expandedSubjects[subject]
+                    ? "bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 shadow-inner"
+                    : "hover:bg-gray-100"
+                }`}
+                onClick={() => toggleSubject(subject)}
+              >
+                <span className="font-semibold text-gray-800">{subject}</span>
+                <span className="text-gray-500">
+                  {expandedSubjects[subject] ? <ChevronDown /> : <ChevronRight />}
+                </span>
+              </div>
 
-    {expandedSubjects[subject] && Array.isArray(expandedSubjects[subject]) && (
-      <div className="mt-2 ml-4 space-y-2">
-        {expandedSubjects[subject].map((topic) => (
-          <div
-            key={topic}
-            className={`flex items-center justify-between p-2 pl-4 rounded-lg cursor-pointer transition-all duration-200
-              ${
-                selectedTopic?.name === topic
-                  ? "bg-indigo-50 font-semibold text-indigo-700 shadow-md"
-                  : "hover:bg-gray-50 hover:pl-5"
-              }`}
-            onClick={() => {
-              setSelectedSubject(subject);
-              setSelectedTopic({ name: topic });
-              fetchQuestions(topic);
-              setSidebarOpen(false);
-            }}
-          >
-            <span className="text-gray-700">{topic}</span>
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-))}
-
+              {Array.isArray(expandedSubjects[subject]) && (
+                <div className="mt-2 ml-4 space-y-2">
+                  {expandedSubjects[subject].map((topic) => (
+                    <div
+                      key={topic}
+                      className={`flex items-center justify-between p-2 pl-4 rounded-lg cursor-pointer transition-all duration-200 ${
+                        selectedTopic?.name === topic
+                          ? "bg-indigo-50 font-semibold text-indigo-700 shadow-md"
+                          : "hover:bg-gray-50 hover:pl-5"
+                      }`}
+                      onClick={() => {
+                        setSelectedSubject(subject);
+                        setSelectedTopic({ name: topic });
+                        fetchQuestions(subject, topic);
+                        setSidebarOpen(false);
+                      }}
+                    >
+                      <span className="text-gray-700">{topic}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </aside>
 
         {/* Main Content */}
@@ -252,7 +271,7 @@ const fetchQuestions = async (topicName) => {
           >
             <Button
               variant="ghost"
-              onClick={() => navigate("/library")}
+              onClick={() => navigate("/acme-academy-open-library")}
               className="mb-6"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -289,18 +308,45 @@ const fetchQuestions = async (topicName) => {
                 No questions found.
               </p>
             ) : (
-              paginatedExpanded.map((item, idx) => (
-                <QuestionDetails
-                  key={item._id || `${item.parentId}-${idx}`}
-                  item={item}
-                  idx={idx}
-                  currentPage={currentPage}
-                  QUESTIONS_PER_PAGE={QUESTIONS_PER_PAGE}
-                  handleOptionClick={handleOptionClick}
-                  getOptionStyle={getOptionStyle}
-                  showSolution={showSolution}
-                />
-              ))
+              paginatedExpanded.map((item, idx) => {
+                const mainQuestionNumber =
+                  (currentPage - 1) * QUESTIONS_PER_PAGE + idx + 1;
+                let parentMainNumber = null;
+                let subIndex = null;
+
+                if (item.isSub && item.parentId) {
+                  const parent = expandedQuestions.find(
+                    (q) => q._id === item.parentId
+                  );
+                  if (parent && Array.isArray(parent.subQuestions)) {
+                    const siblingIndex = parent.subQuestions.findIndex(
+                      (sub) => sub.question === item.question
+                    );
+                    subIndex = siblingIndex;
+                  }
+                  const parentExpandedIndex = expandedQuestions.findIndex(
+                    (q) => q._id === item.parentId
+                  );
+                  parentMainNumber = parentExpandedIndex + 1;
+                }
+
+                return (
+                  <QuestionDetails
+                    key={item._id || `${item.parentId}-${idx}`}
+                    item={item}
+                    idx={idx}
+                    currentPage={currentPage}
+                    QUESTIONS_PER_PAGE={QUESTIONS_PER_PAGE}
+                    handleOptionClick={handleOptionClick}
+                    getOptionStyle={getOptionStyle}
+                    showSolution={showSolution}
+                    mainQuestionNumber={
+                      item.isSub ? parentMainNumber : mainQuestionNumber
+                    }
+                    subIndex={item.isSub ? subIndex : null}
+                  />
+                );
+              })
             )}
 
             {/* Pagination */}
