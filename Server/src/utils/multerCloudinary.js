@@ -1,10 +1,20 @@
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import cloudinary from "./cloudinary.js"; 
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 
-export const cloudinaryStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "test_solutions",
-    allowed_formats: ["jpg", "png", "jpeg"],
+const uploadPath = path.join(process.cwd(), "uploads", "temp");
+
+
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadPath),
+  filename: (req, file, cb) => {
+    const unique = Date.now() + "-" + file.originalname;
+    cb(null, unique);
   },
 });
+
+export const upload = multer({ storage });
