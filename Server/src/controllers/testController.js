@@ -12,25 +12,55 @@ export const createTest = async (req, res) => {
   }
 };
 
-// Add Questions to Test
+
 export const addQuestionsToTest = async (req, res) => {
   try {
     const { testId } = req.params;
     const { questions } = req.body;
+
     if (!questions || questions.length === 0)
       return res.status(400).json({ message: "No questions provided" });
 
     const test = await Test.findById(testId);
     if (!test) return res.status(404).json({ message: "Test not found" });
 
+   
     test.questions.push(...questions);
+
+    
+    test.totalQuestions = test.questions.length;
+
+   
+    if (test.sections && test.sections.length > 0) {
+  
+      let totalMarks = 0;
+      test.sections.forEach((sec) => {
+        const secQuestions = test.questions.filter(
+          (q) => q.section?.toString() === sec._id.toString()
+        );
+        const marksPerQ = sec.marksPerQuestion ?? 1;
+        totalMarks += secQuestions.length * marksPerQ;
+        sec.numQuestions = secQuestions.length; 
+      });
+      test.totalMarks = totalMarks;
+    } else {
+      
+      test.totalMarks = test.questions.length;
+    }
+
     await test.save();
 
-    res.json({ message: "Questions added successfully", totalQuestions: test.questions.length });
+    res.json({
+      message: "Questions added successfully",
+      totalQuestions: test.totalQuestions,
+      totalMarks: test.totalMarks,
+    });
   } catch (err) {
+    console.error("Error adding questions:", err);
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // Upload solution image
 export const uploadSolutionImage = async (req, res) => {
