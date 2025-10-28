@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { cloudinaryStorage } from "../utils/multerCloudinary.js";
+import { upload } from "../utils/multerCloudinary.js";
 import {
   createTest,
   addQuestionsToTest,
@@ -14,7 +14,7 @@ import {
 import { verifyUser } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
-const upload = multer({ storage: cloudinaryStorage });
+
 
 // Create a new test
 router.post("/", createTest);
