@@ -1,4 +1,6 @@
 import Question from "../models/Question.js";
+import cloudinary from "../utils/cloudinary.js";
+import fs from "fs";
 
 
 export const searchQuestions = async (req, res) => {
@@ -26,7 +28,11 @@ export const searchQuestions = async (req, res) => {
 export const getQuestionsByTopic = async (req, res) => {
   const { topic } = req.params;
   try {
-    const questions = await Question.find({ topic });
+        const { subject, topic } = req.params;
+    const query = { topic };
+    if (subject) query.subject = subject;
+
+    const questions = await Question.find(query);
     res.json(questions);
   } catch (err) {
     console.error(err);
@@ -70,14 +76,52 @@ export const addDiscussion = async (req, res) => {
 
 export const addQuestion = async (req, res) => {
   try {
-    const newQuestion = new Question(req.body);
+    let solutionImageUrl = "";
+
+    // 🖼️ Upload file if attached
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "test_solutions",
+      });
+
+      fs.unlinkSync(req.file.path); // cleanup local temp file
+      solutionImageUrl = result.secure_url;
+    } else if (req.body.solutionImage) {
+      solutionImageUrl = req.body.solutionImage.trim();
+    }
+
+    // 🧩 Parse options field safely
+    let options = req.body.options;
+    if (typeof options === "string") {
+      try {
+        options = JSON.parse(options);
+      } catch (err) {
+        console.warn("⚠️ Could not parse options JSON:", err.message);
+        options = [];
+      }
+    }
+
+    const newQuestion = new Question({
+      question: req.body.question,
+      options,
+      answer: req.body.answer,
+      solutionText: req.body.solutionText || "",
+      solutionVideo: req.body.solutionVideo || "",
+      solutionImage: solutionImageUrl,
+      image: req.body.image || "",
+      subject: req.body.subject,
+      topic: req.body.topic,
+    });
+
     await newQuestion.save();
-    res.json(newQuestion);
+    res.status(201).json(newQuestion);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server Error" });
+    console.error("❌ Error in addQuestion:", err);
+    res.status(500).json({ error: err.message || "Something went wrong!" });
   }
 };
+
+
 
 
 export const getQuestionBySlug = async (req, res) => {
