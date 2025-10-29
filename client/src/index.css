@@ -546,3 +546,13 @@
   }
 
 }
+button[data-state][data-orientation="vertical"],
+button[data-state][data-orientation="horizontal"],
+button[role="button"][data-state] {
+  text-decoration: none !important;
+}
+
+.AccordionTrigger,
+.AccordionTrigger * {
+  text-decoration: none !important;
+}
