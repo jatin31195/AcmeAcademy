@@ -1,4 +1,4 @@
-import { InlineMath } from "react-katex";
+import { InlineMath , BlockMath} from "react-katex";
 import { ChevronLeft, ChevronRight, Info, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import "katex/dist/katex.min.css";
@@ -33,7 +33,7 @@ const TestView = ({
     // Handle math segments ($...$)
     if (part.startsWith("$") && part.endsWith("$")) {
       let math = part.slice(1, -1).trim();
-
+      const isMatrix = /\\begin\{bmatrix\}|\\begin\{pmatrix\}|\\\\/.test(math);
       // Normalize symbols and support C/P, etc.
       math = math
         .replace(/\\\\/g, "\\") // fix double backslashes
@@ -64,7 +64,11 @@ const TestView = ({
         .replace(/\{?(\d+)\s*[Cc]\s*(\d+)\}?/g, "{$1 \\choose $2}")
         .replace(/\{?(\d+)\s*[Pp]\s*(\d+)\}?/g, "{$1 \\mathrm{P} $2}");
 
-      return <InlineMath key={i} math={math} />;
+      return isMatrix ? (
+        <BlockMath key={i} math={math} />
+      ) : (
+        <InlineMath key={i} math={math} />
+      );
     }
 
     // Normal text
