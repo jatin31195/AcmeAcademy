@@ -1,11 +1,18 @@
 import Test from "../models/Test.js";
 import UserTestAttempt from "../models/UserTestAttempt.js";
 import User from "../models/User.js";
+import Topic from "../models/Topic.js";
 
-// Create Test
 export const createTest = async (req, res) => {
   try {
     const test = await Test.create(req.body);
+    if (req.body.topic) {
+      await Topic.findByIdAndUpdate(
+        req.body.topic,
+        { $push: { tests: test._id } },
+        { new: true }
+      );
+    }
     res.status(201).json(test);
   } catch (err) {
     res.status(500).json({ message: err.message });
