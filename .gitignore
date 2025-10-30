@@ -1,48 +1,33 @@
-# ===============================
-# Node.js / Backend
-# ===============================
 # Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
+pnpm-debug.log*
 
-# Runtime data
-pids
+# Node modules
+node_modules/
+client/node_modules/
+Server/node_modules/
+
+# Environment variables
+client/.env
+Server/.env
+
+# Build outputs
+client/dist/
+client/build/
+Server/dist/
+Server/build/
+
+# Vite and cache
+.vite/
 *.pid
 *.seed
 *.pid.lock
 
-# Node modules
-Server/node_modules/
-
-# dotenv
-Server/.env
-
-# Build output
-Server/dist
-Server/build
-
-# ===============================
-# React / Frontend
-# ===============================
-# Node modules
-client/node_modules/
-
-# Build output
-client/build/
-client/dist/
-
-# dotenv
-client/.env
-Server/.env
-# Logs
-client/npm-debug.log*
-client/yarn-debug.log*
-
-# Editor directories and OS files
-*.DS_Store
-*.vscode/
-*.idea/
+# IDE files
+.vscode/
+.idea/
 *.swp
+*.DS_Store
