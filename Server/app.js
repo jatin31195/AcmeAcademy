@@ -1,48 +1,59 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import authRoute from './src/routes/authRoute.js';
-import { getMe } from "./src/utils/me.js";
-import pyqRoute from './src/routes/pyqRoute.js'
+import prerender from "prerender-node";
+
+import authRoute from "./src/routes/authRoute.js";
+
+import pyqRoute from "./src/routes/pyqRoute.js";
 import courseRoutes from "./src/routes/courseRoutes.js";
 import subjectRoutes from "./src/routes/subjectRoutes.js";
 import topicRoutes from "./src/routes/topicRoutes.js";
-import testRoute from "./src/routes/testRoute.js"
+import testRoute from "./src/routes/testRoute.js";
 import questionRoutes from "./src/routes/questionRoute.js";
-import prerender from "prerender-node";
+import resultRoutes from "./src/routes/resultRoute.js";
+
 const app = express();
 
+/* ------------------------- 🔹 Middlewares ------------------------- */
 app.use(
   prerender
     .set("prerenderToken", "yd8IUbtERM5oQKILMuBo")
     .set("protocol", "https")
 );
-app.use(cors({
-  origin: ['https://7a40b29474d2.ngrok-free.app','http://localhost:5173'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true,
-}));
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // for Vite dev
+      "https://7a40b29474d2.ngrok-free.app", // optional tunnel
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 app.use(cookieParser());
 app.use(express.json());
 
+/* ------------------------- 🔹 Routes ------------------------- */
 app.use("/api/users", authRoute);
-app.use("/api/users/me", getMe);
-app.use("/api/pyqs",pyqRoute);
+app.use("/api/pyqs", pyqRoute);
 app.use("/api/courses", courseRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/topics", topicRoutes);
-app.use("/api/tests",testRoute );
+app.use("/api/tests", testRoute);
 app.use("/api/questions", questionRoutes);
+app.use("/api/results", resultRoutes);
+
+/* ------------------------- 🔹 Root Route ------------------------- */
 app.get("/", (req, res) => {
-  res.send("ACME Academy Backend is running!");
+  res.send("🚀 ACME Academy Backend is running!");
 });
-app.use(cors({
-  origin: "http://localhost:5173", 
-  credentials: true,             
-}));
+
+/* ------------------------- 🔹 Error Handler ------------------------- */
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error("❌ Error:", err.stack);
   res.status(500).json({ error: "Something went wrong!" });
 });
 
