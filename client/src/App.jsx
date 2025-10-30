@@ -1,4 +1,5 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { useAuth } from "./AuthContext";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
@@ -19,14 +20,14 @@ import LibraryContent from "./pages/LibraryContent";
 import AcmePlayer from "./pages/AcmePlayer";
 import Test from "./pages/Test";
 import TestResult from "./pages/TestResult";
-import 'katex/dist/katex.min.css';
+import "katex/dist/katex.min.css";
 import FreeCourses from "./pages/FreeCourses";
 import PracticeSets from "./pages/PracticeSets";
 import QuestionSEOPage from "./pages/QuestionSEOPage";
 
 function App() {
   const location = useLocation();
-
+  const { user, loading } = useAuth();
 
   const hideNavbar =
     location.pathname === "/" ||
@@ -37,7 +38,6 @@ function App() {
     location.pathname.startsWith("/acme-test") ||
     location.pathname.startsWith("/acme-test-result");
 
-  
   const hideFooter = hideNavbar || location.pathname === "/acme-practice-sets";
 
   return (
@@ -51,6 +51,7 @@ function App() {
           <Route path="/login" element={<Login />} />
         </Route>
 
+        {/* General routes */}
         <Route path="/pyq" element={<PYQ />} />
         <Route path="/pyq/:id" element={<PdfReader />} />
         <Route path="/exam-pattern" element={<ExamPattern />} />
@@ -63,7 +64,7 @@ function App() {
         <Route path="/acme-player" element={<AcmePlayer />} />
         <Route path="/acme-free-courses" element={<FreeCourses />} />
         <Route path="/acme-practice-sets" element={<PracticeSets />} />
-        <Route path="/questions/:slug" element={<QuestionSEOPage/>} />
+        <Route path="/questions/:slug" element={<QuestionSEOPage />} />
 
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
@@ -74,14 +75,22 @@ function App() {
           <Route path="/acme-test-result/:testId" element={<TestResult />} />
         </Route>
 
-        {/* Default/fallback */}
-        <Route path="*" element={<Login />} />
+        {/* Default / unknown route */}
+        <Route
+          path="*"
+          element={
+            loading ? null : user ? (
+              <Navigate to="/home" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
       </Routes>
 
       {!hideFooter && <Footer />}
     </>
   );
 }
-
 
 export default App;
