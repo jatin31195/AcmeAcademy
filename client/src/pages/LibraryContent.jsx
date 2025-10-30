@@ -318,14 +318,20 @@ export default function LibraryContent() {
                               )}
 
                               {/* Free Test Link / Locked */}
+{/* Tests Section */}
 {topic.tests && topic.tests.length > 0 ? (
-  <Link
-    to={`/acme-test/${topic.tests[0]}`} // navigate to the test page by test id
-    className="inline-flex items-center gap-1 px-3 py-1.5 rounded hover:bg-slate-100 text-sm transition-all"
-  >
-    <Play className="h-4 w-4 text-blue-600" />
-    Free Test
-  </Link>
+  <div className="flex items-center gap-2 flex-wrap">
+    {topic.tests.map((testId, index) => (
+      <Link
+        key={testId}
+        to={`/acme-test/${testId}`}
+        className="inline-flex items-center gap-1 px-3 py-1.5 rounded hover:bg-slate-100 text-sm transition-all border border-blue-200 bg-white/70 backdrop-blur-sm shadow-sm hover:shadow-md"
+      >
+        <Play className="h-4 w-4 text-blue-600" />
+        {topic.tests.length === 1 ? "Free Test" : `Test ${index + 1}`}
+      </Link>
+    ))}
+  </div>
 ) : (
   <button
     disabled
@@ -335,6 +341,7 @@ export default function LibraryContent() {
     Free Test (Locked)
   </button>
 )}
+
 
                             </div>
                           </div>
