@@ -59,6 +59,8 @@ function App() {
         <Route path="/acme-courses" element={<Courses />} />
         <Route path="/contact-acme-academy" element={<Contact />} />
         <Route path="/acme-academy-results" element={<Results />} />
+        <Route path="/acme-academy-results/:exam/:year" element={<Results />} />
+        <Route path="/acme-academy-results/:year" element={<Results />} /> 
         <Route path="/acme-academy-open-library" element={<OpenLibrary />} />
         <Route path="/acme-academy-open-library/:id" element={<LibraryContent />} />
         <Route path="/acme-player" element={<AcmePlayer />} />
