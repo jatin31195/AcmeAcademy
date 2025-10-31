@@ -1,11 +1,6 @@
 import mongoose from "mongoose";
 
-const gallerySchema = new mongoose.Schema({
-  url: { type: String, required: true },
-  eventName: { type: String },
-  year: { type: Number },
-  slug: { type: String, index: true },
-});
+
 
 const resultSchema = new mongoose.Schema(
   {
@@ -16,7 +11,7 @@ const resultSchema = new mongoose.Schema(
     score: { type: Number },
     photoUrl: { type: String },
     slug: { type: String, unique: true, index: true },
-    galleryImages: [gallerySchema],
+    photoType:{type:String}
   },
   { timestamps: true }
 );
