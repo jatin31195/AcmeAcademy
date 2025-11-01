@@ -11,7 +11,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, FileText, Youtube, BookOpen, Flag, StickyNote, Play, Lock } from "lucide-react";
 import AcmePlayer from "./AcmePlayer";
 import axios from "axios";
-
+import { BASE_URL } from "../config";
 export default function LibraryContent() {
   const { id } = useParams(); 
 

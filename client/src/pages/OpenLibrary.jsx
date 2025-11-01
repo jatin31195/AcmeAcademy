@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import logo from "/logo.png";
-
+import { BASE_URL } from "../config";
 const OpenLibrary = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">

@@ -7,7 +7,7 @@ import { Trophy, Loader2, Filter } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import PastGallery from "@/components/Results/PastGallery";
 import logo from "/logo.png";
-
+import { BASE_URL } from "../config";
 const Results = () => {
   const navigate = useNavigate();
   const { exam, year } = useParams();
