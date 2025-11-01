@@ -29,29 +29,60 @@ export const getResultByRank = async (req, res) => {
 
 export const uploadResultPhoto = async (req, res) => {
   try {
-    const { exam, year, rank, name, score,photoType } = req.body;
+    const { exam, year, rank, name, score, photoType } = req.body;
     const cloudUrl = await uploadToCloudinary(req.file?.path, "results");
 
-    if (!cloudUrl)
+    if (!cloudUrl) {
       return res.status(400).json({ error: "Failed to upload to Cloudinary" });
+    }
 
-    const slug = slugify(`${exam}-${year}-air-${rank}-${name}`, {
+    // 🧠 Use rank if available, otherwise fallback to score, else use "unranked"
+    const identifier = rank
+      ? `air-${rank}`
+      : score
+      ? `score-${score}`
+      : "unranked";
+
+    // 🧠 Create a unique slug (acts as safe unique key)
+    const slug = slugify(`${exam}-${year}-${identifier}-${name}`, {
       lower: true,
       strict: true,
     });
 
+    // ✅ Prepare the data for insertion/updating
+    const updateData = {
+      name,
+      exam: exam.toLowerCase(),
+      year,
+      rank: rank || null,
+      score: score || null,
+      photoUrl: cloudUrl,
+      slug,
+    };
+
+    if (photoType) {
+      updateData.photoType = photoType.toLowerCase();
+    }
+
+    // ✅ Use slug as unique identifier for upsert
     const result = await Result.findOneAndUpdate(
-      { exam: exam.toLowerCase(), year, rank },
-      { name, score, photoUrl: cloudUrl, slug, photoType:photoType.toLowerCase()},
+      { slug },
+      updateData,
       { upsert: true, new: true }
     );
 
-    res.status(200).json({ message: "Result uploaded successfully", result });
+    res.status(200).json({
+      message: "Result uploaded successfully",
+      result,
+    });
   } catch (err) {
-    console.error(err);
+    console.error("Error uploading result photo:", err);
     res.status(500).json({ error: "Failed to upload result photo" });
   }
 };
+
+
+
 
 
 export const addGalleryImage = async (req, res) => {
@@ -126,5 +157,46 @@ export const getCombinedResultImages = async (req, res) => {
   } catch (err) {
     console.error("Error fetching combined result images:", err);
     res.status(500).json({ error: "Failed to fetch combined result images" });
+  }
+};
+
+
+export const getAvailableYearsByExam = async (req, res) => {
+  try {
+    const { exam } = req.params;
+
+   
+    const years = await Result.distinct("year", { exam });
+
+    
+    const filteredYears = years
+      .filter((y) => y !== null && y !== undefined)
+      .sort((a, b) => b - a);
+
+
+    const finalYears = [ ...filteredYears];
+
+    res.status(200).json(finalYears);
+  } catch (err) {
+    console.error("Error fetching available years:", err);
+    res.status(500).json({ error: "Failed to fetch results" });
+  }
+};
+
+export const getAvailableExams = async (req, res) => {
+  try {
+    
+    const exams = await Result.distinct("exam");
+
+    
+    const filteredExams = exams
+      .filter((e) => e && e.trim() !== "")
+      .map((e) => e.toUpperCase())
+      .sort();
+
+    res.status(200).json(filteredExams);
+  } catch (err) {
+    console.error("Error fetching available exams:", err);
+    res.status(500).json({ error: "Failed to fetch available exams" });
   }
 };
