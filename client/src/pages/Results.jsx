@@ -11,7 +11,8 @@ import logo from "/logo.png";
 const Results = () => {
   const navigate = useNavigate();
   const { exam, year } = useParams();
-
+  const [availableYears, setAvailableYears] = useState([]);
+  const [availableExams, setAvailableExams] = useState([]);
   const [results, setResults] = useState([]);
   const [combined, setCombined] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,64 +31,195 @@ const Results = () => {
     else navigate(`/acme-academy-results/${selectedExam.toLowerCase()}/${selectedYear}`);
   }, [selectedExam, selectedYear]);
 
-  const fetchResults = async () => {
+  useEffect(() => {
+    const fetchExams = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:5000/api/results/exams");
+        
+        setAvailableExams(["MIXED", ...data]);
+      } catch (err) {
+        console.error("Error fetching exams:", err);
+        setAvailableExams(["MIXED", "NIMCET"]); 
+      }
+    };
+    fetchExams();
+  }, []);
+
+ useEffect(() => {
+  const fetchYears = async () => {
     try {
-      setLoading(true);
-      let mainUrl = "";
+      if (!selectedExam) return;
 
-      if (selectedYear === "All")
-        mainUrl = "http://localhost:5000/api/results/top/all";
-      else if (selectedYear === "PastGallery")
-        mainUrl = "http://localhost:5000/api/results/gallery/all";
-      else
-        mainUrl = `http://localhost:5000/api/results/${selectedExam.toLowerCase()}/${selectedYear}`;
-
-      const { data: mainData } = await axios.get(mainUrl);
-      setResults(mainData || []);
-
-      const allExams = ["nimcet", "vit", "mah-cet", "priority"];
-      const otherExams = allExams.filter(
-        (exam) => exam.toUpperCase() !== selectedExam.toUpperCase()
-      );
-      const years = [2025, 2024, 2023, 2022,2021];
-
-      const otherExamUrls = [];
-      for (const exam of otherExams) {
-        for (const year of years) {
-          otherExamUrls.push(
-            `http://localhost:5000/api/results/${exam}/${year}`
-          );
-        }
+      if (selectedExam === "MIXED") {
+        setAvailableYears(["All", "PastGallery"]);
+        setSelectedYear("All");
+        return;
       }
 
-      otherExamUrls.push("http://localhost:5000/api/results/combined");
-
-      const otherResultsPromises = otherExamUrls.map((url) =>
-        axios.get(url).then((res) => res.data).catch(() => [])
+      const { data } = await axios.get(
+        `http://localhost:5000/api/results/years/${selectedExam.toLowerCase()}`
       );
 
-      const allOtherData = await Promise.all(otherResultsPromises);
-      const merged = allOtherData.flat();
-      setCombined(merged || []);
+      // Filter valid numeric years (ignore null)
+      const numericYears = (data || [])
+        .filter((y) => typeof y === "number" && !isNaN(y))
+        .sort((a, b) => b - a);
+
+      const finalYears = ["All", ...numericYears, "PastGallery"];
+      setAvailableYears(finalYears);
+
+      // ✅ Only auto-select latest year if the current selectedYear is invalid
+      if (
+        !numericYears.includes(Number(selectedYear)) &&
+        numericYears.length > 0
+      ) {
+        setSelectedYear(String(numericYears[0])); // Auto-select latest year
+      }
     } catch (err) {
-      console.error("Error fetching results:", err);
-    } finally {
-      setLoading(false);
+      console.error("Error fetching years:", err);
+      setAvailableYears(["All", "PastGallery"]);
+      setSelectedYear("All");
     }
   };
+
+  fetchYears();
+}, [selectedExam]);
+
+
+const fetchResults = async () => {
+  try {
+    setLoading(true);
+
+    // 🟢 1️⃣ MIXED EXAM MODE — show top from all exams (any year)
+    if (selectedExam === "MIXED") {
+      // Fetch all exams list dynamically
+      const { data: exams } = await axios.get("http://localhost:5000/api/results/exams");
+
+      // Fetch top few from each exam (latest years)
+      const examUrls = exams.map(
+        (exam) => `http://localhost:5000/api/results/top/${exam.toLowerCase()}`
+      );
+
+      const allExamResults = await Promise.all(
+        examUrls.map((url) =>
+          axios.get(url).then((res) => res.data).catch(() => [])
+        )
+      );
+
+      // Flatten all & sort by rank or score
+      const mixedCombined = allExamResults.flat().sort((a, b) => {
+        if (a.rank && b.rank) return a.rank - b.rank;
+        if (a.rank && !b.rank) return -1;
+        if (!a.rank && b.rank) return 1;
+        if (a.score && b.score) return b.score - a.score;
+        return 0;
+      });
+
+      // Keep only top few (say 12)
+      setResults(mixedCombined.slice(0, 12));
+
+      // Sidebar remains combined (no reset)
+      return;
+    }
+
+    // 🟠 2️⃣ ALL YEARS MODE (selected exam only)
+    if (selectedYear === "All") {
+      const { data: allYears } = await axios.get(
+        `http://localhost:5000/api/results/years/${selectedExam.toLowerCase()}`
+      );
+
+      const validYears = (allYears || []).filter((y) => typeof y === "number");
+
+      const yearUrls = validYears.map(
+        (y) =>
+          `http://localhost:5000/api/results/${selectedExam.toLowerCase()}/${y}`
+      );
+
+      const allYearResults = await Promise.all(
+        yearUrls.map((url) =>
+          axios.get(url).then((res) => res.data).catch(() => [])
+        )
+      );
+
+      const combinedAllYears = allYearResults.flat().sort((a, b) => {
+        if (a.rank && b.rank) return a.rank - b.rank;
+        if (a.rank && !b.rank) return -1;
+        if (!a.rank && b.rank) return 1;
+        if (a.score && b.score) return b.score - a.score;
+        return 0;
+      });
+
+      setResults(combinedAllYears.slice(0, 12));
+
+      // ✅ Keep sidebar as-is (don’t modify)
+      return;
+    }
+
+    // 🟣 3️⃣ PAST GALLERY MODE
+    if (selectedYear === "PastGallery") {
+      const { data } = await axios.get("http://localhost:5000/api/results/gallery/all");
+      setResults(data || []);
+      return;
+    }
+
+    // 🔵 4️⃣ SPECIFIC YEAR + EXAM MODE
+    const mainUrl = `http://localhost:5000/api/results/${selectedExam.toLowerCase()}/${selectedYear}`;
+    const { data: mainData } = await axios.get(mainUrl);
+    setResults(mainData || []);
+
+    // 🧠 Sidebar data (always fetched for consistency)
+    const allExams = ["nimcet", "vit", "mahcet", "priority"];
+    const otherExams = allExams.filter(
+      (exam) => exam.toUpperCase() !== selectedExam.toUpperCase()
+    );
+    const years = [2025, 2024, 2023, 2022, 2021];
+
+    const otherExamUrls = [];
+    for (const exam of otherExams) {
+      for (const year of years) {
+        otherExamUrls.push(`http://localhost:5000/api/results/${exam}/${year}`);
+      }
+    }
+
+    otherExamUrls.push("http://localhost:5000/api/results/combined");
+
+    const otherResultsPromises = otherExamUrls.map((url) =>
+      axios.get(url).then((res) => res.data).catch(() => [])
+    );
+
+    const allOtherData = await Promise.all(otherResultsPromises);
+    const merged = allOtherData.flat();
+    setCombined(merged || []);
+  } catch (err) {
+    console.error("Error fetching results:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   useEffect(() => {
     fetchResults();
   }, [selectedExam, selectedYear]);
 
   const { mainResults } = useMemo(() => {
-    const main = [];
-    results.forEach((r) => {
-      const examName = r.exam?.toUpperCase() || "";
-      if (examName === selectedExam.toUpperCase()) main.push(r);
-    });
-    return { mainResults: main };
-  }, [results, selectedExam]);
+  const main = results.filter(
+    (r) => (r.exam?.toUpperCase() || "") === selectedExam.toUpperCase()
+  );
+
+  // Sort logic:
+  main.sort((a, b) => {
+    if (a.rank && b.rank) return a.rank - b.rank;
+    if (a.rank && !b.rank) return -1;
+    if (!a.rank && b.rank) return 1;
+    if (a.score && b.score) return b.score - a.score;
+    return 0;
+  });
+
+  return { mainResults: main };
+}, [results, selectedExam]);
+
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -113,38 +245,51 @@ const Results = () => {
   };
 
  
-  const renderCard = (r) => (
-    <motion.div
-      key={r._id || r.url}
-      variants={{
-        hidden: { opacity: 0, y: 30 },
-        visible: { opacity: 1, y: 0 },
-      }}
-      whileHover={{ y: -6, scale: 1.03 }}
-      className="relative rounded-md shadow-md hover:shadow-2xl bg-white border border-gray-200 transition-all duration-500 overflow-hidden group"
-    >
-      <div className="relative h-44 sm:h-52 overflow-hidden">
-        <img
-          src={r.photoUrl || r.url}
-          alt={`${r.name || r.eventName} ${r.exam || selectedExam} ${r.year} Rank ${r.rank} - ACME Academy Topper`}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      </div>
+const renderCard = (r) => (
+  <motion.div
+    key={r._id || r.url}
+    variants={{
+      hidden: { opacity: 0, y: 30 },
+      visible: { opacity: 1, y: 0 },
+    }}
+    whileHover={{ y: -6, scale: 1.03 }}
+    className="relative rounded-md shadow-md hover:shadow-2xl bg-white border border-gray-200 transition-all duration-500 overflow-hidden group"
+  >
+    <div className="relative h-44 sm:h-52 overflow-hidden">
+      <img
+        src={r.photoUrl || r.url}
+        alt={`${r.name || r.eventName} ${r.exam || selectedExam} ${r.year} ${
+          r.rank ? `Rank ${r.rank}` : r.score ? `Score ${r.score}` : ""
+        } - ACME Academy Topper`}
+        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    </div>
 
-      <div className="p-4 text-center">
-        <h3 className="text-base font-semibold text-purple-600 group-hover:text-indigo-700 transition">
-          {r.name || r.eventName}
-        </h3>
-        {r.rank && (
-          <p className="font-semibold text-sm text-gray-600 mt-1">
-            <span className="font-medium text-indigo-600">AIR {r.rank}</span> |{" "}
-            {r.exam.toUpperCase()} {r.year}
-          </p>
-        )}
-      </div>
-    </motion.div>
-  );
+    <div className="p-4 text-center">
+      <h3 className="text-base font-semibold text-purple-600 group-hover:text-indigo-700 transition">
+        {r.name || r.eventName}
+      </h3>
+
+      {r.rank ? (
+        <p className="font-semibold text-sm text-gray-600 mt-1">
+          <span className="font-medium text-indigo-600">AIR {r.rank}</span> |{" "}
+          {r.exam?.toUpperCase()} {r.year}
+        </p>
+      ) : r.score ? (
+        <p className="font-semibold text-sm text-gray-600 mt-1">
+          <span className="font-medium text-green-600">Score: {r.score}</span> |{" "}
+          {r.exam?.toUpperCase()} {r.year}
+        </p>
+      ) : (
+        <p className="font-semibold text-sm text-gray-600 mt-1">
+          {r.exam?.toUpperCase()} {r.year}
+        </p>
+      )}
+    </div>
+  </motion.div>
+);
+
 
 
 const renderSidebarCard = (r) => (
@@ -247,90 +392,154 @@ const renderSidebarCard = (r) => (
 
             <div className="flex flex-wrap gap-3">
               <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-800 font-medium shadow-sm hover:border-indigo-400 focus:ring-2 focus:ring-indigo-500 transition w-36 sm:w-auto"
-              >
-                <option value="All">All Years</option>
-                <option value="2025">2025</option>
-                <option value="2024">2024</option>
-                <option value="2023">2023</option>
-                <option value="2022">2022</option>
-                <option value="PastGallery">Past Gallery</option>
-              </select>
+  value={selectedYear}
+  onChange={(e) => setSelectedYear(e.target.value)}
+  className="px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-800 font-medium shadow-sm hover:border-indigo-400 focus:ring-2 focus:ring-indigo-500 transition w-36 sm:w-auto"
+>
+  {availableYears.map((year) => (
+    <option key={year} value={year}>
+      {year === "All"
+        ? "All Years"
+        : year === "PastGallery"
+        ? "Past Gallery"
+        : year}
+    </option>
+  ))}
+</select>
 
-              <select
-                value={selectedExam}
-                onChange={(e) => setSelectedExam(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-800 font-medium shadow-sm hover:border-indigo-400 focus:ring-2 focus:ring-indigo-500 transition w-36 sm:w-auto"
-              >
-                <option value="NIMCET">NIMCET</option>
-                <option value="MAH-CET">MAH-CET</option>
-                <option value="VIT">VIT</option>
-                <option value="PRIORITY">PRIORITY</option>
-              </select>
+
+             <select
+  value={selectedExam}
+  onChange={(e) => setSelectedExam(e.target.value)}
+  className="px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-800 font-medium shadow-sm hover:border-indigo-400 focus:ring-2 focus:ring-indigo-500 transition w-36 sm:w-auto"
+>
+  {availableExams.map((examName) => (
+    <option key={examName} value={examName}>
+      {examName}
+    </option>
+  ))}
+</select>
+
             </div>
           </motion.div>
 
-          {/* Display */}
-          {loading ? (
-            <div className="flex justify-center items-center py-16">
-              <Loader2 className="animate-spin text-indigo-500 w-8 h-8" />
-              <p className="ml-3 text-gray-600 text-lg">Loading results...</p>
-            </div>
-          ) : selectedYear === "PastGallery" ? (
-            <PastGallery galleryData={results} />
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.2fr] gap-8">
-              {/* LEFT MAIN RESULTS */}
-              <div>
-                <motion.div
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8"
-                  initial="hidden"
-                  animate="visible"
-                  variants={{
-                    hidden: {},
-                    visible: { transition: { staggerChildren: 0.1 } },
-                  }}
-                >
-                  {mainResults.slice(0, 3).map(renderCard)}
-                </motion.div>
+         
+         {loading ? (
+  <div className="flex justify-center items-center py-16">
+    <Loader2 className="animate-spin text-indigo-500 w-8 h-8" />
+    <p className="ml-3 text-gray-600 text-lg">Loading results...</p>
+  </div>
+) : selectedYear === "PastGallery" ? (
+  <PastGallery galleryData={results} />
+) : (
+  <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.2fr] gap-8">
+   
+    <div>
+      {/* 1️⃣ MAIN RESULTS FIRST */}
+      {mainResults.length > 0 ? (
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-12"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.05 } },
+          }}
+        >
+          {mainResults.map(renderCard)}
+        </motion.div>
+      ) : (
+        <p className="text-center text-gray-500 italic py-10">
+          
+        </p>
+      )}
 
-                <motion.div
-                  className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"
-                  initial="hidden"
-                  animate="visible"
-                  variants={{
-                    hidden: {},
-                    visible: { transition: { staggerChildren: 0.05 } },
-                  }}
-                >
-                  {mainResults.slice(3).map(renderCard)}
-                </motion.div>
-              </div>
+   
+      {(() => {
+       
+       const combinedFiltered = Array.from(
+  new Map(
+    combined
+      .filter((r) => r && r.photoUrl)
+      .map((r) => [r.photoUrl, r]) 
+  ).values()
+).filter((r) => r.exam?.toLowerCase() !== selectedExam.toLowerCase());
 
-              
-            <aside
-              className="space-y-5 lg:w-auto w-[85%] sm:w-[60%] mx-auto lg:mx-0"
+
+        if (combinedFiltered.length === 0) return null;
+
+        const half = Math.ceil(combinedFiltered.length / 2);
+        const combinedMain = combinedFiltered.slice(0, half);
+
+        return (
+          <>
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-transparent bg-clip-text mt-8 mb-4">
+              Acme मतलब Selection की GUARANTEE
+            </h3>
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.05 } },
+              }}
             >
-              {combined && combined.length > 0 ? (
-                combined
-                  .filter((r) => {
-                    if (r.photoType === "combined") return true;
-                    if (r.exam?.toLowerCase() !== selectedExam.toLowerCase()) return true;
-                    return false;
-                  })
-                  .slice(0, 30)
-                  .map(renderSidebarCard)
-              ) : (
-                <p className="text-center text-gray-500 text-sm italic">
-                  No additional results to show.
-                </p>
-              )}
-            </aside>
+              {combinedMain.map(renderCard)}
+            </motion.div>
+          </>
+        );
+      })()}
+    </div>
 
-            </div>
-          )}
+    {/* 🟣 SIDEBAR */}
+    <aside className="space-y-5 lg:w-auto w-[85%] sm:w-[60%] mx-auto lg:mx-0 lg:sticky lg:top-20 self-start h-fit">
+      {(() => {
+        const combinedFiltered = combined
+          .filter(
+            (r) =>
+              r.photoType === "combined" ||
+              r.exam?.toLowerCase() !== selectedExam.toLowerCase()
+          )
+          .filter(
+            (r, index, self) =>
+              index ===
+              self.findIndex(
+                (t) =>
+                  t._id?.toString() === r._id?.toString() ||
+                  t.photoUrl === r.photoUrl
+              )
+          );
+
+       // Split the data
+        const half = Math.ceil(combinedFiltered.length / 2);
+        let combinedSidebar = combinedFiltered.slice(half);
+
+        //Apply sorting for non-combined exams
+        combinedSidebar = combinedSidebar.sort((a, b) => {
+          if (a.photoType === "combined" || b.photoType === "combined") return 0;
+          if (a.rank && b.rank) return a.rank - b.rank;
+          if (a.rank && !b.rank) return -1;
+          if (!a.rank && b.rank) return 1;
+          if (a.score && b.score) return b.score - a.score;
+
+          return 0;
+        });
+
+
+        if (combinedSidebar.length === 0)
+          return (
+            <p className="text-center text-gray-500 text-sm italic">
+              No additional results to show.
+            </p>
+          );
+
+        return combinedSidebar.map(renderSidebarCard);
+      })()}
+    </aside>
+  </div>
+)}
+
         </div>
       </section>
 
