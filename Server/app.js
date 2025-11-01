@@ -26,7 +26,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173", // for Vite dev
-      "https://7a40b29474d2.ngrok-free.app", // optional tunnel
+      "https://acmeacademy.onrender.com", // optional tunnel
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
