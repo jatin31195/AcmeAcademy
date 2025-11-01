@@ -12,7 +12,7 @@ import topicRoutes from "./src/routes/topicRoutes.js";
 import testRoute from "./src/routes/testRoute.js";
 import questionRoutes from "./src/routes/questionRoute.js";
 import resultRoutes from "./src/routes/resultRoute.js";
-
+import mathRoutes from "./src/routes/mathQuestionRoute.js"
 const app = express();
 
 /* ------------------------- 🔹 Middlewares ------------------------- */
@@ -45,7 +45,7 @@ app.use("/api/topics", topicRoutes);
 app.use("/api/tests", testRoute);
 app.use("/api/questions", questionRoutes);
 app.use("/api/results", resultRoutes);
-
+app.use("/api/math-question", mathRoutes);
 /* ------------------------- 🔹 Root Route ------------------------- */
 app.get("/", (req, res) => {
   res.send("🚀 ACME Academy Backend is running!");

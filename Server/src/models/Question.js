@@ -20,7 +20,7 @@ const optionSchema = new mongoose.Schema(
 const subQuestionSchema = new mongoose.Schema(
   {
     question: { type: String, required: true },
-    options: { type: [mongoose.Schema.Types.Mixed], default: [] }, // ✅ backward compatible
+    options: { type: [mongoose.Schema.Types.Mixed], default: [] }, 
     answer: String,
     solutionText: String,
     solutionVideo: String,
@@ -32,7 +32,7 @@ const subQuestionSchema = new mongoose.Schema(
       new mongoose.Schema(
         {
           question: { type: String, required: true },
-          options: { type: [mongoose.Schema.Types.Mixed], default: [] }, // ✅ nested compatible
+          options: { type: [mongoose.Schema.Types.Mixed], default: [] },
           answer: String,
           solutionText: String,
           solutionVideo: String,
