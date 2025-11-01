@@ -8,7 +8,7 @@ import Navbar from "./components/layout/Navbar";
 import About from "./pages/About";
 import Footer from "./components/layout/Footer";
 import PYQ from "./pages/PYQ";
-import PdfReader from "./pages/PDFReader";
+import PdfReader from "./pages/PdfReader";
 import ExamPattern from "./pages/ExamPattern";
 import Nimcet2025 from "./components/ExamPattern/Nimcet2025";
 import Courses from "./pages/Courses";
