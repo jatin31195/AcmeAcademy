@@ -67,11 +67,12 @@ function App() {
         <Route path="/acme-free-courses" element={<FreeCourses />} />
         <Route path="/acme-practice-sets" element={<PracticeSets />} />
         <Route path="/questions/:slug" element={<QuestionSEOPage />} />
-
+         <Route path="/home" element={<Home />} />
+         <Route path="/about" element={<About />} />
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/about" element={<About />} />
+         
+          
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/acme-test/:testId" element={<Test />} />
           <Route path="/acme-test-result/:testId" element={<TestResult />} />
