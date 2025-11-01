@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileText, Search, Calendar } from "lucide-react";
-
+import { BASE_URL } from "../config";
 const PYQ = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedExam, setSelectedExam] = useState("all");
@@ -19,7 +19,7 @@ const PYQ = () => {
   useEffect(() => {
     const fetchPYQs = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/pyqs/");
+        const res = await fetch(`${BASE_URL}/api/pyqs/`);
         const data = await res.json();
         setPyqs(data);
       } catch (err) {

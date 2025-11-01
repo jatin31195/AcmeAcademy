@@ -4,7 +4,7 @@ import axios from "axios";
 import InstructionsPage from "../components/Test/InstructionsPage";
 import { useAuth } from "@/AuthContext";
 import TestView from "../components/Test/TestView";
-
+import { BASE_URL } from "../config";
 const Test = () => {
   const { user } = useAuth();
   const { testId } = useParams();
@@ -31,7 +31,7 @@ const Test = () => {
   useEffect(() => {
     const fetchTest = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/tests/${testId}`, { withCredentials: true });
+        const res = await axios.get(`${BASE_URL}/api/tests/${testId}`, { withCredentials: true });
         setTestData(res.data);
         setCurrentSection(res.data.sections?.[0]?.title || "");
         setTimeLeft(res.data.totalDurationMinutes * 60);
@@ -125,7 +125,7 @@ const Test = () => {
     }));
 
     await axios.post(
-      `http://localhost:5000/api/tests/${testId}/submit`,
+      `${BASE_URL}/api/tests/${testId}/submit`,
       {
         answers: formattedAnswers,
         questionStatus,

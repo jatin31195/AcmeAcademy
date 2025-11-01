@@ -6,7 +6,7 @@ import { ArrowLeft, Download, Maximize2, Search, ZoomIn, ZoomOut } from "lucide-
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.js?url";
-
+import { BASE_URL } from "../config";
 const PDFReader = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const PDFReader = () => {
   useEffect(() => {
     const fetchPDF = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/pyqs/${id}`);
+        const res = await fetch(`${BASE_URL}/api/pyqs/${id}`);
         if (!res.ok) throw new Error("Paper not found");
         const data = await res.json();
         setPdfData(data);

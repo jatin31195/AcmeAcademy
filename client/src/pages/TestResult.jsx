@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Download, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/AuthContext";
 import SolutionView from "@/components/Test/SolutionView";
-
+import { BASE_URL } from "../config";
 const TestResult = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const TestResult = () => {
     const fetchResult = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/tests/${testId}/result`,
+          `${BASE_URL}/api/tests/${testId}/result`,
           { withCredentials: true }
         );
         setResults(res.data);

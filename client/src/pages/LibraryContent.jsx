@@ -27,7 +27,7 @@ export default function LibraryContent() {
   useEffect(() => {
   const fetchCourseMeta = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/courses/${id}`);
+      const res = await axios.get(`${BASE_URL}/api/courses/${id}`);
       setCourseMeta(res.data);
     } catch (err) {
       console.error("Error fetching course meta:", err);
@@ -45,13 +45,13 @@ export default function LibraryContent() {
         setLoading(true);
 
         // Fetch subjects
-        const subjectsRes = await axios.get(`http://localhost:5000/api/subjects/course/${id}`);
+        const subjectsRes = await axios.get(`${BASE_URL}/api/subjects/course/${id}`);
         const subjects = subjectsRes.data;
 
         // Fetch topics for each subject
         const sectionsData = await Promise.all(
           subjects.map(async (subject) => {
-            const topicsRes = await axios.get(`http://localhost:5000/api/topics/subject/${subject._id}`);
+            const topicsRes = await axios.get(`${BASE_URL}/api/topics/subject/${subject._id}`);
             return {
               id: subject._id,
               title: subject.title,

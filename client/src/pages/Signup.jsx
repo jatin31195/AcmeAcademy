@@ -9,7 +9,7 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { toast, Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import logo from "/logo.png";
-
+import { BASE_URL } from "../config";
 const Signup = () => {
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState({
@@ -80,7 +80,7 @@ const Signup = () => {
     setLoading(true);
     try {
       const result = await window.confirmationResult.confirm(otp);
-      const res = await fetch("http://localhost:5000/api/users/register", {
+      const res = await fetch(`${BASE_URL}/api/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

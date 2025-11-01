@@ -25,7 +25,7 @@ const QuestionPalette = ({
       }));
 
       const response = await axios.post(
-        `http://localhost:5000/api/tests/${testId}/submit`, // ✅ use actual testId
+        `${BASE_URL}/api/tests/${testId}/submit`, // ✅ use actual testId
         { answers: payload },
         { withCredentials: true } // needed to send JWT cookie
       );

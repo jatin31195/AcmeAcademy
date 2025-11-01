@@ -34,7 +34,7 @@ const Results = () => {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/results/exams");
+        const { data } = await axios.get(`${BASE_URL}/api/results/exams`);
         
         setAvailableExams(["MIXED", ...data]);
       } catch (err) {
@@ -57,7 +57,7 @@ const Results = () => {
       }
 
       const { data } = await axios.get(
-        `http://localhost:5000/api/results/years/${selectedExam.toLowerCase()}`
+        `${BASE_URL}/api/results/years/${selectedExam.toLowerCase()}`
       );
 
       // Filter valid numeric years (ignore null)
@@ -93,11 +93,11 @@ const fetchResults = async () => {
     // 🟢 1️⃣ MIXED EXAM MODE — show top from all exams (any year)
     if (selectedExam === "MIXED") {
       // Fetch all exams list dynamically
-      const { data: exams } = await axios.get("http://localhost:5000/api/results/exams");
+      const { data: exams } = await axios.get(`${BASE_URL}/api/results/exams`);
 
       // Fetch top few from each exam (latest years)
       const examUrls = exams.map(
-        (exam) => `http://localhost:5000/api/results/top/${exam.toLowerCase()}`
+        (exam) => `${BASE_URL}/api/results/top/${exam.toLowerCase()}`
       );
 
       const allExamResults = await Promise.all(
@@ -125,14 +125,14 @@ const fetchResults = async () => {
     // 🟠 2️⃣ ALL YEARS MODE (selected exam only)
     if (selectedYear === "All") {
       const { data: allYears } = await axios.get(
-        `http://localhost:5000/api/results/years/${selectedExam.toLowerCase()}`
+        `${BASE_URL}/api/results/years/${selectedExam.toLowerCase()}`
       );
 
       const validYears = (allYears || []).filter((y) => typeof y === "number");
 
       const yearUrls = validYears.map(
         (y) =>
-          `http://localhost:5000/api/results/${selectedExam.toLowerCase()}/${y}`
+          `${BASE_URL}/api/results/${selectedExam.toLowerCase()}/${y}`
       );
 
       const allYearResults = await Promise.all(
@@ -157,13 +157,13 @@ const fetchResults = async () => {
 
     // 🟣 3️⃣ PAST GALLERY MODE
     if (selectedYear === "PastGallery") {
-      const { data } = await axios.get("http://localhost:5000/api/results/gallery/all");
+      const { data } = await axios.get(`${BASE_URL}/api/results/gallery/all`);
       setResults(data || []);
       return;
     }
 
     // 🔵 4️⃣ SPECIFIC YEAR + EXAM MODE
-    const mainUrl = `http://localhost:5000/api/results/${selectedExam.toLowerCase()}/${selectedYear}`;
+    const mainUrl = `${BASE_URL}/api/results/${selectedExam.toLowerCase()}/${selectedYear}`;
     const { data: mainData } = await axios.get(mainUrl);
     setResults(mainData || []);
 
@@ -177,11 +177,11 @@ const fetchResults = async () => {
     const otherExamUrls = [];
     for (const exam of otherExams) {
       for (const year of years) {
-        otherExamUrls.push(`http://localhost:5000/api/results/${exam}/${year}`);
+        otherExamUrls.push(`${BASE_URL}/api/results/${exam}/${year}`);
       }
     }
 
-    otherExamUrls.push("http://localhost:5000/api/results/combined");
+    otherExamUrls.push(`${BASE_URL}/api/results/combined`);
 
     const otherResultsPromises = otherExamUrls.map((url) =>
       axios.get(url).then((res) => res.data).catch(() => [])

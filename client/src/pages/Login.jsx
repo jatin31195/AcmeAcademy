@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from ".././AuthContext";
 import logo from "/logo.png";
-
+import { BASE_URL } from "../config";
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -23,7 +23,7 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/users/login", {
+      const res = await fetch(`${BASE_URL}/api/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

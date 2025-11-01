@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-
+import { BASE_URL } from "./config";
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
    
-      const res = await fetch("http://localhost:5000/api/users/me", {
+      const res = await fetch(`${BASE_URL}/api/users/me`, {
         credentials: "include",
       });
 
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
   
       if (res.status === 401) {
         console.warn("Access token expired — trying refresh...");
-        const refreshRes = await fetch("http://localhost:5000/api/users/refresh", {
+        const refreshRes = await fetch(`${BASE_URL}/api/users/refresh`, {
           method: "POST",
           credentials: "include",
         });
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await fetch("http://localhost:5000/api/users/logout", {
+      await fetch(`${BASE_URL}/api/users/logout`, {
         method: "POST",
         credentials: "include",
       });

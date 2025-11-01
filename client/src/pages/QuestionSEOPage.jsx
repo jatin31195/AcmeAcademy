@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Helmet } from "react-helmet-async";
-
+import { BASE_URL } from "../config";
 const QuestionSEOPage = () => {
   const { slug } = useParams();
   const [question, setQuestion] = useState(null);
 
   useEffect(() => {
     const fetchQuestion = async () => {
-      const res = await axios.get(`http://localhost:5000/api/questions/q/slug/${slug}`);
+      const res = await axios.get(`${BASE_URL}/api/questions/q/slug/${slug}`);
       setQuestion(res.data);
     };
     fetchQuestion();

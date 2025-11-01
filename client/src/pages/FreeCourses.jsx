@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { BookOpen, Search, Filter, ArrowRight } from "lucide-react";
-
+import { BASE_URL } from "../config";
 const FreeCourses = () => {
   const [courses, setCourses] = useState([]); 
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,7 +18,7 @@ const FreeCourses = () => {
     const fetchCourses = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("http://localhost:5000/api/courses");
+        const res = await axios.get(`${BASE_URL}/api/courses`);
         setCourses(res.data);
       } catch (err) {
         setError("Failed to load courses. Please try again later.");

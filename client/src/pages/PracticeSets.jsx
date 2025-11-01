@@ -9,6 +9,7 @@ import { Helmet } from "react-helmet-async";
 import MainContent from "@/components/PracticeSets/MainContent";
 import MathMainContent from "@/components/PracticeSets/MathMainContent";
 import "katex/dist/katex.min.css";
+import { BASE_URL } from "../config";
 const QUESTIONS_PER_PAGE = 5;
 
 const PracticeSets = () => {
@@ -30,8 +31,8 @@ const PracticeSets = () => {
   const initFetch = async () => {
     try {
       const [generalRes, mathRes] = await Promise.all([
-  axios.get("http://localhost:5000/api/questions/subjects"),
-  axios.get("http://localhost:5000/api/math-question/subjects")
+  axios.get(`${BASE_URL}/api/questions/subjects`),
+  axios.get(`${BASE_URL}/api/math-question/subjects`)
 ]);
 
 const generalSubjects = ((generalRes.data?.data || generalRes.data) || []).map((s) => ({
@@ -67,8 +68,8 @@ const fetchTopics = async (subjectObj) => {
   try {
     const baseUrl =
       type === "math"
-        ? "http://localhost:5000/api/math-question"
-        : "http://localhost:5000/api/questions";
+        ? `${BASE_URL}/api/math-question`
+        : `${BASE_URL}/api/questions`;
 
     const res = await axios.get(
       `${baseUrl}/subjects/${encodeURIComponent(name)}/topics`
@@ -104,8 +105,8 @@ const fetchQuestions = async (subjectObj, topicName) => {
     setLoading(true);
     const baseUrl =
       subjectObj.type === "math"
-        ? "http://localhost:5000/api/math-question"
-        : "http://localhost:5000/api/questions";
+        ? `${BASE_URL}/api/math-question`
+        : `${BASE_URL}/api/questions`;
 
     const res = await axios.get(
       `${baseUrl}/subjects/${encodeURIComponent(subjectObj.name)}/topics/${encodeURIComponent(topicName)}`
