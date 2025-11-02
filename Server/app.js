@@ -28,7 +28,7 @@ app.use(
       "http://localhost:5173", // for Vite dev
       "https://acmeacademy.onrender.com", // optional tunnel
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
     credentials: true,
   })
 );
