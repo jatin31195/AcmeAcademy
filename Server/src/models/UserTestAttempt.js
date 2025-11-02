@@ -16,6 +16,7 @@ const userTestAttemptSchema = new mongoose.Schema({
   submittedAt: { type: Date, default: Date.now },
   attemptNumber: { type: Number, required: true },
   isSubmitted: { type: Boolean, default: false },
+  rank: { type: Number, default: null },
 });
 
 export default mongoose.model("UserTestAttempt", userTestAttemptSchema);

@@ -10,6 +10,8 @@ import {
   getUserTestHistory,
   getUserTestResult,
   updateQuestionSolution,
+  getUserPerformanceAnalytics,
+   getUserTestResultByAttempt
 } from "../controllers/testController.js";
 import { verifyUser } from "../middlewares/authMiddleware.js";
 
@@ -39,5 +41,10 @@ router.get("/:userId/:testId/history", verifyUser, getUserTestHistory);
 
 // Get user's latest result
 router.get("/:testId/result", verifyUser, getUserTestResult);
-
+router.get("/user/performance/analytics", verifyUser, getUserPerformanceAnalytics);
+router.get(
+  "/:testId/attempt/:attemptNumber/result",
+  verifyUser,
+  getUserTestResultByAttempt
+);
 export default router;
