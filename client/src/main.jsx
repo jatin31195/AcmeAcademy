@@ -7,15 +7,17 @@ import { Helmet, HelmetProvider } from "react-helmet-async";
 import App from "./App";
 import "./index.css";
 import { AuthProvider } from "./AuthContext";
-
+import { UserProvider } from "./UserContext";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <HelmetProvider>
       <CookiesProvider>
         <AuthProvider>
+           <UserProvider> 
           <BrowserRouter>
             <App />
           </BrowserRouter>
+          </UserProvider>
         </AuthProvider>
       </CookiesProvider>
     </HelmetProvider>
