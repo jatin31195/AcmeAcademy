@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import { motion } from "framer-motion";
 const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -70,11 +70,18 @@ const Contact = () => {
      
       <section className="py-30 hero-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-white mb-6">
-            Get In
-            <span className="block gradient-text">Touch</span>
-          </h1>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
+          <motion.h1
+            initial={{ opacity: 0, y: -40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-[clamp(2.2rem,5vw,3.8rem)] font-extrabold text-white drop-shadow-2xl"
+          >
+            <span className="bg-gradient-to-r from-pink-400 via-purple-300 to-indigo-300 text-transparent bg-clip-text">
+              Get
+            </span>{" "}
+            <span className="text-white">In Touch</span>
+          </motion.h1>
+          <p className="font-semibold text-xl text-white/90 max-w-3xl mx-auto mb-8">
             Have questions about our courses or need guidance for your MCA preparation? We're here to help!
           </p>
         </div>

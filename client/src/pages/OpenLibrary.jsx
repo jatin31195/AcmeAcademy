@@ -1,19 +1,29 @@
 import { Link } from "react-router-dom";
 import logo from "/logo.png";
 import { BASE_URL } from "../config";
+import { motion } from "framer-motion";
 const OpenLibrary = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
 
       {/* Header */}
-      <section className="relative py-32 overflow-hidden hero-gradient">
+      <section className="relative py-16 sm:py-30 text-center overflow-hidden hero-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Open
-            <span className="text-5xl md:text-6xl font-bold block text-white/90 gradient-text">Library</span>
-          </h1>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto mb-12">
-            Access our comprehensive collection of free study materials, books, notes, and guides for all MCA entrance examinations.
+           <motion.h1
+            initial={{ opacity: 0, y: -40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-[clamp(2.2rem,5vw,3.8rem)] font-extrabold text-white drop-shadow-2xl"
+          >
+            <span className="bg-gradient-to-r from-pink-400 via-purple-300 to-indigo-300 text-transparent bg-clip-text">
+              Open
+            </span>{" "}
+            <span className="text-white">Library</span>
+          </motion.h1>
+          <p className="font-semibold text-xl text-white/90 max-w-3xl mx-auto mb-12">
+            Access our comprehensive collection of free study materials, books, notes, 
+              <br/>
+            and guides for all MCA entrance examinations.
           </p>
         </div>
         {/* subtle decorative circles */}

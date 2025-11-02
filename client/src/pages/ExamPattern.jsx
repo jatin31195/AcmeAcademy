@@ -5,7 +5,7 @@ import Cuetpg from "../components/ExamPattern/Cuetpg";
 import Mahcet from "../components/ExamPattern/Mahcet";
 import Jmi from "../components/ExamPattern/Jmi.jsx";
 import Vit from "../components/ExamPattern/VIT";
-
+import { motion } from "framer-motion";
 const ExamPattern = () => {
   const examPatterns = [
     { id: "nimcet", name: "NIMCET" },
@@ -22,11 +22,20 @@ const ExamPattern = () => {
       {/* Page Header */}
       <section className="py-30 hero-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-white mb-6">
-            Exam <span className="text-5xl md:text-6xl font-bold block text-gray-800">Patterns</span>
-          </h1>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
-            Detailed exam patterns, marking schemes, and section-wise analysis for all major MCA entrance examinations to help you prepare strategically.
+           <motion.h1
+            initial={{ opacity: 0, y: -40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-[clamp(2.2rem,5vw,3.8rem)] font-extrabold text-white drop-shadow-2xl"
+          >
+            <span className="bg-gradient-to-r from-pink-400 via-purple-300 to-indigo-300 text-transparent bg-clip-text">
+              Exam
+            </span>{" "}
+            <span className="text-white">Patterns</span>
+          </motion.h1>
+          <p className="font-semibold text-xl text-white/90 max-w-3xl mx-auto mb-8">
+            Detailed exam patterns, marking schemes, and section-wise analysis 
+            <br/>for all major MCA entrance examinations to help you prepare strategically.
           </p>
         </div>
       </section>
