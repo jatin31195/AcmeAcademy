@@ -9,29 +9,31 @@ import { BASE_URL } from "../config";
 const TestResult = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { testId } = useParams();
-
+  const { testId, attemptNumber } = useParams();  
   const [results, setResults] = useState(null);
   const [showSolutions, setShowSolutions] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
 
-  useEffect(() => {
-    const fetchResult = async () => {
-      try {
-        const res = await axios.get(
-          `${BASE_URL}/api/tests/${testId}/result`,
-          { withCredentials: true }
-        );
-        setResults(res.data);
-      } catch (err) {
-        console.error("Error fetching test result:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchResult();
-  }, [user, testId]);
+ useEffect(() => {
+  const fetchResult = async () => {
+    try {
+      const endpoint = attemptNumber
+        ? `${BASE_URL}/api/tests/${testId}/attempt/${attemptNumber}/result`
+        : `${BASE_URL}/api/tests/${testId}/result`;
+
+      const res = await axios.get(endpoint, { withCredentials: true });
+      setResults(res.data);
+    } catch (err) {
+      console.error("Error fetching test result:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchResult();
+}, [user, testId, attemptNumber]);
+
 
   if (loading)
     return (

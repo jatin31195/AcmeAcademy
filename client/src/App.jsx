@@ -75,7 +75,9 @@ function App() {
           
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/acme-test/:testId" element={<Test />} />
-          <Route path="/acme-test-result/:testId" element={<TestResult />} />
+          <Route path="/acme-test-result/:testId/:attemptNumber?" element={<TestResult />} 
+
+      />
         </Route>
 
         {/* Default / unknown route */}
