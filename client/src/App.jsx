@@ -70,10 +70,10 @@ function App() {
          <Route path="/home" element={<Home />} />
          <Route path="/about" element={<About />} />
         {/* Protected routes */}
+          <Route path="/dashboard" element={<Dashboard />} />
         <Route element={<ProtectedRoute />}>
          
           
-          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/acme-test/:testId" element={<Test />} />
           <Route path="/acme-test-result/:testId/:attemptNumber?" element={<TestResult />} 
 

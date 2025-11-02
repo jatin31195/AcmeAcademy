@@ -86,11 +86,40 @@ const UserProfileCard = () => {
     );
 
   if (!user)
-    return (
-      <div className="text-center py-20 text-gray-600">
-        No profile data available.
-      </div>
-    );
+  return (
+    <div className="max-w-5xl mx-auto px-4 sm:px-6">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white border border-gray-200 rounded-3xl shadow-xl p-10 relative overflow-hidden text-center"
+      >
+        {/* Background glow (same style) */}
+        <div className="absolute -top-10 -right-10 w-72 h-72 bg-purple-100 rounded-full blur-3xl opacity-20 -z-10"></div>
+        <div className="absolute -bottom-12 -left-12 w-80 h-80 bg-indigo-100 rounded-full blur-3xl opacity-20 -z-10"></div>
+
+        {/* Placeholder avatar */}
+        <div className="mx-auto w-28 h-28 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg mb-4">
+          ?
+        </div>
+
+        <h2 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-700 to-indigo-600">
+          Welcome to Dashboard
+        </h2>
+        <p className="mt-3 text-gray-600 text-sm sm:text-base max-w-md mx-auto">
+          Please{" "}
+          <a
+            href="/login"
+            className="text-purple-600 font-semibold hover:underline"
+          >
+            login
+          </a>{" "}
+          to track your progress, update your profile, and unlock personalized insights.
+        </p>
+      </motion.div>
+    </div>
+  );
+
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6">
