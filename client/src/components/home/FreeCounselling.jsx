@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { BASE_URL } from "@/config";
 const FreeCounsellingSection = () => {
 const [form, setForm] = useState({
   name: "",
@@ -24,7 +24,7 @@ const handleSubmit = async (e) => {
   setLoading(true);
 
   try {
-    const res = await fetch("http://localhost:5000/api/mail/send-counselling-mail", {
+    const res = await fetch(`${BASE_URL}http://localhost:5000/api/mail/send-counselling-mail`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
