@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen } from "lucide-react";
 
-const Cuetpg= () => { 
+const Cuetpg = () => {
   const [selectedTab, setSelectedTab] = useState("overview");
 
-  // Exam Overview (Structure & Scheme)
-  const overview = {
+   const overview = {
     conductingBody: "National Testing Agency (NTA)",
     mode: "Computer-Based Test (CBT)",
     language: "English and Hindi",
@@ -54,36 +52,44 @@ const Cuetpg= () => {
 
 
   return (
-    <div className="min-h-screen pt-6">
-      {/* Page Header */}
-      <section className="py-16 hero-gradient text-center">
-        <h1 className="text-5xl font-bold text-white mb-6">
-          CUET PG MCA <span className="gradient-text"></span>
-        </h1>
-        <p className="text-lg text-white/90 max-w-3xl mx-auto">
-          Common University Entrance Test for MCA (SCQP09) – Exam Pattern, Marking Scheme & Syllabus
-        </p>
-      </section>
-
-      {/* Tabs */}
-      <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="space-y-10">
+     
+      {/* Tabs Section */}
+      <section>
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid grid-cols-2 md:grid-cols-3 mb-8">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="syllabus">Syllabus</TabsTrigger>
-            <TabsTrigger value="criteria">Marking Scheme</TabsTrigger>
+          <TabsList className="flex flex-wrap justify-center bg-gray-50 border p-2 rounded-2xl shadow-sm mb-10">
+            <TabsTrigger
+              value="overview"
+              className="px-4 py-2 font-semibold data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-pink-400 data-[state=active]:to-red-400 rounded-xl transition-all"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="syllabus"
+              className="px-4 py-2 font-semibold data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-pink-400 data-[state=active]:to-red-400 rounded-xl transition-all"
+            >
+              Syllabus
+            </TabsTrigger>
+            <TabsTrigger
+              value="criteria"
+              className="px-4 py-2 font-semibold data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-pink-400 data-[state=active]:to-red-400 rounded-xl transition-all"
+            >
+              Marking Scheme
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview */}
           <TabsContent value="overview">
-            <Card className="glass">
+            <Card className="glass border shadow-lg">
               <CardHeader>
-                <CardTitle className="gradient-hero">Exam Overview</CardTitle>
+                <CardTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 via-pink-400 to-red-400 bg-clip-text text-transparent">
+                  Exam Overview
+                </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                {Object.entries(overview).map(([k, v], i) => (
-                  <div key={i} className="p-3 border rounded-lg hover-glow">
-                    <span className="font-semibold capitalize">{k.replace(/([A-Z])/g," $1")}:</span> {v}
+                {Object.entries(overview).map(([key, value], index) => (
+                  <div key={index} className="p-4 border rounded-lg hover:shadow-md transition-all duration-200 hover:bg-white">
+                    <span className="font-semibold capitalize">{key.replace(/([A-Z])/g, " $1")}:</span> {value}
                   </div>
                 ))}
               </CardContent>
@@ -93,17 +99,19 @@ const Cuetpg= () => {
           {/* Syllabus */}
           <TabsContent value="syllabus">
             <div className="grid md:grid-cols-2 gap-6">
-              {Object.entries(syllabus).map(([sub, topics], i) => (
-                <Card key={i} className="glass">
+              {Object.entries(syllabus).map(([subject, topics], i) => (
+                <Card key={i} className="glass border shadow-lg">
                   <CardHeader>
-                    <CardTitle className="flex gradient-hero items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-lg font-semibold bg-gradient-to-r from-blue-600 via-pink-400 to-red-400 bg-clip-text text-transparent">
                       <BookOpen className="h-5 w-5 text-blue-500" />
-                      {sub}
+                      {subject}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="list-disc pl-5 space-y-1 text-sm">
-                      {topics.map((t, j) => <li key={j}>{t}</li>)}
+                    <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                      {topics.map((topic, j) => (
+                        <li key={j}>{topic}</li>
+                      ))}
                     </ul>
                   </CardContent>
                 </Card>
@@ -113,12 +121,14 @@ const Cuetpg= () => {
 
           {/* Marking Scheme */}
           <TabsContent value="criteria">
-            <Card className="glass">
+            <Card className="glass border shadow-lg">
               <CardHeader>
-                <CardTitle className="gradient-hero">Marking & Scoring</CardTitle>
+                <CardTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 via-pink-400 to-red-400 bg-clip-text text-transparent">
+                  Marking & Scoring
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="list-disc pl-5 space-y-2 text-sm">
+                <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
                   <li>Total Questions: 75 (all domain-specific)</li>
                   <li>Total Marks: 300</li>
                   <li>+4 marks for each correct answer</li>
@@ -136,4 +146,4 @@ const Cuetpg= () => {
   );
 };
 
-export default Cuetpg; 
+export default Cuetpg;

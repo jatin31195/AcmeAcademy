@@ -1,13 +1,19 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, FileText, Users, CheckCircle, AlertCircle, BookOpen } from "lucide-react";
+import { BookOpen, Award, University, Info } from "lucide-react";
 
 const Nimcet2025 = () => {
   const [selectedTab, setSelectedTab] = useState("overview");
 
-  const parts = [
+   const parts = [
     {
       part: "Part-I",
       subject: "Mathematics",
@@ -98,43 +104,33 @@ const Nimcet2025 = () => {
   ];
 
   return (
-    <div className="min-h-screen pt-6">
-      {/* Page Header */}
-      <section className="py-16 hero-gradient text-center">
-        <h1 className="text-5xl font-bold text-white mb-6">
-          NIMCET <span className="gradient-text"></span>
-        </h1>
-        <p className="text-lg text-white/90 max-w-3xl mx-auto">
-          National Institute of Technology MCA Common Entrance Test 2025 – Exam Pattern,
-          Marking Scheme, Syllabus & Participating Institutes
-        </p>
-      </section>
+    <div className="space-y-10">
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+        <TabsList className="flex flex-wrap justify-center bg-gray-50 border p-2 rounded-2xl shadow-sm">
+          <TabsTrigger value="overview" className="px-4 py-2 font-semibold data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-pink-500 rounded-xl transition-all">Overview</TabsTrigger>
+          <TabsTrigger value="syllabus" className="px-4 py-2 font-semibold data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-pink-500 rounded-xl transition-all">Syllabus</TabsTrigger>
+          <TabsTrigger value="criteria" className="px-4 py-2 font-semibold data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-pink-500 rounded-xl transition-all">Criteria</TabsTrigger>
+          <TabsTrigger value="institutes" className="px-4 py-2 font-semibold data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-pink-500 rounded-xl transition-all">Institutes</TabsTrigger>
+        </TabsList>
 
-      {/* Tabs */}
-      <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-8">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="syllabus">Syllabus</TabsTrigger>
-            <TabsTrigger value="criteria">Qualifying Criteria</TabsTrigger>
-            <TabsTrigger value="institutes">Participating Institutes</TabsTrigger>
-          </TabsList>
-
-          {/* Overview */}
-          <TabsContent value="overview">
-            <Card className="glass">
+        {/* Overview */}
+        <TabsContent value="overview">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            <Card className="bg-white/90 backdrop-blur-xl shadow-lg border border-gray-100 p-4 sm:p-6 rounded-3xl">
               <CardHeader>
-                <CardTitle className='gradient-hero'>Exam Structure & Marking Scheme</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl font-semibold text-indigo-700">
+                  <Info /> Exam Structure & Marking Scheme
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {parts.map((p, i) => (
-                  <div key={i} className="p-4 border rounded-lg hover-glow">
-                    <div className="flex flex-col md:flex-row justify-between items-center">
+                  <div key={i} className="p-4 border rounded-xl bg-gray-50 hover:bg-white transition-all">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
                       <div>
-                        <h3 className="font-semibold text-lg">{p.part}: {p.subject}</h3>
-                        <p className="text-sm text-muted-foreground">{p.time}</p>
+                        <h3 className="font-semibold text-gray-800">{p.part}: {p.subject}</h3>
+                        <p className="text-sm text-gray-500">{p.time}</p>
                       </div>
-                      <div className="flex gap-6 mt-3 md:mt-0">
+                      <div className="flex gap-4 mt-2 md:mt-0">
                         <Badge>{p.questions} Qs</Badge>
                         <Badge>{p.marks} Marks</Badge>
                       </div>
@@ -145,78 +141,70 @@ const Nimcet2025 = () => {
                     </div>
                   </div>
                 ))}
-                <p className="mt-4 text-sm text-muted-foreground">
-                  • Questions will appear one section after the other. Switching not allowed.<br />
-                  • All questions in English only.<br />
-                  • Each wrong answer: 25% negative marking.<br />
-                  • Multiple responses: negative marking applied.
-                </p>
               </CardContent>
             </Card>
-          </TabsContent>
+          </motion.div>
+        </TabsContent>
 
-          {/* Syllabus */}
-          <TabsContent value="syllabus">
-            <div className="grid md:grid-cols-2 gap-6">
-              {Object.entries(syllabus).map(([sub, topics], i) => (
-                <Card key={i} className="glass">
-                  <CardHeader>
-                    <CardTitle className="flex gradient-hero items-center gap-2">
-                      <BookOpen className="h-5 w-5 text-blue-500" />
-                      {sub}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="list-disc pl-5 space-y-1 text-sm">
-                      {topics.map((t, j) => <li key={j}>{t}</li>)}
-                    </ul>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
+        {/* Syllabus */}
+        <TabsContent value="syllabus">
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.6 }} className="grid md:grid-cols-2 gap-6">
+            {Object.entries(syllabus).map(([subject, topics]) => (
+              <Card key={subject} className="bg-white/80 backdrop-blur-md border border-gray-100 rounded-3xl shadow-sm hover:shadow-md transition">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-indigo-600 font-semibold">
+                    <BookOpen className="w-5 h-5" /> {subject}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                    {topics.map((t, i) => <li key={i}>{t}</li>)}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
+          </motion.div>
+        </TabsContent>
 
-          {/* Criteria */}
-          <TabsContent value="criteria">
-            <Card className="glass">
+        {/* Criteria */}
+        <TabsContent value="criteria">
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.6 }}>
+            <Card className="bg-white/90 backdrop-blur-xl border border-gray-100 rounded-3xl p-6 shadow-lg">
               <CardHeader>
-                <CardTitle className='gradient-hero'>Qualifying & Ranking Criteria</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-indigo-700 font-semibold">
+                  <Award className="w-5 h-5" /> Qualifying Criteria
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="list-disc pl-5 space-y-2 text-sm">
-                  <li>Zero or negative marks in Mathematics OR in total = Disqualified.</li>
-                  <li>Ranking based on total weighted marks (max 1000).</li>
-                  <li><b>Tie-breakers:</b></li>
-                  <ul className="list-decimal pl-6 space-y-1">
-                    <li>Higher marks in Mathematics</li>
-                    <li>If equal → Higher marks in Reasoning</li>
-                    <li>If equal → Higher marks in Computer Awareness</li>
-                    <li>If equal → Older candidate gets preference</li>
-                    <li>If still equal → Random sampling by computer</li>
-                  </ul>
+                <ul className="list-disc pl-6 text-sm text-gray-700 space-y-1">
+                  <li>Zero or negative marks in Mathematics OR overall = Disqualified</li>
+                  <li>Ranking based on total weighted marks (max 1000)</li>
+                  <li><b>Tie-breakers:</b> Maths → Reasoning → Computer → Age → Random</li>
                 </ul>
               </CardContent>
             </Card>
-          </TabsContent>
+          </motion.div>
+        </TabsContent>
 
-          {/* Institutes */}
-          <TabsContent value="institutes">
-            <div className="grid md:grid-cols-2 gap-6">
-              {institutes.map((inst, i) => (
-                <Card key={i} className="glass">
-                  <CardHeader>
-                    <CardTitle className='gradient-hero'>{inst.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="font-semibold">{inst.contact}</p>
-                    <p className="text-sm text-muted-foreground">{inst.email}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </section>
+        {/* Institutes */}
+        <TabsContent value="institutes">
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.6 }} className="grid md:grid-cols-2 gap-6">
+            {institutes.map((inst, i) => (
+              <Card key={i} className="bg-white/80 border border-gray-100 backdrop-blur-md rounded-3xl p-4 hover:shadow-lg transition">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-indigo-600 font-semibold">
+                    <University className="w-5 h-5" /> {inst.name}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="font-medium">{inst.contact}</p>
+                  <p className="text-sm text-gray-500">{inst.email}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </motion.div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
