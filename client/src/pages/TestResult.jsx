@@ -72,7 +72,7 @@ return (
 
     <div className="absolute top-4 left-4">
       <Button
-        onClick={() => navigate("/acme-academy-open-library")}
+        onClick={() => navigate(-1)}
         variant="outline"
         className="border-gray-400 text-gray-600 hover:bg-gray-50"
       >
