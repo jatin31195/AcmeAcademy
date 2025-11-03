@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { BASE_URL } from "./config";
+
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
@@ -9,7 +10,6 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-   
       const res = await fetch(`${BASE_URL}/api/users/me`, {
         credentials: "include",
       });
@@ -17,10 +17,9 @@ export const AuthProvider = ({ children }) => {
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
-        return;
+        return data.user;
       }
 
-  
       if (res.status === 401) {
         console.warn("Access token expired — trying refresh...");
         const refreshRes = await fetch(`${BASE_URL}/api/users/refresh`, {
@@ -32,7 +31,7 @@ export const AuthProvider = ({ children }) => {
           console.log("Access token refreshed successfully ✅");
           const { user: refreshedUser } = await refreshRes.json();
           setUser(refreshedUser);
-          return;
+          return refreshedUser;
         } else {
           console.warn("Refresh token invalid or expired ❌");
           setUser(null);
@@ -48,14 +47,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
   useEffect(() => {
     fetchUser();
   }, []);
 
-  
   const login = (userData) => setUser(userData);
-
 
   const logout = async () => {
     try {
@@ -70,7 +66,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, fetchUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

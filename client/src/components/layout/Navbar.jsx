@@ -3,7 +3,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown, LogOut } from "lucide-react";
 import axios from "axios";
 import logo from "/logo.png";
-import { useUser } from "@/UserContext"; // ✅ use your context
+import { useAuth } from "@/AuthContext";
 import { BASE_URL } from "@/config";
 
 const Navbar = () => {
@@ -14,7 +14,7 @@ const Navbar = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, setUser } = useUser();
+  const { user, logout } = useAuth();
 
   const isLoggedIn = !!user;
 
@@ -38,14 +38,16 @@ const Navbar = () => {
 
 
   const handleLogout = async () => {
-    try {
-      await axios.post(`${BASE_URL}/api/users/logout`, {}, { withCredentials: true });
-      setUser(null);
-    
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
-  };
+  try {
+    await logout();
+    setShowDropdown(false);
+    setIsOpen(false);
+    navigate(0); 
+  } catch (err) {
+    console.error("Logout failed:", err);
+  }
+};
+
 
   const navItems = [
     { name: "Home", path: "/home" },

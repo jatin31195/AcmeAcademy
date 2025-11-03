@@ -3,7 +3,7 @@ import { useAuth } from "./AuthContext";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
-import { ProtectedRoute, PublicRoute } from "./routes/routes";
+import { ProtectedRoute } from "./routes/routes";
 import Navbar from "./components/layout/Navbar";
 import About from "./pages/About";
 import Footer from "./components/layout/Footer";
@@ -46,7 +46,7 @@ function App() {
 
       <Routes>
         {/* Public routes */}
-        <Route element={<PublicRoute />}>
+        <Route >
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
         </Route>

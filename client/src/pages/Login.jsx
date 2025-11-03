@@ -1,25 +1,27 @@
 import React, { useState } from "react";
-import { useNavigate, NavLink , useLocation} from "react-router-dom";
+import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from ".././AuthContext";
+import { useAuth } from "../AuthContext";
 import logo from "/logo.png";
-import { useUser } from "@/UserContext";
 import { BASE_URL } from "../config";
+
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const location = useLocation();
+  const from = location.state?.from?.pathname + location.state?.from?.search || "/home";
+
+  const { login, fetchUser } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const location = useLocation();
-  const from = location.state?.from?.pathname || "/home";
-  const { fetchUser } = useUser();
+
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) return toast.error("Please fill both email and password");
@@ -37,10 +39,16 @@ const Login = () => {
       if (!res.ok) throw new Error(data.message || "Login failed");
 
       toast.success("Welcome back!");
-      await fetchUser();
-    
+
+      
+      await Promise.all([
+        login(data.user || { email }),
+        fetchUser()
+      ]);
+
       
       navigate(from, { replace: true });
+      window.scrollTo(0, 0);
 
     } catch (err) {
       toast.error(err.message || "Server error");
@@ -58,14 +66,18 @@ const Login = () => {
             <div className="flex justify-center mb-4">
               <img src={logo} alt="ACME Academy" className="h-16" />
             </div>
-            <CardTitle className="text-2xl text-white font-bold">Welcome Back</CardTitle>
+            <CardTitle className="text-2xl text-white font-bold">
+              Welcome Back
+            </CardTitle>
             <p className="text-gray-300">Sign in to your dashboard</p>
           </CardHeader>
 
           <CardContent className="space-y-6">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-200">Email Address</Label>
+                <Label htmlFor="email" className="text-gray-200">
+                  Email Address
+                </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
@@ -81,7 +93,9 @@ const Login = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-200">Password</Label>
+                <Label htmlFor="password" className="text-gray-200">
+                  Password
+                </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
@@ -103,9 +117,16 @@ const Login = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
                 {loading ? (
-                  <svg className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+                  <svg
+                    className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"
+                    viewBox="0 0 24 24"
+                  />
                 ) : (
                   <>
                     Login <ArrowRight className="h-4 w-4 ml-1" />
@@ -116,7 +137,10 @@ const Login = () => {
 
             <p className="text-center text-sm text-gray-300">
               New to ACME Academy?{" "}
-              <NavLink to="/signup" className="text-blue-400 hover:text-blue-300 font-medium">
+              <NavLink
+                to="/signup"
+                className="text-blue-400 hover:text-blue-300 font-medium"
+              >
                 Register
               </NavLink>
             </p>
