@@ -7,55 +7,54 @@ const CHANNEL_ID = "UCCTGL0PszN3EOTcXgViH4DA";
 
 const staticVideos = [
   {
-    id: 1,
+    id: "RjOI5bcxwtM",
     title: "NIMCET 2025 TOPPER Reveals BEST Strategies for Success",
     thumbnail: "https://img.youtube.com/vi/RjOI5bcxwtM/maxresdefault.jpg",
-    link: "https://youtu.be/RjOI5bcxwtM?si=m72B3ezr8hkLsDfx",
+    link: "https://youtu.be/RjOI5bcxwtM",
   },
   {
-    id: 2,
+    id: "M4kMKyYIqEo",
     title: "AIR 8 in NIMCET 2025 | Arnab Banik Live Interview",
     thumbnail: "https://img.youtube.com/vi/M4kMKyYIqEo/hqdefault.jpg",
-    link: "https://youtu.be/M4kMKyYIqEo?si=7PtbeYhJqUibkoh1",
+    link: "https://youtu.be/M4kMKyYIqEo",
   },
   {
-    id: 3,
-    title:
-      "AIR-10 in NIMCET-2025 | Mustafa Live Interview",
+    id: "3uWJHbNdlkw",
+    title: "AIR-10 in NIMCET-2025 | Mustafa Live Interview",
     thumbnail: "https://img.youtube.com/vi/3uWJHbNdlkw/hqdefault.jpg",
-    link: "https://youtu.be/3uWJHbNdlkw?si=ukU5S-SG1BsATW5f",
+    link: "https://youtu.be/3uWJHbNdlkw",
   },
-    {
-    id: 1,
+  {
+    id: "nVinl-LwHpg",
     title: "Complete Class 11th Mathematics in One Shot in 12 Hours | IIT-JEE | NIMCET | CUET",
     thumbnail: "https://img.youtube.com/vi/nVinl-LwHpg/hqdefault.jpg",
-    link: "https://www.youtube.com/live/nVinl-LwHpg?si=rE19YFLXSsxRCH12",
+    link: "https://www.youtube.com/live/nVinl-LwHpg",
   },
   {
-    id: 2,
+    id: "VC3SzEwXq5I",
     title: "Set Theory NIMCET PYQs 2008–2022 - Short Tricks",
     thumbnail: "https://img.youtube.com/vi/VC3SzEwXq5I/hqdefault.jpg",
     link: "https://www.youtube.com/watch?v=VC3SzEwXq5I",
   },
   {
-    id: 3,
-    title:
-      "Free Computer Course | NIMCET & CUET 2025–2026 Series",
+    id: "Fn6ngxNn3ds",
+    title: "Free Computer Course | NIMCET & CUET 2025–2026 Series",
     thumbnail: "https://img.youtube.com/vi/Fn6ngxNn3ds/hqdefault.jpg",
-    link: "https://youtube.com/playlist?list=PLjgKXowPULMnNjMybwG1PQxhBhDJeyPIq&si=drVmdEA366-8FTca",
+    link: "https://youtube.com/playlist?list=PLjgKXowPULMnNjMybwG1PQxhBhDJeyPIq",
   },
-
 ];
 
+// Convert ISO 8601 → seconds
 const parseDuration = (duration) => {
-  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-  const hours = parseInt(match?.[1] || 0);
-  const minutes = parseInt(match?.[2] || 0);
-  const seconds = parseInt(match?.[3] || 0);
+  const match = duration?.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!match) return 0;
+  const hours = parseInt(match[1] || 0);
+  const minutes = parseInt(match[2] || 0);
+  const seconds = parseInt(match[3] || 0);
   return hours * 3600 + minutes * 60 + seconds;
 };
 
-// 🔹 Helper — Convert seconds → readable duration (e.g., 5:30)
+// Convert seconds → mm:ss
 const formatDuration = (totalSeconds) => {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
@@ -64,49 +63,68 @@ const formatDuration = (totalSeconds) => {
 
 const TopVideos = () => {
   const [latestVideos, setLatestVideos] = useState([]);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        // Step 1: Fetch latest uploads
-        const searchRes = await fetch(
-          `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&order=date&type=video&maxResults=15`
-        );
-        const searchData = await searchRes.json();
+useEffect(() => {
+  const fetchVideos = async () => {
+    try {
+      const searchRes = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&order=date&type=video&maxResults=15`
+      );
+      const searchData = await searchRes.json();
 
-        const videoIds = searchData.items
-          .map((item) => item.id.videoId)
-          .filter(Boolean)
-          .join(",");
-
-        // Step 2: Fetch details (for duration)
-        const detailsRes = await fetch(
-          `https://www.googleapis.com/youtube/v3/videos?key=${API_KEY}&id=${videoIds}&part=snippet,contentDetails`
-        );
-        const detailsData = await detailsRes.json();
-
-        // Step 3: Filter — only videos longer than 3 min
-        const filtered = detailsData.items
-          .map((vid) => ({
-            id: vid.id,
-            title: vid.snippet.title,
-            duration: parseDuration(vid.contentDetails.duration),
-            thumbnail: vid.snippet.thumbnails.high.url,
-            link: `https://www.youtube.com/watch?v=${vid.id}`,
-            date: new Date(vid.snippet.publishedAt),
-          }))
-          .filter((v) => v.duration > 180) // greater than 3 minutes
-          .sort((a, b) => b.date - a.date) // latest first
-          .slice(0, 6); // only last 6 videos
-
-        setLatestVideos(filtered);
-      } catch (error) {
-        console.error("Error fetching latest videos:", error);
+      if (searchData.error?.errors?.[0]?.reason === "quotaExceeded") {
+        console.warn("YouTube API quota exceeded. Showing static fallback videos.");
+        setLatestVideos(staticVideos);
+        return;
       }
-    };
 
-    fetchVideos();
-  }, []);
+      const items = searchData.items || [];
+      if (items.length === 0) {
+        setLatestVideos(staticVideos);
+        return;
+      }
+
+      const videoIds = items
+        .map((item) => item.id?.videoId)
+        .filter(Boolean)
+        .join(",");
+
+      const detailsRes = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?key=${API_KEY}&id=${videoIds}&part=snippet,contentDetails`
+      );
+      const detailsData = await detailsRes.json();
+
+      if (detailsData.error?.errors?.[0]?.reason === "quotaExceeded") {
+        console.warn("Quota exceeded on video details. Showing static fallback videos.");
+        setLatestVideos(staticVideos);
+        return;
+      }
+
+      const filtered = (detailsData.items || [])
+        .map((vid) => ({
+          id: vid.id,
+          title: vid.snippet.title,
+          duration: parseDuration(vid.contentDetails.duration),
+          thumbnail: vid.snippet.thumbnails?.high?.url || "",
+          link: `https://www.youtube.com/watch?v=${vid.id}`,
+          date: new Date(vid.snippet.publishedAt),
+        }))
+        .filter((v) => v.duration > 180)
+        .sort((a, b) => b.date - a.date)
+        .slice(0, 6);
+
+      setLatestVideos(filtered);
+    } catch (error) {
+      console.error("Error fetching latest videos:", error);
+      setLatestVideos(staticVideos);
+    }
+  };
+
+  fetchVideos();
+}, []);
+
+
 
   return (
     <section className="py-20 bg-gradient-to-b from-blue-50/40 to-white">
@@ -163,13 +181,15 @@ const TopVideos = () => {
           Latest YouTube Uploads
         </motion.h2>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {latestVideos.length === 0 ? (
-            <p className="text-gray-500 col-span-full text-lg">
-              Loading latest videos...
-            </p>
-          ) : (
-            latestVideos.map((video, index) => (
+        {error ? (
+          <p className="text-red-500 text-lg mb-4">{error}</p>
+        ) : latestVideos.length === 0 ? (
+          <p className="text-gray-500 col-span-full text-lg">
+            Loading latest videos...
+          </p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {latestVideos.map((video, index) => (
               <motion.a
                 key={video.id}
                 href={video.link}
@@ -187,7 +207,6 @@ const TopVideos = () => {
                     alt={video.title}
                     className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-700"
                   />
-                  {/* Duration Tag */}
                   <span className="absolute top-2 right-2 bg-black/80 text-white text-xs font-semibold px-2 py-1 rounded-md">
                     {formatDuration(video.duration)}
                   </span>
@@ -207,9 +226,9 @@ const TopVideos = () => {
                   </p>
                 </div>
               </motion.a>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
