@@ -10,9 +10,33 @@ const SolutionView = ({ results, onExit }) => {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-  const sections = results.sections || [];
-  const currentSection = sections[currentSectionIndex];
-  const questions = currentSection?.questions || [];
+  
+let sections = [];
+
+if (results.sections && results.sections.length > 0) {
+  // If the first section has no questions, fill them from results.questions
+  sections = results.sections.map((sec) => ({
+    ...sec,
+    questions:
+      sec.questions && sec.questions.length > 0
+        ? sec.questions
+        : results.questions || [],
+  }));
+} else {
+  // If no sections at all, make one default section
+  sections = [
+    {
+      title: results.testTitle || "Test",
+      questions: results.questions || [],
+      stats: results.stats || { correct: 0, incorrect: 0, unattempted: 0 },
+    },
+  ];
+}
+
+
+const currentSection = sections[currentSectionIndex];
+const questions = currentSection?.questions || [];
+
   const currentQ = questions[currentQuestionIndex];
 
   if (!currentQ) return <div>Loading question...</div>;
@@ -174,7 +198,7 @@ const SolutionView = ({ results, onExit }) => {
                 ? "⚪ You did not attempt this question."
                 : <>🟢 You selected: <span className="font-medium">{renderWithMath(currentQ.userAnswer)}</span></>}
             </p>
-            <p className="text-sm text-gray-600 italic">{currentQ.solution?.text || "Explanation not available."}</p>
+            <p className="text-sm text-gray-600 italic">{renderWithMath(currentQ.solution?.text) || "Explanation not available."}</p>
           </div>
         </div>
 

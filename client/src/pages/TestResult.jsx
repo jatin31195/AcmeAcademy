@@ -24,6 +24,7 @@ const TestResult = () => {
 
       const res = await axios.get(endpoint, { withCredentials: true });
       setResults(res.data);
+    
     } catch (err) {
       console.error("Error fetching test result:", err);
     } finally {
