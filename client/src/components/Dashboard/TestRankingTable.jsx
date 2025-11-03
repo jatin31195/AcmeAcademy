@@ -144,7 +144,7 @@ const TestRankingTable = () => {
             <thead>
               <tr className="border-b border-gray-200 text-sm text-gray-700">
                 <th className="px-4 py-2 text-left font-semibold">Test Name</th>
-                <th className="px-4 py-2 text-left font-semibold">Subject</th>
+              
                 <th className="px-4 py-2 text-right font-semibold">Score</th>
                 <th className="px-4 py-2 text-right font-semibold">Accuracy</th>
                 <th className="px-4 py-2 text-right font-semibold">Rank</th>
@@ -174,14 +174,12 @@ const TestRankingTable = () => {
                       <td className="px-4 py-3 text-sm text-gray-800 font-medium">
                         {test.testTitle}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {test.subject}
-                      </td>
+                      
                       <td className="px-4 py-3 text-sm text-right text-gray-700 font-semibold">
                         {test.score}/{test.totalMarks}
                       </td>
                       <td className="px-4 py-3 text-sm text-right text-gray-700">
-                        {((test.score / test.totalMarks) * 100).toFixed(2)}%
+                        {test.accuracy}%
                       </td>
                       <td className="px-4 py-3 text-sm text-right">
                         <span
