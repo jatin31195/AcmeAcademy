@@ -10,6 +10,7 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+
   const fetchUser = async () => {
     try {
       setLoading(true);
@@ -18,24 +19,27 @@ export const UserProvider = ({ children }) => {
       });
       const userData = res.data?.data?.user || {};
 
-  
+     
       if (!userData.profilePic && userData.fullname) {
-        const initials = userData.fullname
+        userData.initials = userData.fullname
           .split(" ")
           .map((n) => n[0])
-          .join("");
-        userData.initials = initials;
+          .join("")
+          .toUpperCase();
       }
 
       setUser(userData);
+      setError("");
     } catch (err) {
       console.error("❌ Failed to fetch user:", err);
+      setUser(null);
       setError("Failed to load user data");
     } finally {
       setLoading(false);
     }
   };
 
+ 
   useEffect(() => {
     fetchUser();
   }, []);
@@ -54,6 +58,5 @@ export const UserProvider = ({ children }) => {
     </UserContext.Provider>
   );
 };
-
 
 export const useUser = () => useContext(UserContext);

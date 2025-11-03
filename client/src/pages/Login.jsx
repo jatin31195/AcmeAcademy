@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, NavLink , useLocation} from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from ".././AuthContext";
 import logo from "/logo.png";
+import { useUser } from "@/UserContext";
 import { BASE_URL } from "../config";
 const Login = () => {
   const navigate = useNavigate();
@@ -16,7 +17,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/home";
+  const { fetchUser } = useUser();
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) return toast.error("Please fill both email and password");
@@ -34,8 +37,11 @@ const Login = () => {
       if (!res.ok) throw new Error(data.message || "Login failed");
 
       toast.success("Welcome back!");
-      login({ _id: data.userId, username: data.username, email }); // set context
-      navigate("/home");
+      await fetchUser();
+    
+      
+      navigate(from, { replace: true });
+
     } catch (err) {
       toast.error(err.message || "Server error");
     } finally {
