@@ -80,17 +80,7 @@ function App() {
       />
         </Route>
 
-        {/* Default / unknown route */}
-        <Route
-          path="*"
-          element={
-            loading ? null : user ? (
-              <Navigate to="/home" replace />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
+        <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
 
       {!hideFooter && <Footer />}
