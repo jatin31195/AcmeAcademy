@@ -22,7 +22,7 @@ const Results = () => {
   const text = [
     "At ACME Academy, we don’t just teach — we mentor, inspire, and transform.",
     "Our structured NIMCET programs, expert faculty, and proven strategies empower students to unlock their full potential.",
-    "From crystal-clear concept building to smart test analysis — ACME is where dreams turn into results.",
+    
   ];
 
   useEffect(() => {
@@ -333,7 +333,7 @@ const renderSidebarCard = (r) => (
       </Helmet>
 
       {/* Hero Section */}
-      <section className="relative py-12 sm:py-20 md:py-20 overflow-hidden hero-gradient">
+      <section className="relative py-12 sm:py-20 md:py-22 overflow-hidden hero-gradient">
         <div className="max-w-7xl mx-auto px-4 text-center relative z-10">
           <motion.h1
             initial={{ opacity: 0, y: -40 }}

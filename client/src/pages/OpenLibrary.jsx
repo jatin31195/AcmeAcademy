@@ -7,7 +7,7 @@ const OpenLibrary = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
 
       {/* Header */}
-      <section className="relative py-16 sm:py-30 text-center overflow-hidden hero-gradient">
+      <section className="relative py-16 sm:py-24 text-center overflow-hidden hero-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
            <motion.h1
             initial={{ opacity: 0, y: -40 }}
@@ -29,6 +29,19 @@ const OpenLibrary = () => {
         {/* subtle decorative circles */}
         <div className="absolute top-0 left-0 w-72 h-72 bg-pink-100/20 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100/20 rounded-full blur-3xl pointer-events-none"></div>
+           <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0]">
+          <svg
+            className="relative block w-full h-20"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="none"
+            viewBox="0 0 1200 120"
+          >
+            <path
+              d="M985.66 92.83C906.67 72 823.78 48.49 743.84 26.94 661.18 4.8 578.56-5.45 497.2 1.79 423.15 8.3 349.38 28.74 278.07 51.84 183.09 83.72 90.6 121.65 0 120v20h1200v-20c-80.3-1.6-160.39-26.5-214.34-47.17z"
+              fill="white"
+            />
+          </svg>
+        </div>
       </section>
 
       {/* Special Cards */}

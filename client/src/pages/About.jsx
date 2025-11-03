@@ -143,7 +143,7 @@ const About = () => {
 
 
       {/* Hero Section */}
-      <section className="relative py-16 sm:py-30 text-center overflow-hidden hero-gradient">
+      <section className="relative py-16 sm:py-26 text-center overflow-hidden hero-gradient">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 opacity-20 blur-3xl rotate-45 scale-150"></div>
         <div className="relative z-10 max-w-5xl mx-auto px-4">
           <motion.h1
@@ -164,6 +164,19 @@ const About = () => {
             quality education and proven results.
           </p>
           
+        </div>
+          <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0]">
+          <svg
+            className="relative block w-full h-20"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="none"
+            viewBox="0 0 1200 120"
+          >
+            <path
+              d="M985.66 92.83C906.67 72 823.78 48.49 743.84 26.94 661.18 4.8 578.56-5.45 497.2 1.79 423.15 8.3 349.38 28.74 278.07 51.84 183.09 83.72 90.6 121.65 0 120v20h1200v-20c-80.3-1.6-160.39-26.5-214.34-47.17z"
+              fill="white"
+            />
+          </svg>
         </div>
       </section>
       {/* Person Behind Excellence */}
@@ -238,41 +251,41 @@ const About = () => {
   </div>
 </section>
     {/* Vision & Mission Section */}
+{/* Vision & Mission Section */}
 <section className="relative py-20 bg-gradient-to-b from-purple-50 via-gray-50 to-white">
   <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-pink-400/10 to-red-400/10 blur-2xl"></div>
-  <div className="relative z-10 max-w-6xl mx-auto px-6">
+  <div className="relative z-10 max-w-7xl mx-auto px-6">
     <motion.h2
       initial={{ opacity: 0, y: -40 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
-      className="text-3xl sm:text-4xl font-bold text-center mb-10"
+      className="text-3xl sm:text-4xl font-extrabold text-center mb-14 font-[Poppins]"
     >
       <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 text-transparent bg-clip-text">
         Our Vision & Mission
       </span>
     </motion.h2>
 
-    <div className="grid md:grid-cols-2 gap-10">
+    <div className="grid md:grid-cols-2 gap-8">
       {/* Vision */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         whileInView={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8 }}
-        className="bg-white/70 backdrop-blur-xl border border-gray-200 p-8 rounded-2xl shadow-lg hover:shadow-xl transition"
+        className="bg-white/80 backdrop-blur-xl border border-gray-200 px-10 py-8 
+                   rounded-3xl shadow-lg hover:shadow-2xl transition-all 
+                   md:min-h-[280px] flex flex-col justify-center"
       >
-        <h3 className="text-2xl font-semibold mb-3 text-purple-700">
+        <h3 className="text-2xl md:text-3xl font-semibold mb-3 text-purple-700 font-[Poppins]">
           Our Vision
         </h3>
-        <p className="text-gray-700 leading-relaxed text-base sm:text-lg">
-          ACME Academy is a chief organizer of excellence in MCA Entrance coaching,
-          dedicated to nurturing high-caliber students imbued with integrity, discipline,
-          and hard work. We prepare students for a wide range of MCA Entrance Exams with
-          the belief that <strong>“Success is not just an outcome, but a journey of consistent growth.”</strong>
+        <p className="text-gray-700 leading-relaxed text-base md:text-lg font-[Inter] tracking-wide">
+          ACME Academy strives to be a pioneer of excellence in MCA Entrance coaching,
+          nurturing disciplined, confident, and skilled aspirants ready to lead the
+          technology-driven world.
         </p>
-        <p className="text-gray-700 leading-relaxed text-base sm:text-lg mt-3">
-          Our goal is to help students explore great careers in diverse fields of
-          <strong> Information Technology</strong> — from Software Engineering, Full Stack
-          Development, and Ethical Hacking to Data Science and Artificial Intelligence.
+        <p className="text-gray-700 leading-relaxed text-base md:text-lg mt-3 font-[Inter] tracking-wide">
+          We believe <strong>“Success is not just an outcome, but a journey of consistent growth.”</strong>
         </p>
       </motion.div>
 
@@ -281,38 +294,27 @@ const About = () => {
         initial={{ opacity: 0, x: 50 }}
         whileInView={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8 }}
-        className="bg-white/70 backdrop-blur-xl border border-gray-200 p-8 rounded-2xl shadow-lg hover:shadow-xl transition"
+        className="bg-white/80 backdrop-blur-xl border border-gray-200 px-10 py-8 
+                   rounded-3xl shadow-lg hover:shadow-2xl transition-all 
+                   md:min-h-[280px] flex flex-col justify-center"
       >
-        <h3 className="text-2xl font-semibold mb-3 text-pink-700">
+        <h3 className="text-2xl md:text-3xl font-semibold mb-3 text-pink-700 font-[Poppins]">
           Our Mission
         </h3>
-        <p className="text-gray-700 leading-relaxed text-base sm:text-lg">
-          Our mission is to deliver <strong>100% success</strong> in NIMCET and top MCA entrance exams,
-          while building a strong foundation for every student. We focus on transforming even
-          average learners into confident achievers through <strong>real exam-level preparation</strong>,
-          high-quality materials, and personalized mentorship.
+        <p className="text-gray-700 leading-relaxed text-base md:text-lg font-[Inter] tracking-wide">
+          To deliver <strong>100% success</strong> through real exam-level preparation,
+          modern teaching strategies, and personal mentorship that transform every
+          student into an achiever.
         </p>
-
-        <p className="text-gray-700 leading-relaxed text-base sm:text-lg mt-3">
-          Guided by the motto <em>“Practice and Patience Make a Man Perfect,”</em> we help
-          students:
-        </p>
-
-        <ul className="list-decimal list-inside text-gray-700 leading-relaxed text-base sm:text-lg mt-3 space-y-1">
-          <li>Build a strong foundation by mastering basic principles.</li>
-          <li>Begin with simple problems to develop conceptual clarity.</li>
-          <li>Gradually progress to high-level, exam-oriented problems.</li>
-          <li>Practice consistently throughout the year to build confidence.</li>
-        </ul>
-
-        <p className="text-gray-700 leading-relaxed text-base sm:text-lg mt-3">
-          This structured approach ensures every student is fully equipped to excel in
-          competitive MCA Entrance Examinations.
+        <p className="text-gray-700 leading-relaxed text-base md:text-lg mt-3 font-[Inter] tracking-wide">
+          Guided by the principle <em>“Practice and Patience Make a Man Perfect,”</em> we
+          cultivate excellence through structured learning and continuous improvement.
         </p>
       </motion.div>
     </div>
   </div>
 </section>
+
 
       {/* Achievements */}
       {/* Achievements Section */}

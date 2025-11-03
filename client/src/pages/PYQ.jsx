@@ -101,6 +101,19 @@ const PYQ = () => {
               className="font-semibold pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/70"
             />
           </div>
+               <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0]">
+          <svg
+            className="relative block w-full h-20"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="none"
+            viewBox="0 0 1200 120"
+          >
+            <path
+              d="M985.66 92.83C906.67 72 823.78 48.49 743.84 26.94 661.18 4.8 578.56-5.45 497.2 1.79 423.15 8.3 349.38 28.74 278.07 51.84 183.09 83.72 90.6 121.65 0 120v20h1200v-20c-80.3-1.6-160.39-26.5-214.34-47.17z"
+              fill="white"
+            />
+          </svg>
+        </div>
         </div>
       </section>
 

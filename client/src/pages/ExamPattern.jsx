@@ -22,7 +22,7 @@ const ExamPattern = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 overflow-hidden">
       {/* 🌈 Hero Section */}
        {/* 🌊 Hero Section */}
-      <section className="relative py-16 sm:py-28 text-center overflow-hidden hero-gradient">
+      <section className="relative py-16 sm:py-30 text-center overflow-hidden hero-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10"></div>
          <motion.h1
                     initial={{ opacity: 0, y: -40 }}
