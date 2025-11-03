@@ -212,7 +212,8 @@ export const getUserTestAttempts = async (req, res) => {
     const attempts = await UserTestAttempt.find({ user: userId })
       .populate({
         path: "test",
-        select: "title subject totalMarks duration",
+        select:
+          "title subject totalMarks duration sections questions totalQuestions totalDurationMinutes",
       })
       .sort({ submittedAt: -1 });
 
@@ -224,20 +225,122 @@ export const getUserTestAttempts = async (req, res) => {
       });
     }
 
-    const formattedAttempts = attempts.map((attempt) => ({
-      _id: attempt._id,
-      testId: attempt.test?._id,
-      testTitle: attempt.test?.title || "Unknown Test",
-      subject: attempt.test?.subject || "General",
-      totalMarks: attempt.test?.totalMarks || 0,
-      duration: attempt.test?.duration || 0,
-      score: attempt.score,
-      rank: attempt.rank,
-      totalTimeTaken: attempt.totalTimeTaken,
-      attemptNumber: attempt.attemptNumber,
-      isSubmitted: attempt.isSubmitted,
-      submittedAt: attempt.submittedAt,
-    }));
+    const formattedAttempts = attempts.map((attempt) => {
+      const test = attempt.test;
+      if (!test) {
+        return {
+          _id: attempt._id,
+          testId: null,
+          testTitle: "Unknown Test",
+          subject: "General",
+          totalMarks: 0,
+          duration: 0,
+          score: 0,
+          accuracy: 0,
+          totalTimeTaken: 0,
+          attemptNumber: attempt.attemptNumber,
+          isSubmitted: attempt.isSubmitted,
+          submittedAt: attempt.submittedAt,
+          rank: attempt.rank ?? null,
+        };
+      }
+
+      let correct = 0;
+      let incorrect = 0;
+      let unattempted = 0;
+      let totalScore = 0;
+      let positiveMarks = 0;
+      let negativeMarks = 0;
+
+
+      (test.questions || []).forEach((question) => {
+        const qidStr = question._id.toString();
+
+        const userAnsObj = attempt.answers?.find(
+          (a) => a.question && a.question.toString() === qidStr
+        );
+
+        const sectionId = question.section ? question.section.toString() : null;
+        const section =
+          test.sections?.find((s) => s._id && s._id.toString() === sectionId) ||
+          null;
+
+        const marksForQuestion = section?.marksPerQuestion ?? 1;
+        const negMarks = section?.negativeMarks ?? 0;
+
+        const correctAnswer = question.correctAnswer
+          ? question.correctAnswer.toString().trim()
+          : null;
+
+        const userAnswerRaw = userAnsObj?.answer ?? null;
+        const userAnswer =
+          userAnswerRaw === null || userAnswerRaw === undefined
+            ? null
+            : userAnswerRaw.toString().trim();
+
+        let result = "unattempted";
+        if (userAnswer) {
+          result =
+            correctAnswer !== null && userAnswer === correctAnswer
+              ? "correct"
+              : "wrong";
+        }
+
+        let marksObtained = 0;
+        if (result === "correct") {
+          marksObtained = marksForQuestion;
+          correct++;
+          positiveMarks += marksObtained;
+        } else if (result === "wrong") {
+          marksObtained = -negMarks;
+          incorrect++;
+          negativeMarks += Math.abs(marksObtained);
+        } else {
+          unattempted++;
+        }
+
+        totalScore += marksObtained;
+      });
+
+      const attempted = correct + incorrect;
+      const accuracy = attempted > 0 ? (correct / attempted) * 100 : 0;
+
+      const maxMarks =
+        test.sections?.length > 0
+          ? test.sections.reduce(
+              (acc, s) =>
+                acc + (s.numQuestions || 0) * (s.marksPerQuestion ?? 1),
+              0
+            )
+          : test.totalMarks ?? 0;
+
+      const totalTimeTaken =
+        attempt.totalTimeTaken ||
+        attempt.answers.reduce((acc, a) => acc + (a.timeTaken || 0), 0);
+
+      return {
+        _id: attempt._id,
+        testId: test._id,
+        testTitle: test.title || "Unknown Test",
+        subject: test.subject || "General",
+        totalMarks: maxMarks,
+        duration: test.totalDurationMinutes || test.duration || 0,
+        score: totalScore,
+        totalTimeTaken,
+        attemptNumber: attempt.attemptNumber,
+        isSubmitted: attempt.isSubmitted,
+        submittedAt: attempt.submittedAt,
+        rank: attempt.rank ?? null,
+        accuracy: parseFloat(accuracy.toFixed(2)),
+        stats: {
+          correct,
+          incorrect,
+          unattempted,
+          positiveMarks,
+          negativeMarks,
+        },
+      };
+    });
 
     res.status(200).json({
       success: true,
