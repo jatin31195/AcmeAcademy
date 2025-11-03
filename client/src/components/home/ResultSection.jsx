@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
 import resultSample1 from "../../assets/images/acme-poster.jpg";
 import resultSample2 from "../../assets/images/ACMEs-CUET-MCA-2024.png";
 import resultSample3 from "../../assets/images/mah-mca-cet-2024-result.png";
@@ -8,8 +10,6 @@ import resultSample5 from "../../assets/images/Results.jpg";
 import resultSample6 from "../../assets/images/nimcet-2024-result.png";
 
 const ResultsSection = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-
   const resultImages = [
     { src: resultSample1, title: "NIMCET 2025 Toppers", exam: "NIMCET", year: "2025" },
     { src: resultSample2, title: "CUET-PG 2024 Results", exam: "CUET-PG", year: "2024" },
@@ -19,84 +19,98 @@ const ResultsSection = () => {
     { src: resultSample6, title: "JMI MCA 2024 Toppers", exam: "JMI MCA", year: "2024" },
   ];
 
-  // Auto-slide every 30 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % resultImages.length);
-    }, 30000); 
+  const [current, setCurrent] = useState(0);
 
-    return () => clearInterval(timer);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % resultImages.length);
+    }, 3000);
+    return () => clearInterval(interval);
   }, [resultImages.length]);
 
+  const nextSlide = () => setCurrent((prev) => (prev + 1) % resultImages.length);
+  const prevSlide = () => setCurrent((prev) => (prev - 1 + resultImages.length) % resultImages.length);
+
   return (
-    <section className="w-full h-[700px] md:h-[900px] relative overflow-hidden bg-gradient-to-br from-background via-muted/30 to-background px-4 sm:px-6 lg:px-8">
-      {/* Section Header */}
-      <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20 text-center">
-        <h2 className="text-5xl md:text-5xl font-heading font-bold mb-2">
-          Outstanding <span className="gradient-text">Results</span>
+    <section className="relative w-full bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 py-16 overflow-hidden">
+      
+      <div className="text-center mb-10">
+        <h2 className="text-4xl md:text-5xl font-bold mb-3">
+          Outstanding <span className="text-primary gradient-text">Results</span>
         </h2>
-        <p className="text-xl md:text-xl text-muted-foreground">
+        <p className="text-lg text-muted-foreground">
           Celebrating the success of our MCA entrance exam toppers
         </p>
       </div>
 
-      {/* Image Slider */}
-      <div className="w-full pt-16 flex flex-col items-center mt-20 px-4 sm:px-6 lg:px-8">
-  <div className="w-full max-w-7xl shadow-2xl rounded-2xl overflow-hidden">
-    <div className="w-full h-[500px] md:h-[550px] lg:h-[600px] flex items-center justify-center bg-black">
-      <Carousel value={currentSlide} onValueChange={setCurrentSlide} className="w-full h-full rounded-2xl">
-        <CarouselContent className="h-full">
-          {resultImages.map((result, index) => (
-            <CarouselItem key={index} className="h-full flex items-center justify-center">
-              <div className="relative w-full h-full flex items-center justify-center">
-                <img
-                  src={result.src}
-                  alt={result.title}
-                  className="max-h-full max-w-full object-contain object-center"
-                />
-                <div className="absolute inset-0 bg-black/20"></div>
-                <div className="absolute bottom-4 left-4 text-white z-10">
-                  <div className="glass-dark backdrop-blur-md bg-black/30 p-4 rounded-lg border border-white/20">
-                    <h3 className="text-lg md:text-xl font-bold mb-1">{result.title}</h3>
-                    <div className="flex items-center gap-2 text-xs md:text-sm">
-                      <span className="bg-primary/80 px-2 py-1 rounded-full">{result.exam}</span>
-                      <span className="bg-white/20 px-2 py-1 rounded-full">{result.year}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
+      {/* Slider Container */}
+      <div className="relative w-full max-w-6xl mx-auto aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl bg-black">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={current}
+            src={resultImages[current].src}
+            alt={resultImages[current].title}
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.8 }}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        </AnimatePresence>
 
-        {/* Navigation Arrows */}
-        <CarouselPrevious className="absolute left-2 top-1/2 transform -translate-y-1/2 z-30 text-white hover:text-gray-200" />
-        <CarouselNext className="absolute right-2 top-1/2 transform -translate-y-1/2 z-30 text-white hover:text-gray-200" />
-      </Carousel>
-    </div>
+   
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
 
-    {/* Carousel Dots */}
-    <div className="flex justify-center space-x-2 py-4 bg-gray-50">
-      {resultImages.map((_, index) => (
+       
+        <motion.div
+          key={current + "-caption"}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="absolute bottom-6 left-6 bg-black/50 backdrop-blur-md text-white px-6 py-4 rounded-xl border border-white/20 max-w-sm"
+        >
+          <h3 className="text-xl font-semibold mb-1">{resultImages[current].title}</h3>
+          <div className="flex items-center gap-3 text-sm">
+            <span className="bg-primary/80 px-3 py-1 rounded-full">{resultImages[current].exam}</span>
+            <span className="bg-white/30 px-3 py-1 rounded-full">{resultImages[current].year}</span>
+          </div>
+        </motion.div>
+
+       
         <button
-          key={index}
-          onClick={() => setCurrentSlide(index)}
-          className={`w-3 h-3 rounded-full transition-all duration-300 ${
-            index === currentSlide ? "bg-gray-800 scale-125" : "bg-gray-400 hover:bg-gray-600"
-          }`}
-        />
-      ))}
-    </div>
-  </div>
+          onClick={prevSlide}
+          className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
 
-  {/* Tagline Below Carousel */}
-  <div className="w-full max-w-7xl mt-6 text-center">
-    <h2 className="text-2xl md:text-3xl font-bold">
-      If <span className="gradient-text">NIMCET</span> is the ऐम, <span className="gradient-text">Acme</span> is the नेम
-    </h2>
-  </div>
-</div>
+      
+        <div className="absolute bottom-4 w-full flex justify-center space-x-2">
+          {resultImages.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrent(idx)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                idx === current ? "bg-white scale-125" : "bg-gray-400 hover:bg-gray-300"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
 
+      
+      <div className="text-center mt-12 px-4">
+        <h2 className="text-2xl md:text-3xl font-bold">
+          <span className="gradient-text">Acme </span> मतलब{" "}
+          <span className="gradient-text">Selection </span>की<span className="gradient-text"> GUARANTEE</span> 
+        </h2>
+      </div>
     </section>
   );
 };

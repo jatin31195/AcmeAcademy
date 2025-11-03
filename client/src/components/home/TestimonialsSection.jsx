@@ -1,22 +1,19 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Star, Quote } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const TestimonialsSection = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
   const testimonials = [
     {
-      name: "Priya Sharma",
-      exam: "NIMCET 2024",
-      rank: "AIR 23",
-      image: "PS",
+      name: "Tanmay Mandal",
+      exam: "NIMCET 2022",
+      rank: "AIR 5",
+      image: "TM",
       rating: 5,
       testimonial:
-        "ACME Academy's comprehensive study material and expert guidance helped me crack NIMCET with a top rank. The mock tests were exactly like the real exam pattern.",
+        "ACME Academy’s test series were a game-changer! I improved consistently with daily practice and guidance from the best mentors.",
       college: "NIT Trichy",
     },
     {
@@ -26,7 +23,7 @@ const TestimonialsSection = () => {
       image: "RK",
       rating: 5,
       testimonial:
-        "The faculty at ACME Academy are amazing! Their personalized attention and doubt-clearing sessions made all the difference in my preparation journey.",
+        "The personal mentorship and structured study plan at ACME helped me stay focused and confident throughout my prep.",
       college: "JNU Delhi",
     },
     {
@@ -36,7 +33,7 @@ const TestimonialsSection = () => {
       image: "AG",
       rating: 5,
       testimonial:
-        "I'm grateful to ACME Academy for helping me achieve my dream. The structured approach and regular assessments kept me motivated throughout my preparation.",
+        "Regular assessments and interactive lectures gave me the clarity I needed to excel. Thank you ACME for making learning fun!",
       college: "VJTI Mumbai",
     },
     {
@@ -46,7 +43,7 @@ const TestimonialsSection = () => {
       image: "VS",
       rating: 5,
       testimonial:
-        "The previous year question papers and detailed solutions provided by ACME Academy were instrumental in my success. Highly recommended!",
+        "The detailed PYQ solutions and mock tests were super helpful in strengthening my weak topics before the exam.",
       college: "Jamia Millia Islamia",
     },
     {
@@ -56,186 +53,116 @@ const TestimonialsSection = () => {
       image: "SP",
       rating: 5,
       testimonial:
-        "ACME Academy's online platform made learning flexible and effective. The video lectures and interactive sessions were top-notch.",
+        "ACME Academy’s video lectures and doubt sessions made preparation seamless even with my college schedule.",
       college: "BIT Mesra",
     },
   ];
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [testimonials.length]);
+  const [startIndex, setStartIndex] = useState(0);
 
-  const nextTestimonial = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
+  const nextSlide = () => {
+    setStartIndex((prev) => (prev + 1) % testimonials.length);
   };
 
-  const prevTestimonial = () => {
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length
+  const prevSlide = () => {
+    setStartIndex(
+      (prev) => (prev - 1 + testimonials.length) % testimonials.length
     );
   };
 
+  useEffect(() => {
+    const timer = setInterval(nextSlide, 6000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const visibleTestimonials = [
+    testimonials[startIndex],
+    testimonials[(startIndex + 1) % testimonials.length],
+    testimonials[(startIndex + 2) % testimonials.length],
+  ];
+
   return (
-    <section className="py-20 bg-muted/30 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+    <section className="py-16 bg-gradient-to-br from-blue-50 via-indigo-50 to-white relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Header */}
         <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: -30 }}
+          className="text-center mb-10"
+          initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">
-            Success Stories from Our
-            <span className="gradient-text"> Toppers</span>
+          <h2 className="text-3xl md:text-4xl font-heading font-bold mb-3">
+            What Our <span className="gradient-text">Students Say</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Hear from our successful students who achieved their MCA dreams with
-            ACME Academy's expert guidance
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Real experiences. Real success. Here’s what our toppers think about ACME.
           </p>
         </motion.div>
 
-        {/* Main Testimonial Display */}
-        <div className="relative max-w-4xl mx-auto">
-          <Card className="glass p-8 hover-glow overflow-hidden">
-            <CardContent className="p-0">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentIndex}
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
-                  transition={{ duration: 0.6, ease: "easeInOut" }}
-                  className="text-center mb-8"
-                >
-                  <Quote className="h-12 w-12 text-primary mx-auto mb-6 opacity-20" />
-                  <blockquote className="text-xl md:text-2xl leading-relaxed text-foreground mb-6 font-medium">
-                    "{testimonials[currentIndex].testimonial}"
-                  </blockquote>
-
-                  {/* Rating */}
-                  <motion.div
-                    className="flex justify-center mb-6"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-                  >
-                    {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="h-5 w-5 text-yellow-400 fill-current"
-                      />
-                    ))}
-                  </motion.div>
-
-                  {/* Student Info */}
-                  <motion.div
-                    className="flex flex-col items-center"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                  >
-                    <Avatar className="h-16 w-16 mb-4 ring-4 ring-primary/20">
-                      <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
-                        {testimonials[currentIndex].image}
-                      </AvatarFallback>
-                    </Avatar>
-                    <h4 className="text-xl font-semibold text-foreground mb-1">
-                      {testimonials[currentIndex].name}
-                    </h4>
-                    <div className="flex flex-col sm:flex-row items-center gap-2 text-muted-foreground">
-                      <span className="bg-primary/10 px-3 py-1 rounded-full text-sm font-medium">
-                        {testimonials[currentIndex].rank}
-                      </span>
-                      <span>•</span>
-                      <span>{testimonials[currentIndex].exam}</span>
-                      <span>•</span>
-                      <span className="text-primary font-medium">
-                        {testimonials[currentIndex].college}
-                      </span>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              </AnimatePresence>
-            </CardContent>
-          </Card>
-
-          {/* Navigation Buttons */}
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 glass hover-glow"
-            onClick={prevTestimonial}
+        {/* Compact Horizontal Slider */}
+        <div className="relative flex items-center ">
+          <button
+            onClick={prevSlide}
+            className="absolute -left-2 md:-left-6 bg-white/60 hover:bg-indigo-100 text-indigo-700 rounded-full p-2 shadow-md transition-all z-10"
           >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 glass hover-glow"
-            onClick={nextTestimonial}
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+
+          <div className="flex overflow-hidden w-full">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={startIndex}
+                className="flex gap-6 w-full justify-center mb-4"
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ duration: 0.6, ease: "easeInOut" }}
+              >
+                {visibleTestimonials.map((t, idx) => (
+                  <Card
+                    key={idx}
+                    className="w-[300px] md:w-[340px] bg-white/70 backdrop-blur-md border border-gray-200/50 shadow-lg hover:shadow-xl hover:-translate-y-2 transition-all rounded-2xl"
+                  >
+                    <CardContent className="p-6 text-center">
+                      <Avatar className="h-14 w-14 mx-auto mb-4 ring-4 ring-indigo-100">
+                        <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-semibold">
+                          {t.image}
+                        </AvatarFallback>
+                      </Avatar>
+                      <h4 className="font-semibold text-lg text-gray-800 mb-1">
+                        {t.name}
+                      </h4>
+                      <p className="text-sm text-gray-500 mb-2">
+                        {t.rank} • {t.exam}
+                      </p>
+                      <p className="text-xs text-indigo-600 font-medium mb-2">
+                        {t.college}
+                      </p>
+                      <div className="flex justify-center mb-3">
+                        {[...Array(t.rating)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className="h-4 w-4 text-yellow-400 fill-current"
+                          />
+                        ))}
+                      </div>
+                      <p className="text-sm text-gray-600 line-clamp-4 leading-relaxed">
+                        "{t.testimonial}"
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          <button
+            onClick={nextSlide}
+            className="absolute -right-2 md:-right-6 bg-white/60 hover:bg-indigo-100 text-indigo-700 rounded-full p-2 shadow-md transition-all z-10"
           >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Testimonial Indicators */}
-        <div className="flex justify-center space-x-2 mt-8">
-          {testimonials.map((_, index) => (
-            <motion.button
-              key={index}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === currentIndex
-                  ? "bg-primary scale-125"
-                  : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
-              }`}
-              whileTap={{ scale: 0.8 }}
-              whileHover={{ scale: 1.2 }}
-              onClick={() => setCurrentIndex(index)}
-            />
-          ))}
-        </div>
-
-        {/* Additional Testimonial Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mt-16">
-          {testimonials.slice(0, 3).map((testimonial, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-            >
-              <Card className="glass hover-glow transition-all duration-300 hover:scale-105">
-                <CardContent className="p-6 text-center">
-                  <Avatar className="h-12 w-12 mx-auto mb-4">
-                    <AvatarFallback className="bg-accent text-accent-foreground">
-                      {testimonial.image}
-                    </AvatarFallback>
-                  </Avatar>
-                  <h4 className="font-semibold mb-1">{testimonial.name}</h4>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {testimonial.rank} • {testimonial.exam}
-                  </p>
-                  <div className="flex justify-center mb-3">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="h-4 w-4 text-yellow-400 fill-current"
-                      />
-                    ))}
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {testimonial.testimonial}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+            <ChevronRight className="h-5 w-5" />
+          </button>
         </div>
       </div>
     </section>

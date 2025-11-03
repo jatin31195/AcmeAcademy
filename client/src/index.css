@@ -139,12 +139,7 @@
     border: 1px solid hsl(var(--border));
   }
 
-  .gradient-text {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+ 
 
   .hover-glow {
     transition: box-shadow 0.3s ease;
@@ -218,7 +213,7 @@
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
     --gradient-hero:linear-gradient(135deg, #0072CE, #66CCFF);
-    --gradient-text: linear-gradient(to right, #2563eb, #9333ea, #ec4899); 
+   
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.8) 0%, hsl(220 13% 95% / 0.4) 100%);
     --gradient-glass: linear-gradient(145deg, hsl(0 0% 100% / 0.1) 0%, hsl(220 13% 95% / 0.05) 100%);
 
@@ -362,13 +357,7 @@
   color: transparent;
   }
   
-  .gradient-text {
-  background: var(--gradient-text);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-}
+
 
   /* Hero gradient background */
   .hero-gradient {
@@ -566,4 +555,9 @@ button[role="button"][data-state] {
 }
 .scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
+}
+.gradient-text {
+  background: linear-gradient(90deg, #0ea5e9, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
