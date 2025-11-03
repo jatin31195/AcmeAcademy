@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import prerender from "prerender-node";
 
 import authRoute from "./src/routes/authRoute.js";
-
+import mailRoutes from "./src/routes/mailRoute.js"
 import pyqRoute from "./src/routes/pyqRoute.js";
 import courseRoutes from "./src/routes/courseRoutes.js";
 import subjectRoutes from "./src/routes/subjectRoutes.js";
@@ -45,6 +45,7 @@ app.use("/api/topics", topicRoutes);
 app.use("/api/tests", testRoute);
 app.use("/api/questions", questionRoutes);
 app.use("/api/results", resultRoutes);
+app.use("/api/mail", mailRoutes);
 app.use("/api/math-question", mathRoutes);
 /* ------------------------- 🔹 Root Route ------------------------- */
 app.get("/", (req, res) => {
