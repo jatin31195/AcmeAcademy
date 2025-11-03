@@ -14,6 +14,7 @@ import { BASE_URL } from "../config";
 
 const Signup = () => {
   const navigate = useNavigate();
+
   const [userDetails, setUserDetails] = useState({
     username: "",
     fullname: "",
@@ -25,19 +26,10 @@ const Signup = () => {
     whatsapp: "",
     whatsappSameAsPhone: false,
   });
+
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
-  const [accountCreated, setAccountCreated] = useState(false);
-
-  function onCaptchVerify() {
-    if (window.recaptchaVerifier) window.recaptchaVerifier.clear();
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-      size: "invisible",
-      callback: () => console.log("Recaptcha verified!"),
-      "expired-callback": () => console.log("Recaptcha expired, try again."),
-    });
-  }
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -45,80 +37,48 @@ const Signup = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
       whatsapp:
-        name === "whatsappSameAsPhone" && checked ? prev.phone : prev.whatsapp,
+        name === "whatsappSameAsPhone" && checked
+          ? prev.phone
+          : prev.whatsapp,
     }));
   };
 
   const onSignup = async () => {
-    const { username, fullname, email, password, confirmPassword, phone } = userDetails;
-    if (!username || !fullname || !email || !password || !confirmPassword || !phone) {
-      toast.error("Please fill all required fields");
-      return;
-    }
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+    if (!userDetails.phone) {
+      toast.error("Please enter your phone number");
       return;
     }
 
-    setLoading(true);
     try {
-      onCaptchVerify();
-      const appVerifier = window.recaptchaVerifier;
-      const formatPh = "+" + phone;
-
-      const confirmationResult = await signInWithPhoneNumber(auth, formatPh, appVerifier);
-      window.confirmationResult = confirmationResult;
+      setLoading(true);
+      const recaptcha = new RecaptchaVerifier(auth, "recaptcha-container", {});
+      const confirmation = await signInWithPhoneNumber(
+        auth,
+        `+${userDetails.phone}`,
+        recaptcha
+      );
+      window.confirmationResult = confirmation;
       setShowOTP(true);
       toast.success("OTP sent successfully!");
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message || "Failed to send OTP");
+    } catch (error) {
+      toast.error(error.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
   };
 
   const onOTPVerify = async () => {
-    setLoading(true);
     try {
-      const result = await window.confirmationResult.confirm(otp);
-      const res = await fetch(`${BASE_URL}/api/users/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: userDetails.username,
-          fullname: userDetails.fullname,
-          email: userDetails.email,
-          password: userDetails.password,
-          dob: userDetails.dob,
-          phone: "+" + userDetails.phone,
-          whatsapp: userDetails.whatsappSameAsPhone
-            ? "+" + userDetails.phone
-            : "+" + userDetails.whatsapp,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to create account");
-
-      setAccountCreated(true);
+      setLoading(true);
+      await window.confirmationResult.confirm(otp);
       toast.success("Account created successfully!");
       navigate("/login");
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message || "Invalid OTP or server error");
+    } catch (error) {
+      toast.error("Invalid OTP, please try again");
     } finally {
       setLoading(false);
     }
   };
-
-  if (accountCreated) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-emerald-500 text-white text-2xl">
-        🎉 Account created successfully!
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-950">
@@ -136,6 +96,7 @@ const Signup = () => {
               </h2>
 
               <div className="space-y-4">
+                {/* Username */}
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <input
@@ -144,10 +105,12 @@ const Signup = () => {
                     placeholder="Username"
                     value={userDetails.username}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full pl-10 pr-3 py-2 rounded bg-gray-800 text-white border border-gray-700 
+                      focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
 
+                {/* Full Name */}
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <input
@@ -156,10 +119,12 @@ const Signup = () => {
                     placeholder="Full Name"
                     value={userDetails.fullname}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full pl-10 pr-3 py-2 rounded bg-gray-800 text-white border border-gray-700 
+                      focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
 
+                {/* Email */}
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <input
@@ -168,10 +133,12 @@ const Signup = () => {
                     placeholder="Email"
                     value={userDetails.email}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full pl-10 pr-3 py-2 rounded bg-gray-800 text-white border border-gray-700 
+                      focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
 
+                {/* Password */}
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <input
@@ -180,10 +147,12 @@ const Signup = () => {
                     placeholder="Password"
                     value={userDetails.password}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full pl-10 pr-3 py-2 rounded bg-gray-800 text-white border border-gray-700 
+                      focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
 
+                {/* Confirm Password */}
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <input
@@ -192,10 +161,12 @@ const Signup = () => {
                     placeholder="Confirm Password"
                     value={userDetails.confirmPassword}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full pl-10 pr-3 py-2 rounded bg-gray-800 text-white border border-gray-700 
+                      focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
 
+                {/* Date of Birth */}
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <input
@@ -203,10 +174,12 @@ const Signup = () => {
                     name="dob"
                     value={userDetails.dob}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full pl-10 pr-3 py-2 rounded bg-gray-800 text-white border border-gray-700 
+                      focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
 
+                {/* Phone Number */}
                 <div className="relative">
                   <BsTelephoneFill className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <PhoneInput
@@ -233,6 +206,7 @@ const Signup = () => {
                   />
                 </div>
 
+                {/* WhatsApp Same Checkbox */}
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -241,9 +215,12 @@ const Signup = () => {
                     onChange={handleChange}
                     className="w-4 h-4 accent-blue-500"
                   />
-                  <label className="text-gray-300">WhatsApp same as phone?</label>
+                  <label className="text-gray-300">
+                    WhatsApp same as phone?
+                  </label>
                 </div>
 
+                {/* WhatsApp Number (if different) */}
                 {!userDetails.whatsappSameAsPhone && (
                   <div className="relative">
                     <BsTelephoneFill className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -251,7 +228,10 @@ const Signup = () => {
                       country={"in"}
                       value={userDetails.whatsapp}
                       onChange={(value) =>
-                        setUserDetails((prev) => ({ ...prev, whatsapp: value }))
+                        setUserDetails((prev) => ({
+                          ...prev,
+                          whatsapp: value,
+                        }))
                       }
                       inputStyle={{
                         width: "100%",
@@ -266,10 +246,12 @@ const Signup = () => {
                   </div>
                 )}
 
+                {/* Signup Button */}
                 <button
                   onClick={onSignup}
                   disabled={loading}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded flex justify-center items-center gap-2 transition"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded 
+                    flex justify-center items-center gap-2 transition"
                 >
                   {loading ? (
                     <CgSpinner className="animate-spin h-5 w-5" />
@@ -280,6 +262,7 @@ const Signup = () => {
                   )}
                 </button>
 
+                {/* Redirect to Login */}
                 <p className="text-center text-sm text-gray-300 mt-3">
                   Already have an account?{" "}
                   <span
@@ -307,7 +290,8 @@ const Signup = () => {
               <button
                 onClick={onOTPVerify}
                 disabled={loading}
-                className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded flex justify-center items-center gap-2 transition"
+                className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded 
+                  flex justify-center items-center gap-2 transition"
               >
                 {loading ? (
                   <CgSpinner className="animate-spin h-5 w-5" />
@@ -320,6 +304,7 @@ const Signup = () => {
             </div>
           )}
         </div>
+
         <div id="recaptcha-container"></div>
       </div>
     </div>
