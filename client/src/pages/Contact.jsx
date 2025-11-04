@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { toast } from "react-toastify";
 import {
   Select,
   SelectContent,
@@ -26,9 +26,9 @@ import {
 } from "@/components/ui/select";
 import { motion, useAnimation, useInView } from "framer-motion";
 import { Helmet } from "react-helmet-async";
-
+import { BASE_URL } from "@/config";
 const Contact = () => {
-  const [formData, setFormData] = useState({
+   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
@@ -36,14 +36,44 @@ const Contact = () => {
     subject: "",
     message: "",
   });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Contact form submitted:", formData);
-  };
-
+  // 🔹 Handle Form Input
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // 🔹 Submit Logic (Copied from HeroSection)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${BASE_URL}/api/mail/send-counselling-mail`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) throw new Error("Network response was not ok");
+
+      await res.json();
+      toast.success("✅ Message sent successfully!");
+
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        center: "",
+        subject: "",
+        
+      });
+    } catch (err) {
+      toast.error("❌ Error sending message. Please try again!");
+      console.error("Error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const quickContacts = [
@@ -280,12 +310,12 @@ const AnimatedStat = ({ icon: Icon, value, label, delay = 0 }) => {
                       <Input
                         id="email"
                         type="email"
-                        placeholder="your@email.com"
+                        placeholder="your@email.com (optional)"
                         value={formData.email}
                         onChange={(e) =>
                           handleInputChange("email", e.target.value)
                         }
-                        required
+                        
                       />
                     </div>
                   </div>
@@ -343,25 +373,17 @@ const AnimatedStat = ({ icon: Icon, value, label, delay = 0 }) => {
                     </Select>
                   </div>
 
-                  <div>
-                    <Label htmlFor="message">Message</Label>
-                    <Textarea
-                      id="message"
-                      rows={4}
-                      placeholder="Please describe your query..."
-                      value={formData.message}
-                      onChange={(e) =>
-                        handleInputChange("message", e.target.value)
-                      }
-                      required
-                    />
-                  </div>
+                 
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 via-pink-400 to-red-400 text-white hover:scale-105 transition rounded-full"
+                    disabled={loading}
+                    className={`w-full bg-gradient-to-r from-blue-600 via-pink-400 to-red-400 text-white hover:scale-105 transition rounded-full flex items-center justify-center gap-2 ${
+                      loading ? "opacity-70 cursor-not-allowed" : ""
+                    }`}
                   >
-                    <Send className="mr-2 h-4 w-4" /> Send Message
+                    {loading ? "Sending..." : <Send className="mr-2 h-4 w-4" />}
+                    {!loading && "Send Message"}
                   </Button>
                 </form>
               </CardContent>
