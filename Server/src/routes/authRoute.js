@@ -7,7 +7,9 @@ import {
   logoutUser,
   updateProfile,
   getProfile,
-  getUserTestAttempts
+  getUserTestAttempts,
+  sendEmailOtp,
+  verifyEmailOtp
 } from "../controllers/authController.js";
 import { verifyUser } from "../middlewares/authMiddleware.js";
 import { upload } from "../utils/multerCloudinary.js";
@@ -27,4 +29,6 @@ router.patch(
 );
 router.get("/profile", verifyUser, getProfile);
 router.get("/user/all-test", verifyUser, getUserTestAttempts);
+router.post("/send-otp", sendEmailOtp);
+router.post("/verify-otp", verifyEmailOtp);
 export default router;

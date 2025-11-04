@@ -2,17 +2,97 @@ import * as userService from "../services/authService.js";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import UserTestAttempt from "../models/UserTestAttempt.js";
+import nodemailer from "nodemailer";
+const otpStore = new Map();
+const verifiedEmails = new Set();
+export const sendEmailOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email required" });
+
+    const existingUser = await userService.getUserByEmail(email);
+    if (existingUser)
+      return res.status(400).json({ message: "Email already registered" });
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    otpStore.set(email, { otp, createdAt: Date.now() });
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "acmeacademy15@gmail.com",
+        pass: "umla jwhq tojz apvl",
+      },
+    });
+
+    const mailOptions = {
+      from: `"ACME Academy" <acmeacademy15@gmail.com>`,
+      to: email,
+      subject: "Your ACME Academy OTP Verification Code",
+      html: `
+        <div style="font-family:Arial;padding:20px;background:#f9f9f9;border-radius:10px;">
+          <h2 style="color:#4F46E5;">🔐 Email Verification</h2>
+          <p>Dear Student,</p>
+          <p>Your OTP for ACME Academy registration is:</p>
+          <h1 style="color:#E11D48;letter-spacing:5px;">${otp}</h1>
+          <p>This code will expire in <b>5 minutes</b>.</p>
+          <p style="font-size:13px;color:#777;">If you didn’t request this, ignore this email.</p>
+        </div>`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: "OTP sent successfully" });
+  } catch (err) {
+    console.error("Send OTP error:", err);
+    res.status(500).json({ message: "Failed to send OTP" });
+  }
+};
+
+export const verifyEmailOtp = (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const stored = otpStore.get(email);
+    if (!stored) return res.status(400).json({ message: "No OTP found" });
+
+    const isExpired = Date.now() - stored.createdAt > 5 * 60 * 1000;
+    if (isExpired) {
+      otpStore.delete(email);
+      return res.status(400).json({ message: "OTP expired" });
+    }
+
+    if (stored.otp !== otp)
+      return res.status(400).json({ message: "Invalid OTP" });
+
+    // ✅ Mark email as verified
+    verifiedEmails.add(email);
+    otpStore.delete(email);
+
+    res.status(200).json({ verified: true, message: "OTP verified successfully" });
+  } catch (err) {
+    console.error("Verify OTP error:", err);
+    res.status(500).json({ message: "Server error verifying OTP" });
+  }
+};
+
+
 export const registerUser = async (req, res) => {
   try {
-    const { username, fullname, email, password, dob, phone, whatsapp } = req.body;
+    const { username, fullname, email, password, dob, whatsapp } = req.body;
+
+   
+    if (!verifiedEmails.has(email)) {
+      return res.status(403).json({
+        message: "Please verify your email before registration",
+      });
+    }
+
+    
+    verifiedEmails.delete(email);
 
     const existingEmail = await userService.getUserByEmail(email);
     if (existingEmail)
       return res.status(400).json({ message: "Email already registered" });
-
-    const existingPhone = await userService.getUserByPhone(phone);
-    if (existingPhone)
-      return res.status(400).json({ message: "Phone number already registered" });
 
     const user = await userService.createUser({
       username,
@@ -20,13 +100,13 @@ export const registerUser = async (req, res) => {
       email,
       password,
       dob,
-      phone,
       whatsapp,
     });
 
-    res
-      .status(201)
-      .json({ message: "User created successfully", userId: user._id });
+    res.status(201).json({
+      message: "User created successfully",
+      userId: user._id,
+    });
   } catch (err) {
     console.error("Register error:", err);
     res.status(500).json({ message: "Server Error" });

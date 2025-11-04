@@ -27,11 +27,7 @@ const userSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    phone: {
-      type: String,
-      required: true,
-      unique: true,
-    },
+    
     whatsapp: {
       type: String,
       default: "",
@@ -69,7 +65,7 @@ const userSchema = new mongoose.Schema(
     gender: {
       type: String,
       enum: ["male", "female", "other"],
-      default: "",
+      default: null,
     },
 
 
