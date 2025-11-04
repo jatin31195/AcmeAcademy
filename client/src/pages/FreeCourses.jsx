@@ -70,8 +70,8 @@ const FreeCourses = () => {
     
 
       {/* Resources Grid */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-16 ">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
           {loading ? (
             <div className="text-center py-20">
               <div className="animate-spin h-10 w-10 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-4"></div>
@@ -82,32 +82,32 @@ const FreeCourses = () => {
           ) : filteredResources.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredResources.map((course) => (
-                <Link
-                  key={course._id}
-                  to={`/acme-academy-open-library/${course._id}`}
-                  state={{ meta: course }}
-                >
-                  <div className="rounded-xl shadow-lg bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105 p-6 h-full flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-start justify-between mb-2">
-                        <h2 className="text-lg font-semibold text-indigo-600">{course.title}</h2>
-                        <span className="text-xs px-2 py-1 border rounded">{course.type}</span>
-                      </div>
-                      <div className="flex gap-2 mb-3">
-                        <span className="text-xs bg-gray-200 px-2 py-1 rounded">{course.category}</span>
-                        <span className="text-xs border px-2 py-1 rounded">{course.exam}</span>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-4">{course.description}</p>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                     
-                      <div className="flex items-center gap-2 text-indigo-600 font-medium">
-                        Start Learning
-                        <ArrowRight className="h-4 w-4" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+              <Link
+  key={course._id}
+  to={`/acme-academy-open-library/${course._id}`}
+  state={{ meta: course }}
+>
+  <div className="rounded-xl shadow-lg bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105 p-6 h-full flex flex-col justify-between cursor-pointer">
+    <div>
+      <div className="flex items-start justify-between mb-2 cursor-pointer">
+        <h2 className="text-lg font-semibold text-indigo-600">{course.title}</h2>
+        <span className="text-xs px-2 py-1 border rounded">{course.type}</span>
+      </div>
+      <div className="flex gap-2 mb-3">
+        <span className="text-xs bg-gray-200 px-2 py-1 rounded">{course.category}</span>
+        <span className="text-xs border px-2 py-1 rounded">{course.exam}</span>
+      </div>
+      <p className="text-sm text-gray-600 mb-4">{course.description}</p>
+    </div>
+    <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center gap-2 text-indigo-600 font-medium">
+        Start Learning
+        <ArrowRight className="h-4 w-4" />
+      </div>
+    </div>
+  </div>
+</Link>
+
               ))}
             </div>
           ) : (
