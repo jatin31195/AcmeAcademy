@@ -271,7 +271,7 @@ const HeroSection = () => {
           
           <div className="flex justify-center">
             <img
-              src="https://acmeacademy.in/wp-content/uploads/2023/12/mobileapp01.jpg.webp"
+              src="https://res.cloudinary.com/dwqvrtvu1/image/upload/v1762278134/mobileapp01.jpg_g3lhyt.webp"
               alt="Acme Academy"
               className="w-[90%] max-w-md rounded-2xl shadow-lg hover:scale-105 transition-transform duration-500"
             />
