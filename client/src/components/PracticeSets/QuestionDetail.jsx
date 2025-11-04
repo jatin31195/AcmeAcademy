@@ -207,11 +207,14 @@ const renderMathText = (text) => {
 
         <div className="relative z-10">
           {isSub && (
-            <p className="text-sm text-gray-500 mb-1 whitespace-pre-line">
-              From: {item.parentTopic} →{" "}
-              {item.parentQuestion.replace(/\\n/g, "\n")}
-            </p>
-          )}
+  <p className="text-sm text-gray-500 mb-1 whitespace-pre-line">
+    From: {item.parentTopic || "Unknown Topic"} →{" "}
+    {item.parentQuestion
+      ? item.parentQuestion.replace(/\\n/g, "\n")
+      : "Parent question not available"}
+  </p>
+)}
+
 
           {/* Question */}
           <p className="font-medium mb-2 flex flex-wrap items-baseline">
