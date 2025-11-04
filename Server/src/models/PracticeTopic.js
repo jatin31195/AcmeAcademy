@@ -12,8 +12,8 @@ const practiceTopicSchema = new mongoose.Schema(
       required: true,
     },
 
-    generalQuestions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Question" }],
-    mathQuestions: [{ type: mongoose.Schema.Types.ObjectId, ref: "MathQuestion" }],
+    Questions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Question" }],
+    
   },
   { timestamps: true }
 );

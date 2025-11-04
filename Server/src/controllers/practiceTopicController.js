@@ -12,7 +12,6 @@ export const createPracticeTopic = async (req, res) => {
       });
     }
 
-    
     const practiceSet = await PracticeSet.findById(practiceSetId);
     if (!practiceSet) {
       return res.status(404).json({
@@ -21,16 +20,14 @@ export const createPracticeTopic = async (req, res) => {
       });
     }
 
-    
     const newTopic = await PracticeTopic.create({
       title,
       description,
       practiceSet: practiceSetId,
     });
 
-    
     await PracticeSet.findByIdAndUpdate(practiceSetId, {
-      $addToSet: { topics: newTopic._id }, 
+      $addToSet: { topics: newTopic._id },
     });
 
     res.status(201).json({
@@ -47,14 +44,13 @@ export const createPracticeTopic = async (req, res) => {
   }
 };
 
-
+// ✅ Get all topics under a practice set
 export const getTopicsByPracticeSet = async (req, res) => {
   try {
     const { practiceSetId } = req.params;
 
     const topics = await PracticeTopic.find({ practiceSet: practiceSetId })
-      .populate("generalQuestions")
-      .populate("mathQuestions")
+      .populate("Questions") // <-- fixed here
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -71,17 +67,18 @@ export const getTopicsByPracticeSet = async (req, res) => {
   }
 };
 
-
+// ✅ Get topic by its ID
 export const getTopicById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const topic = await PracticeTopic.findById(id)
-      .populate("generalQuestions")
-      .populate("mathQuestions");
+    const topic = await PracticeTopic.findById(id).populate("Questions"); // <-- fixed here
 
     if (!topic) {
-      return res.status(404).json({ success: false, message: "Topic not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Topic not found",
+      });
     }
 
     res.status(200).json({
