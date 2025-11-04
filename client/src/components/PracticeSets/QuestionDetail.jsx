@@ -1,5 +1,62 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { InlineMath, BlockMath } from "react-katex";
+import "katex/dist/katex.min.css";
+const renderWithMath = (text) => {
+  if (!text) return "No question text";
+
+
+  const parts = text.split(/(\$[^$]+\$)/g);
+
+  return parts.map((part, i) => {
+
+    if (part.startsWith("$") && part.endsWith("$")) {
+      let math = part.slice(1, -1).trim();
+
+      math = math
+        .replace(/\\\\/g, "\\")
+        .replace(/\\times/g, " \\times ")
+        
+        .replace(/\\div/g, " \\div ")
+        .replace(/\\cdot/g, " \\cdot ")
+        .replace(/\\pm/g, " \\pm ")
+        .replace(/\\le/g, " \\le ")
+        .replace(/\\ge/g, " \\ge ")
+        .replace(/\\neq/g, " \\neq ")
+        .replace(/\\infty/g, " \\infty ")
+        .replace(/\\sqrt/g, " \\sqrt ")
+        .replace(/\\frac/g, " \\frac ")
+        .replace(/\\int(?![a-zA-Z])/g, " \\int ")
+        .replace(/\\sum/g, " \\sum ")
+        .replace(/\\to/g, " \\to ")
+        .replace(/\\alpha/g, " \\alpha ")
+        .replace(/\\beta/g, " \\beta ")
+        .replace(/\\gamma/g, " \\gamma ")
+        .replace(/\\delta/g, " \\delta ")
+        .replace(/\\theta/g, " \\theta ")
+        .replace(/\\pi/g, " \\pi ")
+        .replace(/\\phi/g, " \\phi ")
+        .replace(/\\sigma/g, " \\sigma ")
+        .replace(/\\mu/g, " \\mu ")
+        .replace(/\\lambda/g, " \\lambda ")
+        .replace(/\\subset/g, " \\subset ")
+        .replace(/\\supset/g, " \\supset ")
+        .replace(/\\cup/g, " \\cup ")
+        .replace(/\\cap/g, " \\cap ")
+        .replace(/\\in(?!t)/g, " \\in ")
+        .replace(/\\notin/g, " \\notin ")
+        .replace(/\\emptyset/g, " \\emptyset ")
+        .replace(/\\phi/g, " \\phi ")
+        .replace(/\\bigcup/g, " \\bigcup ")
+        .replace(/\\bigcap/g, " \\bigcap ");
+        
+      return <InlineMath key={i} math={math} />;
+    }
+
+  
+    return <span key={i}>{part}</span>;
+  });
+};
 
 const QuestionDetails = ({
   item,
@@ -16,180 +73,10 @@ const QuestionDetails = ({
   const isSub = item.isSub;
   const uniqueId = isSub ? `${item.parentId}-${idx}` : item._id;
 
-
   const isImageUrl = (str) =>
     typeof str === "string" &&
     str.match(/\.(jpeg|jpg|png|gif|webp)$/i) &&
     str.startsWith("http");
-
-
-  const replaceFractions = (text) => {
-    if (!text) return text;
-    return text
-      .replace(
-        /https:\/\/www\.indiabix\.com\/_files\/images\/aptitude\/1-div-(\d+)by(\d+)\.gif/gi,
-        (_, num, den) => `${num}/${den}`
-      )
-      .replace(
-        /https:\/\/www\.indiabix\.com\/_files\/images\/aptitude\/1-sym-oparen-h1\.gif/gi,
-        "("
-      )
-      .replace(
-        /https:\/\/www\.indiabix\.com\/_files\/images\/aptitude\/1-sym-cparen-h1\.gif/gi,
-        ")"
-      )
-      .replace(
-        /https:\/\/www\.indiabix\.com\/_files\/images\/aptitude\/1-sym-times-h1\.gif/gi,
-        "×"
-      )
-      .replace(
-        /https:\/\/www\.indiabix\.com\/_files\/images\/aptitude\/1-sym-plus-h1\.gif/gi,
-        "+"
-      )
-      .replace(
-        /https:\/\/www\.indiabix\.com\/_files\/images\/aptitude\/1-sym-minus-h1\.gif/gi,
-        "-"
-      )
-      .replace(
-        /https:\/\/www\.indiabix\.com\/_files\/images\/aptitude\/1-sym-equal-h1\.gif/gi,
-        "="
-      )
-      .replace(
-        /https:\/\/www\.indiabix\.com\/_files\/images\/aptitude\/1-sym-div-h1\.gif/gi,
-        "÷"
-      )
-      .replace(/https?:\/\/[^\s]+/g, "")
-      .replace(/\[|\]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-  };
-
-const renderMathText = (text) => {
-  if (!text) return null;
-  text = text.replace(/\s+/g, " ").trim();
-
-  // ✅ Updated token pattern — now supports π, sin, cos, tan, and mixed forms
-  const tokens =
-    /sin|cos|tan|π|[a-zA-Z]+\([^)]*\)\^\d+|\([^()]+\)\^\d+|√\([^)]*\)|√\d+|[a-zA-Z0-9π√]+\/[a-zA-Z0-9π√]+|\d+\s+\d+\/\d+|\d+\/\d+|[a-zA-Z]+\([^)]*\)|[a-zA-Z]+|\d+|[=()^_+\-×÷]|[^\s]+/g;
-
-  const parts = [];
-  let match;
-  while ((match = tokens.exec(text)) !== null) parts.push(match[0]);
-
-  const renderFraction = (num, den, key) => (
-    <span
-      key={key}
-      className="flex flex-col items-center justify-center mx-0.5 text-sm"
-      style={{ lineHeight: "1.1em" }}
-    >
-      <span className="border-b border-gray-600 px-1 leading-none">
-        {renderMathText(num)}
-      </span>
-      <span className="leading-none">{renderMathText(den)}</span>
-    </span>
-  );
-
-  return (
-    <span className="flex items-center flex-wrap">
-      {parts.map((part, i) => {
-        // ✅ Square root √(...)
-        if (part.startsWith("√")) {
-          const inner = part.startsWith("√(")
-            ? part.slice(2, -1)
-            : part.slice(1);
-          return (
-            <span key={i} className="flex items-center mx-0.5">
-              √
-              <span className="border-t border-gray-600 px-1">
-                {renderMathText(inner)}
-              </span>
-            </span>
-          );
-        }
-
-        // ✅ Handle exponents like x^2, (x-1)^2, π^2
-        const power = part.match(/^(.+)\^(\d+)$/);
-        if (power) {
-          const [, base, exp] = power;
-          return (
-            <span
-              key={i}
-              className="inline-flex items-baseline mx-0.5"
-              style={{ lineHeight: "1.2em" }}
-            >
-              {renderMathText(base)}
-              <sup
-                className="text-[0.75em] ml-0.5 relative"
-                style={{ top: "-0.55em" }}
-              >
-                {exp}
-              </sup>
-            </span>
-          );
-        }
-
-        // ✅ Handle trig functions like sin(x), cos(π/2)
-        if (part.match(/^(sin|cos|tan)\([^()]*\)$/)) {
-          const fn = part.match(/^(sin|cos|tan)/)[1];
-          const inner = part.match(/\(([^()]*)\)/)[1];
-          return (
-            <span key={i} className="flex items-center mx-1">
-              {fn}
-              <span>(</span>
-              {renderMathText(inner)}
-              <span>)</span>
-            </span>
-          );
-        }
-
-        // ✅ Handle algebraic functions like f(x)
-        if (part.match(/^[a-zA-Z]+\([^()]*\)$/)) {
-          const name = part.match(/^([a-zA-Z]+)\(/)[1];
-          const inner = part.match(/\(([^()]*)\)/)[1];
-          return (
-            <span key={i} className="flex items-center mx-1">
-              {name}(
-              {renderMathText(inner)})
-            </span>
-          );
-        }
-
-        // ✅ Fractions like (a+b)/(c−d)
-        const parenFrac = part.match(/^\(([^()]*)\)\/\(([^()]*)\)$/);
-        if (parenFrac) {
-          const [, num, den] = parenFrac;
-          return renderFraction(num, den, i + "-pf");
-        }
-
-        // ✅ Mixed numbers like 5 2/3
-        const mixed = part.match(/^(\d+)\s+(\d+)\/(\d+)$/);
-        if (mixed) {
-          const [, whole, num, den] = mixed;
-          return (
-            <span key={i} className="flex items-center mx-1">
-              <span>{whole}</span>
-              {renderFraction(num, den, i + "-mix")}
-            </span>
-          );
-        }
-
-        // ✅ Simple fractions like π/2 or 2π/3
-        const algebraicFrac = part.match(/^([^/]+)\/([^/]+)$/);
-        if (algebraicFrac && !part.includes("http")) {
-          const [, num, den] = algebraicFrac;
-          return renderFraction(num, den, i + "-frac");
-        }
-
-        // ✅ Default
-        return (
-          <span key={i} className="mx-0.5">
-            {part}
-          </span>
-        );
-      })}
-    </span>
-  );
-};
 
   return (
     <Card
@@ -207,30 +94,25 @@ const renderMathText = (text) => {
 
         <div className="relative z-10">
           {isSub && (
-  <p className="text-sm text-gray-500 mb-1 whitespace-pre-line">
-    From: {item.parentTopic || "Unknown Topic"} →{" "}
-    {item.parentQuestion
-      ? item.parentQuestion.replace(/\\n/g, "\n")
-      : "Parent question not available"}
-  </p>
-)}
+            <p className="text-sm text-gray-500 mb-1">
+              From: {item.parentTopic} →{" "}
+              {renderWithMath(item.parentQuestion?.replace(/\\n/g, " "))}
+            </p>
+          )}
 
-
-          {/* Question */}
+          {/* 🧮 Question */}
           <p className="font-medium mb-2 flex flex-wrap items-baseline">
             <span className="mr-1">
               {item.isSub
-                ? `Q${mainQuestionNumber} ${String.fromCharCode(
+                ? `Q${mainQuestionNumber}${String.fromCharCode(
                     97 + (subIndex || 0)
                   )})`
                 : `Q${mainQuestionNumber}.`}
             </span>
-            <span>
-              {renderMathText(replaceFractions(item.question?.replace(/\\n/g, " ")))}
-            </span>
+            <span>{renderWithMath(item.question?.replace(/\\n/g, " "))}</span>
           </p>
 
-          {/* Question Image */}
+          {/* 🖼️ Question Image */}
           {item.image && (
             <div className="w-full flex justify-center mb-2">
               <img
@@ -241,14 +123,13 @@ const renderMathText = (text) => {
             </div>
           )}
 
-          {/* Options */}
+          {/* 🔘 Options */}
           {item.options?.length > 0 && (
             <div className="space-y-2">
               {item.options.map((opt, i) => {
                 let optionText = "";
                 let optionImage = "";
 
-               
                 if (typeof opt === "object") {
                   optionText = opt.text || "";
                   optionImage = opt.image || "";
@@ -282,11 +163,7 @@ const renderMathText = (text) => {
                       <span className="font-medium">
                         {String.fromCharCode(65 + i)}.
                       </span>
-
-                      <div className="text-sm">
-                        {renderMathText(replaceFractions(optionText))}
-                      </div>
-
+                      <div className="text-sm">{renderWithMath(optionText)}</div>
                       {optionImage && (
                         <img
                           src={optionImage}
@@ -302,7 +179,7 @@ const renderMathText = (text) => {
           )}
         </div>
 
-        {/* Solution Section */}
+        {/* 💡 Solution Section */}
         {showSolution[uniqueId]?.show && (
           <div className="mt-3 p-3 rounded bg-blue-50 border border-blue-300 text-sm space-y-3">
             <div className="flex flex-col gap-2">
@@ -320,9 +197,7 @@ const renderMathText = (text) => {
                 </div>
               ) : (
                 <span className="font-semibold text-green-700">
-                  {renderMathText(
-                    replaceFractions(showSolution[uniqueId]?.correctAnswer)
-                  )}
+                  {renderWithMath(showSolution[uniqueId]?.correctAnswer || "")}
                 </span>
               )}
             </div>
@@ -331,9 +206,7 @@ const renderMathText = (text) => {
               {showSolution[uniqueId]?.solutionText && (
                 <p>
                   🧠 Explanation:{" "}
-                  {renderMathText(
-                    replaceFractions(showSolution[uniqueId]?.solutionText)
-                  )}
+                  {renderWithMath(showSolution[uniqueId]?.solutionText || "")}
                 </p>
               )}
 
