@@ -55,25 +55,57 @@ const About = () => {
     },
   ];
 
-  const milestones = [
-    {
-      year: "2015",
-      event: "Academy Founded",
-      description:
-        "Started under the guidance of Kartikey Pandey (NIT Raipur, Ph.D. Scholar)",
-    },
-    {
-      year: "2018",
-      event: "Nationwide Reach",
-      description: "Became preferred choice for MCA aspirants across India",
-    },
-    {
-      year: "2022",
-      event: "1000+ Selections",
-      description:
-        "Students selected in NITs, DU, JNU, BHU, JMI, HCU & more",
-    },
-  ];
+const milestones = [
+  {
+    year: "2015",
+    title: "The Beginning of a Legacy",
+    highlight: "ACME Academy Founded",
+    description:
+      "Established under Dr. Kartikey Pandey (NIT Raipur, Ph.D.), ACME began its mission to guide MCA aspirants toward premier institutes across India.",
+  },
+  {
+    year: "2018",
+    title: "Chhattisgarh’s No.1 Academy",
+    highlight: "Regional Excellence Achieved",
+    description:
+      "ACME became the most trusted MCA Entrance Academy in Chhattisgarh with record selections and exceptional teaching standards.",
+  },
+  {
+    year: "2020",
+    title: "Digital Transformation",
+    highlight: "Learning Never Stopped",
+    description:
+      "During COVID, ACME launched its Mobile App, ensuring uninterrupted classes and nationwide learning from home.",
+  },
+  {
+    year: "2021",
+    title: "Nationwide Recognition",
+    highlight: "Trusted by Students Across India",
+    description:
+      "Learners from every corner of India joined ACME’s programs, making it a leading national name in MCA preparation.",
+  },
+  {
+    year: "2023",
+    title: "Expansion to Lucknow",
+    highlight: "Offline Growth",
+    description:
+      "With growing demand, ACME opened its new offline center in Lucknow, bringing top mentorship to North India.",
+  },
+  {
+    year: "2025",
+    title: "Historic Achievements",
+    highlight: "Top All India Ranks",
+    description:
+      "Students secured NIMCET AIR-4, 8, 10 and CUET AIR-2, 7, 9. The Lucknow center moved to Kanpur, expanding our excellence further.",
+  },
+  {
+    year: "Beyond 2025",
+    title: "The Journey Continues…",
+    highlight: "Transforming Aspirations into Achievements",
+    description:
+      "With 2000+ selections in NITs, DU, JNU, BHU, JMI & HCU — ACME continues to build NITians with trust, quality, and results.",
+  },
+];
 
   const faculty = [
     {
@@ -131,7 +163,7 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
-      {/* SVG Gradient */}
+    
       <svg width="0" height="0">
   <defs>
     <linearGradient id="purple-red-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -142,7 +174,7 @@ const About = () => {
 </svg>
 
 
-      {/* Hero Section */}
+  
       <section className="relative py-16 sm:py-26 text-center overflow-hidden hero-gradient">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 opacity-20 blur-3xl rotate-45 scale-150"></div>
         <div className="relative z-10 max-w-5xl mx-auto px-4">
@@ -179,12 +211,12 @@ const About = () => {
           </svg>
         </div>
       </section>
-      {/* Person Behind Excellence */}
+  
 <section className="relative py-20 bg-gradient-to-b from-white via-gray-50 to-purple-50 overflow-hidden">
   <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 via-pink-300/10 to-red-400/10 blur-3xl"></div>
 
   <div className="relative z-10 max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-    {/* Image */}
+    
     <motion.div
       initial={{ opacity: 0, x: -60 }}
       whileInView={{ opacity: 1, x: 0 }}
@@ -201,7 +233,7 @@ const About = () => {
       </div>
     </motion.div>
 
-    {/* Content */}
+ 
     <motion.div
       initial={{ opacity: 0, x: 60 }}
       whileInView={{ opacity: 1, x: 0 }}
@@ -250,8 +282,7 @@ const About = () => {
     </motion.div>
   </div>
 </section>
-    {/* Vision & Mission Section */}
-{/* Vision & Mission Section */}
+ 
 <section className="relative py-20 bg-gradient-to-b from-purple-50 via-gray-50 to-white">
   <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-pink-400/10 to-red-400/10 blur-2xl"></div>
   <div className="relative z-10 max-w-7xl mx-auto px-6">
@@ -267,7 +298,7 @@ const About = () => {
     </motion.h2>
 
     <div className="grid md:grid-cols-2 gap-8">
-      {/* Vision */}
+   
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         whileInView={{ opacity: 1, x: 0 }}
@@ -289,7 +320,7 @@ const About = () => {
         </p>
       </motion.div>
 
-      {/* Mission */}
+    
       <motion.div
         initial={{ opacity: 0, x: 50 }}
         whileInView={{ opacity: 1, x: 0 }}
@@ -316,8 +347,7 @@ const About = () => {
 </section>
 
 
-      {/* Achievements */}
-      {/* Achievements Section */}
+     
 <section className="relative py-20 bg-gradient-to-b from-white via-purple-50 to-white overflow-hidden">
   <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-pink-100/40 via-purple-100/20 to-transparent blur-3xl opacity-50 pointer-events-none"></div>
 
@@ -351,7 +381,7 @@ const About = () => {
   </div>
 </section>
 
-{/* Core Values Section */}
+
 <section className="relative py-24 bg-gradient-to-r from-purple-50 via-white to-pink-50 overflow-hidden">
   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_#c084fc33,_transparent_70%)]"></div>
   <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -390,9 +420,9 @@ const About = () => {
 </section>
 
 
-      {/* Journey / Milestones */}
+    
 <section className="relative py-20 bg-gradient-to-b from-white via-purple-50 to-pink-50 overflow-hidden">
-  {/* Soft gradient glow background */}
+  
   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(196,181,253,0.3),_transparent_70%)] blur-3xl"></div>
 
   <div className="max-w-6xl mx-auto px-6 relative z-10">
@@ -400,14 +430,14 @@ const About = () => {
       initial={{ opacity: 0, y: -20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="text-4xl sm:text-5xl font-extrabold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-600 to-red-500"
+      className="text-3xl sm:text-4xl font-bold text-center mb-14 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-600 to-red-500"
     >
-      Our Journey
+      Our Journey – <span className="text-gray-800">A Decade of Excellence</span>
     </motion.h2>
 
     <div className="relative max-w-4xl mx-auto">
-      {/* Vertical timeline line */}
-      <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-blue-400 via-purple-500 to-pink-500 rounded-full"></div>
+     
+      <div className="absolute left-1/2 transform -translate-x-1/2 w-[2px] h-full bg-gradient-to-b from-blue-400 via-purple-500 to-pink-500 rounded-full"></div>
 
       <div className="space-y-12">
         {milestones.map((m, i) => (
@@ -420,25 +450,28 @@ const About = () => {
               i % 2 === 0 ? "justify-start" : "justify-end"
             } sm:gap-10`}
           >
-            {/* Connecting Dot */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 shadow-md shadow-purple-300"></div>
+      
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 shadow-md shadow-purple-200"></div>
 
-            {/* Timeline Card */}
+            
             <div
-              className={`w-full sm:w-[45%] bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/30 p-6 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${
+              className={`w-full sm:w-[46%] bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 p-5 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl ${
                 i % 2 === 0 ? "text-left" : "text-right"
               }`}
             >
               <Badge
                 variant="outline"
-                className="border-purple-400 text-purple-700 mb-3 font-semibold"
+                className="border-purple-300 text-purple-700 mb-2 font-medium text-xs px-3 py-1"
               >
                 {m.year}
               </Badge>
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-500">
-                {m.event}
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-500">
+                {m.title}
               </h3>
-              <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
+              <p className="text-sm text-purple-700 font-medium mb-1 italic">
+                {m.highlight}
+              </p>
+              <p className="text-gray-600 leading-relaxed text-sm">
                 {m.description}
               </p>
             </div>
@@ -446,14 +479,25 @@ const About = () => {
         ))}
       </div>
     </div>
+
+  
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      transition={{ delay: 0.3, duration: 0.8 }}
+      className="text-center mt-14 text-xs sm:text-sm text-gray-700 font-medium"
+    >
+      💫 <span className="font-semibold text-purple-700">ACME ACADEMY</span> — Transforming Aspirations into Achievements since{" "}
+      <span className="text-pink-600 font-bold">2015</span>
+    </motion.div>
   </div>
 </section>
 
 
-      {/* Faculty */}
-      {/* Faculty Section */}
+
+     
 <section className="relative py-20 bg-gradient-to-b from-white via-purple-50 to-pink-50 overflow-hidden">
-  {/* Soft glow background */}
+  
   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(196,181,253,0.25),_transparent_70%)] blur-3xl"></div>
 
   <div className="relative z-10 max-w-7xl mx-auto px-6">
@@ -513,7 +557,7 @@ const About = () => {
   </div>
 </section>
 
-{/* CTA Section */}
+
 <section className="py-20 bg-gradient-to-b from-pink-50 via-white to-purple-50">
   <div className="max-w-4xl mx-auto px-6 text-center">
     <motion.div
