@@ -3,6 +3,9 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import UserTestAttempt from "../models/UserTestAttempt.js";
 import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+dotenv.config();
+
 const otpStore = new Map();
 const verifiedEmails = new Set();
 export const sendEmailOtp = async (req, res) => {
@@ -18,12 +21,13 @@ export const sendEmailOtp = async (req, res) => {
     otpStore.set(email, { otp, createdAt: Date.now() });
 
     const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "acmeacademy15@gmail.com",
-        pass: "umla jwhq tojz apvl",
-      },
-    });
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
 
     const mailOptions = {
       from: `"ACME Academy" <acmeacademy15@gmail.com>`,

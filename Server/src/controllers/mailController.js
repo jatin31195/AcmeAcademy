@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
-
+import dotenv from "dotenv";
+dotenv.config();
 export const sendCounsellingMail = async (req, res) => {
   try {
     const { name, email, phone, center, subject } = req.body;
@@ -10,12 +11,13 @@ export const sendCounsellingMail = async (req, res) => {
 
   
     const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "acmeacademy15@gmail.com", 
-        pass: "umla jwhq tojz apvl", 
-      },
-    });
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
 
     
     const mailHTML = `
