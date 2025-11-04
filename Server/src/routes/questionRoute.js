@@ -1,16 +1,22 @@
 import express from "express";
-import * as questionController from "../controllers/questionController.js"; 
+import * as questionController from "../controllers/questionController.js";
 import { upload } from "../utils/multerCloudinary.js";
-const router = express.Router();
 
+const router = express.Router();
 router.get("/search", questionController.searchQuestions);
 router.get("/", questionController.getAllQuestions);
-router.get("/subjects", questionController.getAllSubjects);
-router.get("/subjects/:subject/topics", questionController.getTopicsBySubject);
-router.get("/subjects/:subject/topics/:topic", questionController.getQuestionsByTopic);
-router.get("/q/slug/:slug", questionController.getQuestionBySlug);
 router.post("/", upload.single("solutionImage"), questionController.addQuestion);
-
+router.put("/:id", upload.single("solutionImage"), questionController.updateQuestion);
 router.post("/:id/discussion", questionController.addDiscussion);
+router.get("/topics", questionController.getAllTopics);
+router.get(
+  "/practice-topic/:practiceTopicId/topics",
+  questionController.getTopicsByPracticeTopic
+);
+router.get(
+  "/practice-topic/:practiceTopicId/topics/:topic",
+  questionController.getQuestionsByPracticeTopicAndTopic
+);
+router.get("/slug/:slug", questionController.getQuestionBySlug);
 
 export default router;

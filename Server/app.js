@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import prerender from "prerender-node";
-
+import practiceSetRoutes from "./src/routes/practiceSetRoute.js";
 import authRoute from "./src/routes/authRoute.js";
 import mailRoutes from "./src/routes/mailRoute.js"
 import pyqRoute from "./src/routes/pyqRoute.js";
@@ -12,7 +12,7 @@ import topicRoutes from "./src/routes/topicRoutes.js";
 import testRoute from "./src/routes/testRoute.js";
 import questionRoutes from "./src/routes/questionRoute.js";
 import resultRoutes from "./src/routes/resultRoute.js";
-import mathRoutes from "./src/routes/mathQuestionRoute.js"
+import practiceTopicRoutes from "./src/routes/practiceTopicRoutes.js";
 const app = express();
 
 /* ------------------------- 🔹 Middlewares ------------------------- */
@@ -46,7 +46,9 @@ app.use("/api/tests", testRoute);
 app.use("/api/questions", questionRoutes);
 app.use("/api/results", resultRoutes);
 app.use("/api/mail", mailRoutes);
-app.use("/api/math-question", mathRoutes);
+app.use("/api/practice-set", practiceSetRoutes);
+app.use("/api/practice-topic", practiceTopicRoutes);
+
 /* ------------------------- 🔹 Root Route ------------------------- */
 app.get("/", (req, res) => {
   res.send("🚀 ACME Academy Backend is running!");

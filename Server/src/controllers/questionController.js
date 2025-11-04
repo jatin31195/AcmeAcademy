@@ -1,169 +1,219 @@
 import Question from "../models/Question.js";
+import PracticeTopic from "../models/PracticeTopic.js";
 import cloudinary from "../utils/cloudinary.js";
 import fs from "fs";
-
-
-export const searchQuestions = async (req, res) => {
-  const { q, subject, topic, section } = req.query;
-  try {
-    const filter = {};
-    if (subject) filter.subject = subject;
-    if (topic) filter.topic = topic;
-    if (section) filter.section = section;
-
-    let questions;
-    if (q) {
-      questions = await Question.find({ ...filter, $text: { $search: q } }).limit(50);
-    } else {
-      questions = await Question.find(filter).limit(50);
-    }
-    res.json(questions);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server Error" });
-  }
-};
-
-
-export const getQuestionsByTopic = async (req, res) => {
-  const { topic } = req.params;
-  try {
-        const { subject, topic } = req.params;
-    const query = { topic };
-    if (subject) query.subject = subject;
-
-    const questions = await Question.find(query);
-    res.json(questions);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server Error" });
-  }
-};
-
-
-export const getAllQuestions = async (req, res) => {
-  const { subject, topic, section } = req.query;
-  try {
-    const filter = {};
-    if (subject) filter.subject = subject;
-    if (topic) filter.topic = topic;
-    if (section) filter.section = section;
-
-    const questions = await Question.find(filter).limit(200);
-    res.json(questions);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server Error" });
-  }
-};
-
-
-export const addDiscussion = async (req, res) => {
-  const { id } = req.params;
-  const { user, comment } = req.body;
-  try {
-    const question = await Question.findById(id);
-    if (!question) return res.status(404).json({ error: "Question not found" });
-
-    question.discussion.push({ user, comment });
-    await question.save();
-    res.json(question.discussion);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server Error" });
-  }
-};
+import { slugifyQuestion } from "../utils/slugify.js";
 
 export const addQuestion = async (req, res) => {
   try {
-    let solutionImageUrl = "";
+    const data = Array.isArray(req.body)
+      ? req.body
+      : req.body.questions
+      ? req.body.questions
+      : [req.body];
 
-    // 🖼️ Upload file if attached
+    const savedQuestions = [];
+
+    for (const item of data) {
+      let solutionImageUrl = "";
+
+      if (req.file) {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: "test_solutions",
+        });
+        fs.unlinkSync(req.file.path);
+        solutionImageUrl = result.secure_url;
+      } else if (item.solutionImage) {
+        solutionImageUrl = item.solutionImage.trim();
+      }
+
+      let options = item.options;
+      if (typeof options === "string") {
+        try {
+          options = JSON.parse(options);
+        } catch {
+          options = [];
+        }
+      }
+
+      const question = new Question({
+        question: item.question,
+        options: options || [],
+        answer: item.answer,
+        solutionText: item.solutionText || "",
+        solutionVideo: item.solutionVideo || "",
+        solutionImage: solutionImageUrl,
+        image: item.image || "",
+        tags: item.tags
+          ? typeof item.tags === "string"
+            ? item.tags.split(",").map((t) => t.trim())
+            : item.tags
+          : [],
+        topic: item.topic || "",
+        section: item.section || "",
+        practiceTopic: item.practiceTopic,
+        slug: slugifyQuestion({ question: item.question }),
+      });
+
+      const saved = await question.save();
+
+      if (item.practiceTopic) {
+        await PracticeTopic.findByIdAndUpdate(item.practiceTopic, {
+          $push: { generalQuestions: saved._id },
+        });
+      }
+
+      savedQuestions.push(saved);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `${savedQuestions.length} question(s) added successfully`,
+      data: savedQuestions,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Failed to add question(s)" });
+  }
+};
+
+export const updateQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = { ...req.body };
+
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
         folder: "test_solutions",
       });
-
-      fs.unlinkSync(req.file.path); // cleanup local temp file
-      solutionImageUrl = result.secure_url;
-    } else if (req.body.solutionImage) {
-      solutionImageUrl = req.body.solutionImage.trim();
+      fs.unlinkSync(req.file.path);
+      updateData.solutionImage = result.secure_url;
     }
 
-    // 🧩 Parse options field safely
-    let options = req.body.options;
-    if (typeof options === "string") {
-      try {
-        options = JSON.parse(options);
-      } catch (err) {
-        console.warn("⚠️ Could not parse options JSON:", err.message);
-        options = [];
-      }
+    if (updateData.options && typeof updateData.options === "string") {
+      updateData.options = JSON.parse(updateData.options);
+    }
+    if (updateData.tags && typeof updateData.tags === "string") {
+      updateData.tags = updateData.tags.split(",").map((t) => t.trim());
     }
 
-    const newQuestion = new Question({
-      question: req.body.question,
-      options,
-      answer: req.body.answer,
-      solutionText: req.body.solutionText || "",
-      solutionVideo: req.body.solutionVideo || "",
-      solutionImage: solutionImageUrl,
-      image: req.body.image || "",
-      subject: req.body.subject,
-      topic: req.body.topic,
-    });
+    const updated = await Question.findByIdAndUpdate(id, updateData, { new: true });
+    if (!updated) return res.status(404).json({ error: "Question not found" });
 
-    await newQuestion.save();
-    res.status(201).json(newQuestion);
+    res.json({ success: true, data: updated });
   } catch (err) {
-    console.error("❌ Error in addQuestion:", err);
-    res.status(500).json({ error: err.message || "Something went wrong!" });
+    res.status(500).json({ success: false, error: "Failed to update question" });
+  }
+};
+
+export const searchQuestions = async (req, res) => {
+  try {
+    const { q, topic, section } = req.query;
+    const filter = {};
+    if (topic) filter.topic = topic;
+    if (section) filter.section = section;
+    const query = q ? { ...filter, $text: { $search: q } } : filter;
+    const questions = await Question.find(query).sort({ createdAt: -1 }).limit(50);
+    res.json({ success: true, data: questions });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Failed to search questions" });
+  }
+};
+
+export const getAllQuestions = async (req, res) => {
+  try {
+    const { topic, section } = req.query;
+    const filter = {};
+    if (topic) filter.topic = topic;
+    if (section) filter.section = section;
+    const questions = await Question.find(filter).sort({ createdAt: -1 }).limit(200);
+    res.json({ success: true, data: questions });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Failed to fetch questions" });
   }
 };
 
 
 
+export const getQuestionsByPracticeTopicAndTopic = async (req, res) => {
+  try {
+    const { practiceTopicId, topic } = req.params;
+    const questions = await Question.find({
+      practiceTopic: practiceTopicId,
+      topic: new RegExp(`^${topic}$`, "i"),
+    }).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: questions.length,
+      data: questions,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch questions by practiceTopic and topic",
+    });
+  }
+};
+
+export const getQuestionsByTopic = async (req, res) => {
+  try {
+    const { topic } = req.params;
+    const query = { topic: new RegExp(`^${topic}$`, "i") };
+    const questions = await Question.find(query).sort({ createdAt: -1 });
+    res.json({ success: true, data: questions });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Failed to fetch questions" });
+  }
+};
 
 export const getQuestionBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    let question = await Question.findOne({ slug });
-    if (!question) {
-      question = await Question.findOne({
-        question: { $regex: new RegExp(`^${slug}$`, "i") }
-      });
-    }
-
-    if (!question)
-      return res.status(404).json({ error: "Question not found" });
-
-    res.json(question);
+    const question = await Question.findOne({ slug });
+    if (!question) return res.status(404).json({ error: "Question not found" });
+    res.json({ success: true, data: question });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server Error" });
+    res.status(500).json({ success: false, error: "Failed to fetch question" });
   }
 };
 
-
-
-export const getTopicsBySubject = async (req, res) => {
-  const { subject } = req.params;
+export const addDiscussion = async (req, res) => {
   try {
-    const topics = await Question.distinct("topic", { subject });
-    res.json(topics);
+    const { id } = req.params;
+    const { user, comment } = req.body;
+    const question = await Question.findById(id);
+    if (!question) return res.status(404).json({ error: "Question not found" });
+    question.discussion.push({ user, comment });
+    await question.save();
+    res.json({ success: true, discussion: question.discussion });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server Error" });
+    res.status(500).json({ success: false, error: "Failed to add discussion" });
   }
 };
 
-
-export const getAllSubjects = async (req, res) => {
+export const getAllTopics = async (req, res) => {
   try {
-    const subjects = await Question.distinct("subject");
-    res.json(subjects);
+    const topics = await Question.distinct("topic");
+    res.json({ success: true, data: topics });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server Error" });
+    res.status(500).json({ success: false, error: "Failed to fetch topics" });
+  }
+};
+export const getTopicsByPracticeTopic = async (req, res) => {
+  try {
+    const { practiceTopicId } = req.params;
+    const topics = await Question.distinct("topic", { practiceTopic: practiceTopicId });
+
+    res.json({
+      success: true,
+      count: topics.length,
+      data: topics,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching topics by practiceTopic:", err);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch topics by practiceTopic",
+    });
   }
 };
