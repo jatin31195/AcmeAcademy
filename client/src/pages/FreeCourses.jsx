@@ -41,66 +41,33 @@ const FreeCourses = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
       {/* Header */}
-      <section className="relative py-20 bg-gradient-to-r from-blue-500 to-indigo-600 overflow-hidden">
+      <section className="relative py-30 bg-gradient-to-r from-blue-500 to-indigo-600 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Free
+           
             <span className="text-5xl md:text-6xl font-bold block text-gray-100">Self Study Courses</span>
           </h1>
           <p className="text-xl text-white/90 max-w-3xl mx-auto mb-6">
             Access all MCA self-study courses curated for you. Learn at your own pace with complete resources, notes, and guides.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/70" />
-              <input
-                type="text"
-                placeholder="Search resources..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-full rounded-md border border-white/20 bg-white/10 text-white placeholder:text-white/70 py-2"
-              />
-            </div>
-          </div>
+              <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0]">
+          <svg
+            className="relative block w-full h-20"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="none"
+            viewBox="0 0 1200 120"
+          >
+            <path
+              d="M985.66 92.83C906.67 72 823.78 48.49 743.84 26.94 661.18 4.8 578.56-5.45 497.2 1.79 423.15 8.3 349.38 28.74 278.07 51.84 183.09 83.72 90.6 121.65 0 120v20h1200v-20c-80.3-1.6-160.39-26.5-214.34-47.17z"
+              fill="white"
+            />
+          </svg>
+        </div>
         </div>
       </section>
 
       {/* Filters */}
-      <section className="py-8 bg-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Filter className="h-5 w-5" />
-              <span className="font-medium">Filters:</span>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-[180px] border rounded px-2 py-2"
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category === "all" ? "All Categories" : category}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={selectedExam}
-                onChange={(e) => setSelectedExam(e.target.value)}
-                className="w-[180px] border rounded px-2 py-2"
-              >
-                {exams.map((exam) => (
-                  <option key={exam} value={exam}>
-                    {exam === "all" ? "All Exams" : exam}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      </section>
+    
 
       {/* Resources Grid */}
       <section className="py-16">
@@ -133,7 +100,7 @@ const FreeCourses = () => {
                       <p className="text-sm text-gray-600 mb-4">{course.description}</p>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">{course.topicsCount || 0} Topics</span>
+                     
                       <div className="flex items-center gap-2 text-indigo-600 font-medium">
                         Start Learning
                         <ArrowRight className="h-4 w-4" />
