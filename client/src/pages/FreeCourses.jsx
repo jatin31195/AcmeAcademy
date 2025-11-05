@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { BookOpen, Search, Filter, ArrowRight } from "lucide-react";
 import { BASE_URL } from "../config";
+import SEO from "../components/SEO";
+
 const FreeCourses = () => {
   const [courses, setCourses] = useState([]); 
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,6 +41,60 @@ const FreeCourses = () => {
   });
 
   return (
+    <><SEO
+  title="Free MCA Self-Study Courses | NIMCET & CUET-PG Preparation | ACME Academy"
+  description="Access 100% free MCA self-study courses from ACME Academy — including notes, guides, and video lectures for NIMCET, CUET-PG, and MAH-CET. Learn at your own pace!"
+  url="https://www.acmeacademy.in/acme-free-courses"
+  image="https://www.acmeacademy.in/assets/og-free-courses.jpg"
+  keywords="Free MCA courses, MCA online study, NIMCET free course, CUET PG MCA course, ACME Academy, MCA entrance coaching"
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "ACME Academy Free MCA Courses",
+    "description": "A free library of MCA entrance self-study courses offered by ACME Academy — including Mathematics, Reasoning, Computer Concepts, and English modules.",
+    "url": "https://www.acmeacademy.in/acme-free-courses",
+    "publisher": {
+      "@type": "EducationalOrganization",
+      "name": "ACME Academy",
+      "url": "https://www.acmeacademy.in",
+      "logo": "https://www.acmeacademy.in/logo.png"
+    },
+    "mainEntity": {
+      "@type": "ItemList",
+      "name": "Free MCA Self Study Courses",
+      "itemListOrder": "ItemListOrderAscending",
+      "numberOfItems": courses?.length || 0,
+      "itemListElement": courses?.slice(0, 12).map((course, index) => ({
+        "@type": "Course",
+        "position": index + 1,
+        "name": course.title,
+        "description": course.description || "MCA self-paced course with notes and video lectures.",
+        "provider": {
+          "@type": "EducationalOrganization",
+          "name": "ACME Academy",
+          "url": "https://www.acmeacademy.in"
+        },
+        "educationalLevel": "Postgraduate Entrance",
+        "courseMode": "Online",
+        "isAccessibleForFree": true,
+        "url": `https://www.acmeacademy.in/acme-academy-open-library/${course._id}`,
+        "hasCourseInstance": {
+          "@type": "CourseInstance",
+          "courseMode": "Self-paced",
+          "inLanguage": "en",
+          "startDate": "2025-01-01",
+          "endDate": "2025-12-31",
+          "provider": {
+            "@type": "EducationalOrganization",
+            "name": "ACME Academy",
+            "url": "https://www.acmeacademy.in"
+          }
+        }
+      }))
+    }
+  }}
+/>
+
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
       {/* Header */}
       <section className="relative py-30 bg-gradient-to-r from-blue-500 to-indigo-600 overflow-hidden">
@@ -120,6 +176,7 @@ const FreeCourses = () => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 

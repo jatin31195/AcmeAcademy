@@ -6,6 +6,7 @@ import Cuetpg from "../components/ExamPattern/Cuetpg";
 import Mahcet from "../components/ExamPattern/Mahcet";
 import Jmi from "../components/ExamPattern/Jmi";
 import Vit from "../components/ExamPattern/VIT";
+import SEO from "../components/SEO";
 
 const ExamPattern = () => {
   const [selectedExam, setSelectedExam] = useState("nimcet");
@@ -19,6 +20,98 @@ const ExamPattern = () => {
   ];
 
   return (
+    <>
+    <SEO
+  title="MCA Exam Patterns 2025 | NIMCET, CUET-PG, MAH-CET, JMI & VIT MCA"
+  description="Explore detailed MCA exam patterns for NIMCET, CUET-PG, MAH-CET, JMI, and VIT MCA. Know the syllabus, marking scheme, duration, and question structure for 2025 entrance exams."
+  url="https://www.acmeacademy.in/mca-exam-patterns"
+  image="https://www.acmeacademy.in/assets/og-exam-patterns.jpg"
+  keywords="MCA exam pattern 2025, NIMCET syllabus, CUET PG MCA, MAH CET MCA paper pattern, JMI MCA entrance, VIT MCA exam structure, ACME Academy"
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "MCA Exam Patterns 2025",
+    "description": "Compare exam patterns, syllabus, marking schemes, and question distribution for top MCA entrance exams including NIMCET, CUET-PG, MAH-CET, JMI MCA, and VIT MCA.",
+    "url": "https://www.acmeacademy.in/mca-exam-patterns",
+    "publisher": {
+      "@type": "EducationalOrganization",
+      "name": "ACME Academy",
+      "url": "https://www.acmeacademy.in",
+      "logo": "https://www.acmeacademy.in/logo.png"
+    },
+    "mainEntity": {
+      "@type": "ItemList",
+      "name": "MCA Exam Patterns List",
+      "numberOfItems": 5,
+      "itemListElement": [
+        {
+          "@type": "EducationalOccupationalProgram",
+          "position": 1,
+          "name": "NIMCET Exam Pattern 2025",
+          "educationalCredentialAwarded": "MCA Admission (National Institutes of Technology)",
+          "description": "NIMCET 2025 paper pattern with 120 MCQs on Mathematics, Analytical Ability, Logical Reasoning, Computer Awareness, and English.",
+          "timeOfDay": "Morning",
+          "educationalLevel": "Postgraduate Entrance",
+          "inLanguage": "en",
+          "provider": {
+            "@type": "EducationalOrganization",
+            "name": "NITs (National Institutes of Technology)"
+          },
+          "url": "https://www.acmeacademy.in/mca-exam-patterns#nimcet"
+        },
+        {
+          "@type": "EducationalOccupationalProgram",
+          "position": 2,
+          "name": "CUET-PG MCA Exam Pattern 2025",
+          "educationalCredentialAwarded": "MCA Admission (Central Universities)",
+          "description": "CUET-PG MCA pattern with 75 MCQs covering Computer Science, Reasoning, Mathematics, and Analytical Aptitude.",
+          "provider": {
+            "@type": "EducationalOrganization",
+            "name": "NTA (National Testing Agency)"
+          },
+          "url": "https://www.acmeacademy.in/mca-exam-patterns#cuet-pg"
+        },
+        {
+          "@type": "EducationalOccupationalProgram",
+          "position": 3,
+          "name": "MAH-CET MCA Exam Pattern 2025",
+          "educationalCredentialAwarded": "MCA Admission (Maharashtra State)",
+          "description": "MAH-CET MCA paper with 100 questions from Logical Reasoning, Quantitative Aptitude, English, and Computer Concepts.",
+          "provider": {
+            "@type": "EducationalOrganization",
+            "name": "State Common Entrance Test Cell, Maharashtra"
+          },
+          "url": "https://www.acmeacademy.in/mca-exam-patterns#mah-cet"
+        },
+        {
+          "@type": "EducationalOccupationalProgram",
+          "position": 4,
+          "name": "JMI MCA Entrance Exam Pattern 2025",
+          "educationalCredentialAwarded": "MCA Admission (Jamia Millia Islamia University)",
+          "description": "JMI MCA pattern — 100 MCQs on Mathematics, Reasoning, Computer Awareness, and General English.",
+          "provider": {
+            "@type": "EducationalOrganization",
+            "name": "Jamia Millia Islamia"
+          },
+          "url": "https://www.acmeacademy.in/mca-exam-patterns#jmi"
+        },
+        {
+          "@type": "EducationalOccupationalProgram",
+          "position": 5,
+          "name": "VIT MCA Exam Pattern 2025",
+          "educationalCredentialAwarded": "MCA Admission (VIT University)",
+          "description": "VIT MCA entrance with 100 MCQs covering Analytical Ability, Computer Awareness, Mathematics, and Logical Reasoning.",
+          "provider": {
+            "@type": "EducationalOrganization",
+            "name": "VIT University"
+          },
+          "url": "https://www.acmeacademy.in/mca-exam-patterns#vit"
+        }
+      ]
+    }
+  }}
+/>
+
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 overflow-hidden">
       {/* 🌈 Hero Section */}
        {/* 🌊 Hero Section */}
@@ -124,6 +217,7 @@ const ExamPattern = () => {
         </motion.div>
       </section>
     </div>
+    </>
   );
 };
 

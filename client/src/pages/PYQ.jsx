@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileText, Search, Calendar } from "lucide-react";
 import { BASE_URL } from "../config";
 import { motion } from "framer-motion";
+import SEO from "../components/SEO";
+
 const PYQ = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedExam, setSelectedExam] = useState("all");
@@ -16,7 +18,7 @@ const PYQ = () => {
 
   const navigate = useNavigate();
 
-  // Fetch PYQs from backend
+
   useEffect(() => {
     const fetchPYQs = async () => {
       try {
@@ -32,7 +34,7 @@ const PYQ = () => {
     fetchPYQs();
   }, []);
 
-  // Intersection Observer for scroll animations
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -51,7 +53,6 @@ const PYQ = () => {
   const exams = ["all", "NIMCET", "CUET-PG", "MAH-CET", "JMI MCA", "BIT MCA", "VIT MCA", "DU MCA"];
   const years = ["all", "2024", "2023", "2022", "2021", "2020"];
 
-  // Filter PYQs based on search, exam, year
   const filteredPYQ = pyqs.filter((pyq) => {
     const matchesSearch =
       pyq.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -77,6 +78,39 @@ const PYQ = () => {
   if (loading) return <div className="text-center py-20">Loading question papers...</div>;
 
   return (
+    <>
+    <SEO
+  title="Previous Year MCA Entrance Question Papers | ACME Academy"
+  description="Download and practice Previous Year Question Papers (PYQs) for NIMCET, CUET-PG, MAH-CET, JMI, BIT, and other MCA entrance exams. Prepare effectively with ACME Academy."
+  url="https://www.acmeacademy.in/pyq"
+  image="https://www.acmeacademy.in/assets/og-pyq.jpg"
+  keywords="NIMCET PYQ, CUET-PG question papers, MAH-CET MCA papers, JMI MCA PYQs, BIT MCA papers, ACME Academy PYQs, previous year MCA papers"
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Previous Year MCA Entrance Question Papers",
+    "description":
+      "Browse and download PYQs from NIMCET, CUET-PG, MAH-CET, and other MCA entrance exams. Curated by ACME Academy.",
+    "url": "https://www.acmeacademy.in/pyq",
+    "numberOfItems": pyqs?.length || 0,
+    "itemListElement": pyqs?.slice(0, 10).map((pyq, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "url": `https://www.acmeacademy.in/pyq/${pyq._id}`,
+      "name": `${pyq.exam} ${pyq.year} Question Paper`,
+      "description": pyq.description || `${pyq.exam} ${pyq.year} MCA entrance PYQ`,
+      "dateCreated": pyq.year ? `${pyq.year}-01-01` : undefined,
+      "additionalType": "https://schema.org/Dataset",
+      "inLanguage": "en",
+      "publisher": {
+        "@type": "Organization",
+        "name": "ACME Academy",
+        "url": "https://www.acmeacademy.in",
+      },
+    })),
+  }}
+/>
+
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
       {/* Header */}
       <section className="relative py-16 sm:py-34 text-center overflow-hidden hero-gradient">
@@ -189,6 +223,7 @@ const PYQ = () => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 

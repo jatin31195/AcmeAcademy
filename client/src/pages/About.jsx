@@ -17,6 +17,8 @@ import PP from "../assets/images/pritesh-pandey.png";
 import SK from "../assets/images/sohail-sir.jpg";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import SEO from "../components/SEO";
+
 const GradientIcon = ({ Icon, className = "" }) => (
   <Icon
     className={`mx-auto mb-3 ${className}`}
@@ -162,6 +164,92 @@ const milestones = [
   }, []);
 
   return (
+    <><SEO
+  title="About ACME Academy | Best MCA Coaching in India (Online & Offline)"
+  description="ACME Academy is India's most trusted MCA entrance coaching institute for NIMCET, CUET-PG, and MAH-CET. With 2000+ selections, 10+ years of experience, and nationwide students, ACME leads MCA preparation both online and offline."
+  url="https://www.acmeacademy.in/about"
+  image="https://www.acmeacademy.in/assets/og-about-acme.jpg"
+  keywords="about ACME Academy, best MCA coaching in India, top NIMCET coaching, MCA entrance preparation, best online MCA coaching, best offline MCA institute, ACME Academy India"
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": "About ACME Academy",
+    "description": "Learn about ACME Academy — India's leading MCA entrance coaching institute offering online and offline programs for NIMCET, CUET-PG, MAH-CET, JMI, and more.",
+    "url": "https://www.acmeacademy.in/about",
+    "publisher": {
+      "@type": "EducationalOrganization",
+      "name": "ACME Academy",
+      "url": "https://www.acmeacademy.in",
+      "logo": "https://www.acmeacademy.in/logo.png"
+    },
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "ACME Academy",
+      "alternateName": "ACME Academy India",
+      "url": "https://www.acmeacademy.in",
+      "logo": "https://www.acmeacademy.in/logo.png",
+      "foundingDate": "2015",
+      "founder": {
+        "@type": "Person",
+        "name": "Mr. Kartikey Pandey",
+        "jobTitle": "Director & Mathematics Mentor",
+        "alumniOf": "NIT Raipur",
+        "sameAs": "https://www.linkedin.com/in/kartikey-pandey"
+      },
+      "description": "ACME Academy offers India’s best online and offline MCA coaching with 10+ years of experience and 2000+ selections in NITs, DU, JNU, BHU, JMI, and HCU.",
+      "slogan": "Transforming Aspirations into Achievements",
+      "sameAs": [
+        "https://www.instagram.com/acmeacademy.in",
+        "https://www.facebook.com/acmeacademy.in",
+        "https://www.youtube.com/@acmeacademy"
+      ],
+      "address": [
+        {
+          "@type": "PostalAddress",
+          "streetAddress": "Near Fafadih Chowk",
+          "addressLocality": "Raipur",
+          "addressRegion": "Chhattisgarh",
+          "postalCode": "492001",
+          "addressCountry": "IN"
+        },
+        {
+          "@type": "PostalAddress",
+          "streetAddress": "ACME Academy (NIMCET MCA)",
+          "addressLocality": "Kanpur",
+          "addressRegion": "Uttar Pradesh",
+          "postalCode": "208016",
+          "addressCountry": "IN"
+        }
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+91-8109977628",
+          "contactType": "customer support",
+          "areaServed": "IN",
+          "availableLanguage": ["English", "Hindi"]
+        },
+        {
+          "@type": "ContactPoint",
+          "telephone": "+91-9516001679",
+          "contactType": "admissions",
+          "areaServed": "IN",
+          "availableLanguage": ["English", "Hindi"]
+        }
+      ],
+      "memberOf": {
+        "@type": "EducationalOccupationalProgram",
+        "name": "MCA Entrance Preparation (NIMCET, CUET-PG, MAH-CET, JMI)",
+        "educationalCredentialAwarded": "MCA Admission",
+        "provider": {
+          "@type": "EducationalOrganization",
+          "name": "ACME Academy"
+        }
+      }
+    }
+  }}
+/>
+
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
     
       <svg width="0" height="0">
@@ -593,6 +681,7 @@ const milestones = [
 </section>
 
     </div>
+    </>
   );
 };
 

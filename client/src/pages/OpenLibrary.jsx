@@ -2,8 +2,52 @@ import { Link } from "react-router-dom";
 import logo from "/logo.png";
 import { BASE_URL } from "../config";
 import { motion } from "framer-motion";
+import SEO from "../components/SEO";
+
 const OpenLibrary = () => {
   return (
+    <><SEO
+  title="Open Library | Free MCA Study Materials & Notes | ACME Academy"
+  description="Access ACME Academy's free Open Library — get MCA entrance notes, free courses, and practice sets for NIMCET, CUET-PG, and other MCA exams. 100% free learning resources."
+  url="https://www.acmeacademy.in/acme-academy-open-library"
+  image="https://www.acmeacademy.in/assets/og-open-library.jpg"
+  keywords="MCA free study materials, NIMCET notes, CUET-PG MCA free courses, MCA entrance preparation, ACME Open Library"
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "ACME Academy Open Library",
+    "description": "Free study resources, self-study courses, and practice sets for MCA entrance exams such as NIMCET, CUET-PG, MAH-CET, and others.",
+    "url": "https://www.acmeacademy.in/acme-academy-open-library",
+    "publisher": {
+      "@type": "EducationalOrganization",
+      "name": "ACME Academy",
+      "url": "https://www.acmeacademy.in",
+      "logo": "https://www.acmeacademy.in/logo.png"
+    },
+    "mainEntity": {
+      "@type": "ItemList",
+      "name": "Free MCA Learning Resources",
+      "numberOfItems": 2,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Acme Free Self Study Courses",
+          "description": "Access self-paced MCA courses with notes, theory, and guides from ACME Academy.",
+          "url": "https://www.acmeacademy.in/acme-free-courses"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Practice Sets",
+          "description": "Solve interactive MCA practice sets and previous year exam questions for NIMCET and other entrances.",
+          "url": "https://www.acmeacademy.in/acme-practice-sets"
+        }
+      ]
+    }
+  }}
+/>
+
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
 
       {/* Header */}
@@ -103,6 +147,7 @@ const OpenLibrary = () => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 

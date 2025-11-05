@@ -5,6 +5,8 @@ import InstructionsPage from "../components/Test/InstructionsPage";
 import { useAuth } from "@/AuthContext";
 import TestView from "../components/Test/TestView";
 import { BASE_URL } from "../config";
+import SEO from "../components/SEO";
+
 const Test = () => {
   const { user } = useAuth();
   const { testId } = useParams();
@@ -164,25 +166,79 @@ const Test = () => {
     notVisited: Object.values(questionStatus).filter(q => !q.visited).length,
     answeredAndMarked: Object.values(questionStatus).filter(q => q.answered && q.markedForReview).length,
   };
-
+const jsonLd = testData
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Quiz",
+        "name": testData.title || "ACME Academy Mock Test",
+        "description":
+          testData.description ||
+          "Attempt MCA entrance mock tests by ACME Academy with real-time timer and analytics.",
+        "url": `https://www.acmeacademy.in/test/${testId}`,
+        "about": {
+          "@type": "Course",
+          "name": testData.examType || "MCA Entrance Preparation",
+          "provider": {
+            "@type": "Organization",
+            "name": "ACME Academy",
+            "url": "https://www.acmeacademy.in",
+            "logo": "https://www.acmeacademy.in/assets/logo.png",
+            "sameAs": [
+              "https://www.facebook.com/acmeacademy",
+              "https://www.youtube.com/@acmeacademy",
+              "https://www.instagram.com/acmeacademy"
+            ]
+          }
+        },
+        "learningResourceType": "Practice Test",
+        "educationalLevel": "Postgraduate",
+        "timeRequired": `PT${testData.totalDurationMinutes || 60}M`,
+        "hasPart": testData.questions?.map((q, index) => ({
+          "@type": "Question",
+          "position": index + 1,
+          "name": q.questionText || `Question ${index + 1}`,
+          "acceptedAnswer": q.correctAnswer
+            ? { "@type": "Answer", "text": q.correctAnswer }
+            : undefined
+        })),
+        "creator": {
+          "@type": "Organization",
+          "name": "ACME Academy",
+          "url": "https://www.acmeacademy.in"
+        }
+      }
+    : null;
   if (!testData) return <div>Loading...</div>;
 
-  if (!testStarted)
-    return (
-      <InstructionsPage
-        test={testData}
-        instructionsRead={instructionsRead}
-        setInstructionsRead={setInstructionsRead}
-        onStart={() => {
-          setTestStarted(true);
-          setTestStartTime(Date.now());
-          setQuestionStartTime(Date.now());
-        }}
-        username={user?.username || "Student"}
-      />
-    );
+ 
 
   return (
+    <>
+  {testData && (
+    <SEO
+      title={`${testData.title} | ACME Academy Test`}
+      description={`Attempt ${testData.title} by ACME Academy — India's most trusted platform for MCA Entrance preparation.`}
+      url={`https://www.acmeacademy.in/test/${testId}`}
+      image="https://www.acmeacademy.in/assets/test-preview.png"
+      keywords="MCA entrance test, NIMCET mock test, CUET MCA online test, ACME Academy, practice exam, test series"
+      jsonLd={jsonLd}
+    />
+  )}
+
+  
+  {!testStarted ? (
+    <InstructionsPage
+      test={testData}
+      instructionsRead={instructionsRead}
+      setInstructionsRead={setInstructionsRead}
+      onStart={() => {
+        setTestStarted(true);
+        setTestStartTime(Date.now());
+        setQuestionStartTime(Date.now());
+      }}
+      username={user?.username || "Student"}
+    />
+  ) : (
     <TestView
       user={user}
       testData={testData}
@@ -200,6 +256,9 @@ const Test = () => {
       formatTime={formatTime}
       currentSection={currentSection}
     />
+  )}
+</>
+
   );
 };
 

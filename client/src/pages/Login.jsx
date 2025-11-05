@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "../AuthContext";
 import logo from "/logo.png";
 import { BASE_URL } from "../config";
+import SEO from "../components/SEO";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -58,6 +59,14 @@ const Login = () => {
   };
 
   return (
+    <>
+    <SEO
+  title="Login - ACME Academy"
+  description="Access your ACME Academy account to take mock tests, track results, and continue your MCA entrance preparation journey."
+  url="https://www.acmeacademy.in/login"
+  noindex={true}
+/>
+
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-950">
       <Toaster toastOptions={{ duration: 4000 }} />
       <div className="w-full max-w-md">
@@ -148,6 +157,7 @@ const Login = () => {
         </Card>
       </div>
     </div>
+    </>
   );
 };
 

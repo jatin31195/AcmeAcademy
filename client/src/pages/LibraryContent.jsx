@@ -12,6 +12,8 @@ import { ArrowLeft, FileText, Youtube, BookOpen, Flag, StickyNote, Play, Lock } 
 import AcmePlayer from "./AcmePlayer";
 import axios from "axios";
 import { BASE_URL } from "../config";
+import SEO from "../components/SEO";
+
 export default function LibraryContent() {
   const { id } = useParams(); 
 
@@ -112,6 +114,75 @@ export default function LibraryContent() {
   if (loading) return <div className="p-10 text-center">Loading sections...</div>;
 
   return (
+    <>
+    <SEO
+  title={`${courseMeta.title} | ACME Academy Open Library`}
+  description={
+    courseMeta.description ||
+    `Access free MCA entrance course materials, video lectures, notes, and assignments for ${courseMeta.title} by ACME Academy.`
+  }
+  url={`https://www.acmeacademy.in/acme-academy-open-library/${id}`}
+  image="https://www.acmeacademy.in/assets/og-course.jpg"
+  keywords={`${courseMeta.title}, MCA notes, MCA lectures, NIMCET preparation, CUET PG MCA materials, ACME Academy`}
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "Course",
+    "name": courseMeta.title,
+    "description": courseMeta.description || "Comprehensive MCA entrance preparation course with notes, lectures, and tests.",
+    "url": `https://www.acmeacademy.in/acme-academy-open-library/${id}`,
+    "provider": {
+      "@type": "EducationalOrganization",
+      "name": "ACME Academy",
+      "url": "https://www.acmeacademy.in",
+      "logo": "https://www.acmeacademy.in/logo.png"
+    },
+    "hasCourseInstance": {
+      "@type": "CourseInstance",
+      "courseMode": "Online",
+      "courseWorkload": `${sections.length} subjects`,
+      "inLanguage": "en",
+      "provider": {
+        "@type": "EducationalOrganization",
+        "name": "ACME Academy",
+        "url": "https://www.acmeacademy.in"
+      }
+    },
+    "hasPart": sections.map((section, i) => ({
+      "@type": "CreativeWork",
+      "position": i + 1,
+      "name": section.title,
+      "description": `Topics and learning resources for ${section.title}.`,
+      "about": section.emoji ? section.emoji : "Study module",
+      "learningResourceType": "Educational material",
+      "educationalUse": "Study",
+      "isAccessibleForFree": true,
+      "provider": {
+        "@type": "EducationalOrganization",
+        "name": "ACME Academy",
+        "url": "https://www.acmeacademy.in"
+      },
+      "hasPart": section.groups.flatMap((g, idx) =>
+        g.topics.map((topic, j) => ({
+          "@type": "LearningResource",
+          "position": `${i + 1}.${idx + 1}.${j + 1}`,
+          "name": topic.title,
+          "url": `https://www.acmeacademy.in/acme-academy-open-library/${id}#${topic._id}`,
+          "educationalLevel": "Postgraduate Entrance",
+          "inLanguage": "en",
+          "isAccessibleForFree": true,
+          "learningResourceType": "Video / Notes / Assignment",
+          "about": section.title,
+          "provider": {
+            "@type": "EducationalOrganization",
+            "name": "ACME Academy",
+            "url": "https://www.acmeacademy.in"
+          }
+        }))
+      )
+    }))
+  }}
+/>
+
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
     
       <section className="relative py-30 hero-gradient overflow-hidden">
@@ -391,5 +462,6 @@ export default function LibraryContent() {
         </div>
       )}
     </div>
+    </>
   );
 }
