@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.acmeacademy.in/sitemap.xml
+Host: https://www.acmeacademy.in
+
+# Disallow sensitive/private pages
+Disallow: /dashboard
+Disallow: /admin

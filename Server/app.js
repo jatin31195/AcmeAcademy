@@ -13,8 +13,12 @@ import testRoute from "./src/routes/testRoute.js";
 import questionRoutes from "./src/routes/questionRoute.js";
 import resultRoutes from "./src/routes/resultRoute.js";
 import practiceTopicRoutes from "./src/routes/practiceTopicRoutes.js";
+import sitemapRoutes from "./src/routes/sitemap.js";
+import path from "path";
+import { fileURLToPath } from "url";
 const app = express();
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 /* ------------------------- 🔹 Middlewares ------------------------- */
 app.use(
   prerender
@@ -48,7 +52,8 @@ app.use("/api/results", resultRoutes);
 app.use("/api/mail", mailRoutes);
 app.use("/api/practice-set", practiceSetRoutes);
 app.use("/api/practice-topic", practiceTopicRoutes);
-
+app.use(express.static(path.join(__dirname, "./public")));
+app.use("/", sitemapRoutes);
 /* ------------------------- 🔹 Root Route ------------------------- */
 app.get("/", (req, res) => {
   res.send("🚀 ACME Academy Backend is running!");
