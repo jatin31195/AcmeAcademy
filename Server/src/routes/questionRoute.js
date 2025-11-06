@@ -7,7 +7,7 @@ router.get("/search", questionController.searchQuestions);
 router.get("/", questionController.getAllQuestions);
 router.post("/", upload.single("solutionImage"), questionController.addQuestion);
 router.put("/:id", upload.single("solutionImage"), questionController.updateQuestion);
-router.post("/:id/discussion", questionController.addDiscussion);
+router.patch("/:id/discussion", questionController.addDiscussion);
 router.get("/topics", questionController.getAllTopics);
 router.get(
   "/practice-topic/:practiceTopicId/topics",

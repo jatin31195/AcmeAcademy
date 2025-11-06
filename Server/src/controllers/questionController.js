@@ -177,19 +177,32 @@ export const getQuestionBySlug = async (req, res) => {
   }
 };
 
+
 export const addDiscussion = async (req, res) => {
   try {
     const { id } = req.params;
     const { user, comment } = req.body;
+
     const question = await Question.findById(id);
-    if (!question) return res.status(404).json({ error: "Question not found" });
+    if (!question)
+      return res.status(404).json({ error: "Question not found" });
+
     question.discussion.push({ user, comment });
     await question.save();
-    res.json({ success: true, discussion: question.discussion });
+
+    res.json({
+      success: true,
+      message: "Discussion added successfully",
+      discussion: question.discussion,
+    });
   } catch (err) {
-    res.status(500).json({ success: false, error: "Failed to add discussion" });
+    console.error("❌ Error adding discussion:", err);
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to add discussion" });
   }
 };
+
 
 export const getAllTopics = async (req, res) => {
   try {
