@@ -17,6 +17,6 @@ router.get(
   "/practice-topic/:practiceTopicId/topics/:topic",
   questionController.getQuestionsByPracticeTopicAndTopic
 );
-router.get("/slug/:slug", questionController.getQuestionBySlug);
+router.get("/q/slug/:slug", questionController.getQuestionBySlug);
 
 export default router;
