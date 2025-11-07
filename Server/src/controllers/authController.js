@@ -79,25 +79,23 @@ export const verifyEmailOtp = (req, res) => {
   }
 };
 
-
 export const registerUser = async (req, res) => {
   try {
     const { username, fullname, email, password, dob, whatsapp } = req.body;
 
-   
     if (!verifiedEmails.has(email)) {
       return res.status(403).json({
         message: "Please verify your email before registration",
       });
     }
 
-    
     verifiedEmails.delete(email);
 
     const existingEmail = await userService.getUserByEmail(email);
     if (existingEmail)
       return res.status(400).json({ message: "Email already registered" });
 
+    // ✅ Create user
     const user = await userService.createUser({
       username,
       fullname,
@@ -107,8 +105,76 @@ export const registerUser = async (req, res) => {
       whatsapp,
     });
 
+   
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    
+    const mailHTML = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fc; padding: 30px; border-radius: 12px; max-width: 600px; margin: 20px auto; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #e0e0e0;">
+        
+        <div style="text-align:center; margin-bottom: 20px;">
+          <img src="https://res.cloudinary.com/dwqvrtvu1/image/upload/v1762162237/logo_1_yo58k3.png" alt="ACME Academy Logo" style="width: 130px; border-radius: 8px;" />
+        </div>
+
+        <h2 style="color:#1e40af; text-align:center;">🎉 Welcome to ACME Academy!</h2>
+
+        <p style="font-size:16px; color:#333; text-align:center; margin: 15px 0;">
+          Dear <strong>${fullname || "Student"}</strong>,
+        </p>
+
+        <p style="font-size:15px; line-height:1.6; color:#444;">
+          Congratulations on taking your first step toward MCA Entrance success! 🚀
+        </p>
+
+        <p style="font-size:15px; line-height:1.6; color:#444;">
+          We're thrilled to have you join the <strong>ACME Academy</strong> family. Our mission is to help you excel in all your MCA entrance exams like 
+          <strong>NIMCET</strong>, <strong>CUET</strong>, <strong>VIT</strong>, and <strong>MAH-CET</strong>.
+        </p>
+
+        <p style="font-size:15px; line-height:1.6; color:#444;">
+          Keep practicing, stay consistent, and never stop believing in yourself. Remember — success is a journey, not a destination.
+        </p>
+
+        <div style="text-align:center; margin: 25px 0;">
+          <a href="https://acmeacademy.in" 
+             style="background:#1e40af; color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:bold; display:inline-block;">
+             Start Your Journey →
+          </a>
+        </div>
+
+        <p style="font-size:14px; color:#555; text-align:center;">
+          Wishing you all the very best for your MCA entrance journey!<br/>
+          <strong>- Team ACME Academy 💙</strong>
+        </p>
+
+        <hr style="margin:25px 0; border:0; border-top:1px solid #ddd;" />
+
+        <p style="text-align:center; font-size:13px; color:#777;">
+          © ${new Date().getFullYear()} ACME Academy. All Rights Reserved.<br/>
+          <span style="font-size:12px;">This is an automated welcome email. Please do not reply.</span>
+        </p>
+      </div>
+    `;
+
+    
+    const mailOptions = {
+      from: `"ACME Academy" <acmeacademy15@gmail.com>`,
+      to: email,
+      subject: "🎉 Welcome to ACME Academy — Let’s Begin Your MCA Journey!",
+      html: mailHTML,
+    };
+
+   
+    await transporter.sendMail(mailOptions);
+
     res.status(201).json({
-      message: "User created successfully",
+      message: "User created successfully and welcome email sent!",
       userId: user._id,
     });
   } catch (err) {
@@ -116,6 +182,7 @@ export const registerUser = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 
 export const loginUser = async (req, res) => {
   try {
