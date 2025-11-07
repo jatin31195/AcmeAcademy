@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Bell } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import axios from "axios";
-
+import { BASE_URL } from "@/config";
 const ResultsSection = () => {
   const [resultImages, setResultImages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +21,7 @@ const ResultsSection = () => {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/results/home/result");
+        const res = await axios.get(`${BASE_URL}/api/results/home/result`);
         setResultImages(res.data);
       } catch (error) {
         console.error("Error fetching result images:", error);
