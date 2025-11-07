@@ -3,23 +3,24 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 
 const FAQSection = () => {
   const faqs = [
-    {
-      q: "What is the duration of the NIMCET course?",
-      a: "Our full-time NIMCET batch runs for 8 months with complete syllabus coverage and weekly mock tests.",
-    },
-    {
-      q: "Is online coaching available?",
-      a: "Yes, we offer live interactive online classes with recorded sessions and online doubt-solving.",
-    },
-    {
-      q: "Does ACME provide mock tests?",
-      a: "Absolutely. We provide 50+ sectional and 10 full-length mock tests with performance analytics.",
-    },
-    {
-      q: "What is the batch strength?",
-      a: "Each batch has a limited size of 40 students to ensure personal attention.",
-    },
-  ];
+  {
+    q: "What is the duration of the NIMCET course?",
+    a: "Our full-time NIMCET batch runs for 10 months, and the entire syllabus is covered twice with weekly mock tests and regular revisions.",
+  },
+  {
+    q: "Is online coaching available?",
+    a: "Yes, we offer live interactive online classes with recorded sessions, online doubt-solving, and affordable pricing for all students.",
+  },
+  {
+    q: "Does ACME provide mock tests?",
+    a: "Absolutely. We provide 1000+ mock tests, including live and pre-uploaded practice tests, along with detailed performance analytics.",
+  },
+  {
+    q: "What is the batch strength?",
+    a: "We proudly train over 700+ students every year while ensuring dedicated mentorship and consistent performance tracking.",
+  },
+];
+
 
   return (
     <section className="py-24 bg-muted/20">
