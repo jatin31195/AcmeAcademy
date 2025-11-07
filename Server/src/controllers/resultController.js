@@ -27,6 +27,7 @@ export const getResultByRank = async (req, res) => {
 };
 
 
+
 export const uploadResultPhoto = async (req, res) => {
   try {
     const { exam, year, rank, name, score, photoType } = req.body;
@@ -36,50 +37,51 @@ export const uploadResultPhoto = async (req, res) => {
       return res.status(400).json({ error: "Failed to upload to Cloudinary" });
     }
 
-    // 🧠 Use rank if available, otherwise fallback to score, else use "unranked"
+    // Build a readable identifier for slug
     const identifier = rank
       ? `air-${rank}`
       : score
       ? `score-${score}`
       : "unranked";
 
-    // 🧠 Create a unique slug (acts as safe unique key)
-    const slug = slugify(`${exam}-${year}-${identifier}-${name}`, {
+    // Initial slug
+    let baseSlug = slugify(`${exam}-${year}-${identifier}-${name || "undefined"}`, {
       lower: true,
       strict: true,
     });
 
-    // ✅ Prepare the data for insertion/updating
-    const updateData = {
+    // ✅ Always add new entry — ensure slug uniqueness
+    let uniqueSlug = baseSlug;
+    const existingSlug = await Result.findOne({ slug: uniqueSlug });
+    if (existingSlug) {
+      const randomSuffix = Math.random().toString(36).substring(2, 6);
+      uniqueSlug = `${baseSlug}-${randomSuffix}`;
+    }
+
+    // ✅ Create new result (no overwrite ever)
+    const newResult = new Result({
       name,
-      exam: exam.toLowerCase(),
-      year,
+      exam: exam?.toLowerCase(),
+      year: year || null,
       rank: rank || null,
       score: score || null,
       photoUrl: cloudUrl,
-      slug,
-    };
+      photoType: photoType?.toLowerCase(),
+      slug: uniqueSlug,
+    });
 
-    if (photoType) {
-      updateData.photoType = photoType.toLowerCase();
-    }
-
-    // ✅ Use slug as unique identifier for upsert
-    const result = await Result.findOneAndUpdate(
-      { slug },
-      updateData,
-      { upsert: true, new: true }
-    );
+    await newResult.save();
 
     res.status(200).json({
       message: "Result uploaded successfully",
-      result,
+      result: newResult,
     });
   } catch (err) {
     console.error("Error uploading result photo:", err);
     res.status(500).json({ error: "Failed to upload result photo" });
   }
 };
+
 
 
 
@@ -200,3 +202,19 @@ export const getAvailableExams = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch available exams" });
   }
 };
+export const getHomeResultImages = async (req, res) => {
+  try {
+    const results = await Result.find({ photoType: { $regex: /^home$/i } })
+      .sort({ _id: 1 }) 
+      .select("name exam year rank score photoUrl slug photoType");
+
+    if (!results.length)
+      return res.status(404).json({ message: "No home result images found" });
+
+    res.status(200).json(results);
+  } catch (err) {
+    console.error("Error fetching home result images:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
