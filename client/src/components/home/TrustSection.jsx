@@ -38,10 +38,17 @@ const TrustSection = () => {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-4xl md:text-5xl font-extrabold mb-4"
+          className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight"
         >
           India’s Most Trusted{" "}
-          <span className="gradient-text">MCA Entrance Academy</span>
+          <span className="bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
+            <span className="font-extrabold text-red-600">M</span>
+            <span className="font-semibold ">C</span>{"A "}
+            <span className="font-extrabold text-red-600">E</span>
+            <span className="font-semibold">ntrance</span>{" "}
+            <span className="font-extrabold text-red-600">Ac</span>
+            <span className="font-semibold">ademy</span>
+          </span>
         </motion.h2>
 
         <motion.p
@@ -50,8 +57,7 @@ const TrustSection = () => {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="text-lg md:text-xl text-muted-foreground mb-12"
         >
-          With <span className="font-semibold text-primary">ACME Academy</span>,
-          begin your journey to success.
+          With <span className="font-semibold text-primary">ACME Academy</span>, begin your journey to success.
         </motion.p>
 
         {/* Stats */}
