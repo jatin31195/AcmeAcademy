@@ -10,33 +10,32 @@ import TopVideos from "@/components/home/TopVideos";
 import SEO from "../components/SEO";
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "Organization",
+  "@type": "EducationalOrganization",
   "name": "ACME Academy",
   "url": "https://www.acmeacademy.in",
-  "logo": "https://www.acmeacademy.in/assets/logo.png",
+  "logo": "https://www.acmeacademy.in/logo.png",
   "sameAs": [
-    "https://www.facebook.com/acmeacademy",
-    "https://www.youtube.com/@acmeacademy",
-    "https://www.instagram.com/acmeacademy"
+    "https://www.facebook.com/acmeacademynimcetmcacoaching",
+    "https://www.youtube.com/c/ACMEACADEMYMCAENTRANCEACADEMYNIMCETAIMCA",
+    "https://www.instagram.com/acmeacademy.in/",
+    "https://t.me/Acme_Academy"
   ],
   "description": "India’s most trusted MCA Entrance Coaching platform for NIMCET, CUET, MAH-CET, and JMI exams.",
-  
-  /* ✅ Founder Details */
   "founder": {
     "@type": "Person",
-    "name": "Mr. Kartikey Pandey",
+    "name": "Kartikey Pandey",
     "jobTitle": "Director & Mathematics Mentor",
-    "qualification": "MCA (NIT Raipur), Ph.D. Scholar",
-    "experience": "10+ Years",
-    "specialization": "Mathematics & Reasoning",
+    "alumniOf": {
+      "@type": "CollegeOrUniversity",
+      "name": "National Institute of Technology, Raipur"
+    },
+    "qualification": "MCA, Ph.D. Scholar",
     "image": "https://www.acmeacademy.in/assets/KP.png"
   },
-
-  /* ✅ Contact Points */
   "contactPoint": [
     {
       "@type": "ContactPoint",
-      "telephone": "+91-XXXXXXXXXX",
+      "telephone": "+91-8109977628",
       "contactType": "Customer Support",
       "availableLanguage": ["English", "Hindi"]
     },
@@ -47,16 +46,16 @@ const jsonLd = {
       "availableLanguage": ["English", "Hindi"]
     }
   ],
-
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "ACME Academy Center, Raipur",
+    "streetAddress": "ACME Building, behind Kota Stadium, Kota, Raipur",
     "addressLocality": "Raipur",
     "addressRegion": "Chhattisgarh",
-    "postalCode": "492001",
+    "postalCode": "492010",
     "addressCountry": "IN"
   }
 };
+
 
 
 function Home() {
