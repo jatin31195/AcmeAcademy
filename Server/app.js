@@ -1,4 +1,5 @@
 import express from "express";
+import forceHttps from "express-force-https";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import prerender from "prerender-node";
@@ -20,6 +21,18 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 /* ------------------------- 🔹 Middlewares ------------------------- */
+app.use(forceHttps);
+app.use((req, res, next) => {
+  const canonicalHost = "www.acmeacademy.in";
+  if (
+    req.headers.host &&
+    req.headers.host !== canonicalHost &&
+    !req.headers.host.includes("localhost")
+  ) {
+    return res.redirect(301, `https://${canonicalHost}${req.originalUrl}`);
+  }
+  next();
+});
 app.use(
   prerender
     .set("prerenderToken", "yd8IUbtERM5oQKILMuBo")
