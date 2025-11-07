@@ -6,57 +6,48 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const TestimonialsSection = () => {
   const testimonials = [
-    {
-      name: "Tanmay Mandal",
-      exam: "NIMCET 2022",
-      rank: "AIR 5",
-      image: "TM",
-      rating: 5,
-      testimonial:
-        "ACME Academy’s test series were a game-changer! I improved consistently with daily practice and guidance from the best mentors.",
-      college: "NIT Trichy",
-    },
-    {
-      name: "Rahul Kumar",
-      exam: "CUET-PG MCA 2024",
-      rank: "AIR 15",
-      image: "RK",
-      rating: 5,
-      testimonial:
-        "The personal mentorship and structured study plan at ACME helped me stay focused and confident throughout my prep.",
-      college: "JNU Delhi",
-    },
-    {
-      name: "Ananya Gupta",
-      exam: "MAH-CET MCA 2024",
-      rank: "AIR 8",
-      image: "AG",
-      rating: 5,
-      testimonial:
-        "Regular assessments and interactive lectures gave me the clarity I needed to excel. Thank you ACME for making learning fun!",
-      college: "VJTI Mumbai",
-    },
-    {
-      name: "Vikash Singh",
-      exam: "JMI MCA 2024",
-      rank: "AIR 12",
-      image: "VS",
-      rating: 5,
-      testimonial:
-        "The detailed PYQ solutions and mock tests were super helpful in strengthening my weak topics before the exam.",
-      college: "Jamia Millia Islamia",
-    },
-    {
-      name: "Sneha Patel",
-      exam: "BIT MCA 2024",
-      rank: "AIR 5",
-      image: "SP",
-      rating: 5,
-      testimonial:
-        "ACME Academy’s video lectures and doubt sessions made preparation seamless even with my college schedule.",
-      college: "BIT Mesra",
-    },
-  ];
+  {
+    name: "Tanmay Mandal",
+    exam: "NIMCET 2022",
+    rank: "AIR 5",
+    image: "TM",
+    rating: 5,
+    testimonial:
+      "ACME Academy’s test series were a game-changer! I improved consistently with daily practice and guidance from the best mentors.",
+    college: "NIT Trichy",
+  },
+  {
+    name: "Abdul Wakil",
+    exam: "NIMCET 2024",
+    rank: "AIR 35",
+    image: "AW",
+    rating: 5,
+    testimonial:
+      "Kartikey Sir and the entire ACME team are incredibly helpful. They helped me strengthen my concepts, clear all doubts, and boost my problem-solving skills. Their mentorship was the key to my success.",
+    college: "NIT Trichy",
+  },
+  {
+    name: "Mustafa",
+    exam: "NIMCET 2025",
+    rank: "AIR 10",
+    image: "MF",
+    rating: 5,
+    testimonial:
+      "Thanks to Kartikey Sir and ACME Academy — they took my preparation for both NIMCET and CUET to the next level. The crash course, live tests, and constant motivation were the best part of my journey!",
+    
+  },
+  {
+    name: "Mujeeb Khan",
+    exam: "NIMCET 2024",
+    rank: "AIR 22",
+    image: "MK",
+    rating: 5,
+    testimonial:
+      "Joining ACME Academy was the best decision of my MCA preparation. The mentorship, mock tests, and personalized guidance by Kartikey Sir helped me stay confident and achieve my dream rank.",
+    
+  },
+];
+
 
   const [startIndex, setStartIndex] = useState(0);
 
@@ -127,7 +118,11 @@ const TestimonialsSection = () => {
                     <p className="text-sm text-gray-500 mb-1">
                       {t.rank} • {t.exam}
                     </p>
-                    <p className="text-xs text-indigo-600 font-medium mb-2">{t.college}</p>
+                    {t.college && (
+                        <p className="text-xs text-indigo-600 font-medium mb-2">
+                          {t.college}
+                        </p>
+                      )}
 
                     <div className="flex justify-center mb-3">
                       {[...Array(t.rating)].map((_, i) => (

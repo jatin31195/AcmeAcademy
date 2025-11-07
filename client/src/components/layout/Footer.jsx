@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
@@ -6,7 +6,13 @@ import logo from "/logo.png";
 
 const Footer = () => {
   const examLinks = [
-    "NIMCET", "CUET-PG MCA", "MAH-CET MCA", "JMI MCA", "BIT MCA", "VIT MCA", "DU MCA"
+    "NIMCET",
+    "CUET-PG MCA",
+    "MAH-CET MCA",
+    "JMI MCA",
+    "BIT MCA",
+    "VIT MCA",
+    "DU MCA",
   ];
 
   const quickLinks = [
@@ -36,25 +42,44 @@ const Footer = () => {
               </div>
             </div>
             <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-              Your gateway to MCA success. Expert coaching for all major MCA entrance exams with a proven track record of 95% success rate.
+              Your gateway to MCA success. Expert coaching for all major MCA
+              entrance exams with a proven track record of 95% success rate.
             </p>
-            <div className="flex space-x-4">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+
+            {/* Social Links */}
+            <div className="flex flex-wrap gap-3">
+              <a
+                href="https://t.me/Acme_Academy"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button size="icon" variant="ghost" className="hover-glow">
+                  <Send className="h-5 w-5" />
+                </Button>
+              </a>
+              <a
+                href="https://www.facebook.com/acmeacademynimcetmcacoaching"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Button size="icon" variant="ghost" className="hover-glow">
                   <Facebook className="h-5 w-5" />
                 </Button>
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
-                <Button size="icon" variant="ghost" className="hover-glow">
-                  <Twitter className="h-5 w-5" />
-                </Button>
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+              <a
+                href="https://www.instagram.com/acmeacademy.in/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Button size="icon" variant="ghost" className="hover-glow">
                   <Instagram className="h-5 w-5" />
                 </Button>
               </a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer">
+              <a
+                href="https://www.youtube.com/c/ACMEACADEMYMCAENTRANCEACADEMYNIMCETAIMCA"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Button size="icon" variant="ghost" className="hover-glow">
                   <Youtube className="h-5 w-5" />
                 </Button>
@@ -63,29 +88,26 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          {/* Quick Links */}
-<div>
-  <h4 className="text-base font-heading font-semibold text-foreground mb-6 uppercase tracking-wide">
-    Quick Links
-  </h4>
-  <ul className="space-y-3">
-    {quickLinks.map((link) => (
-      <li key={link.label}>
-        <Link
-          to={link.path}
-          className="text-base text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2"
-        >
-          {/* Add logo only for Acme Library */}
-          {link.label === "Acme Library" && (
-            <img src={logo} alt="ACME" className="h-4 w-auto" />
-          )}
-          {link.label}
-        </Link>
-      </li>
-    ))}
-  </ul>
-</div>
-
+          <div>
+            <h4 className="text-base font-heading font-semibold text-foreground mb-6 uppercase tracking-wide">
+              Quick Links
+            </h4>
+            <ul className="space-y-3">
+              {quickLinks.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    to={link.path}
+                    className="text-base text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2"
+                  >
+                    {link.label === "Acme Library" && (
+                      <img src={logo} alt="ACME" className="h-4 w-auto" />
+                    )}
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
           {/* Exams */}
           <div>
@@ -113,35 +135,40 @@ const Footer = () => {
             </h4>
             <div className="space-y-5">
               {/* Raipur Center */}
-            
-            <div>
-              <h5 className="text-base font-medium text-foreground mb-3">Raipur Center</h5>
-              <div className="space-y-3">
-                <a
-                  href="https://maps.app.goo.gl/d7TJY2bcB8nB3WHQ8"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start space-x-2 hover:text-primary transition-colors"
-                >
-                  <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-base text-muted-foreground">
-                    ACME Building, behind Kota Stadium, Kota, Raipur, Chhattisgarh 492010
-                  </p>
-                </a>
-                <a
-                  href="tel:+918109977628"
-                  className="flex items-center space-x-2 hover:text-primary transition-colors"
-                >
-                  <Phone className="h-5 w-5 text-primary" />
-                  <p className="text-base text-muted-foreground">+91 8109977628</p>
-                </a>
+              <div>
+                <h5 className="text-base font-medium text-foreground mb-3">
+                  Raipur Center
+                </h5>
+                <div className="space-y-3">
+                  <a
+                    href="https://maps.app.goo.gl/d7TJY2bcB8nB3WHQ8"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start space-x-2 hover:text-primary transition-colors"
+                  >
+                    <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                    <p className="text-base text-muted-foreground">
+                      ACME Building, behind Kota Stadium, Kota, Raipur,
+                      Chhattisgarh 492010
+                    </p>
+                  </a>
+                  <a
+                    href="tel:+918109977628"
+                    className="flex items-center space-x-2 hover:text-primary transition-colors"
+                  >
+                    <Phone className="h-5 w-5 text-primary" />
+                    <p className="text-base text-muted-foreground">
+                      +91 8109977628
+                    </p>
+                  </a>
+                </div>
               </div>
-            </div>
-
 
               {/* Kanpur Center */}
               <div>
-                <h5 className="text-base font-medium text-foreground mb-3">Kanpur Center</h5>
+                <h5 className="text-base font-medium text-foreground mb-3">
+                  Kanpur Center
+                </h5>
                 <div className="space-y-3">
                   <a
                     href="https://maps.google.com/?q=Geeta Nagar, Kanpur"
@@ -150,14 +177,18 @@ const Footer = () => {
                     className="flex items-start space-x-2 hover:text-primary transition-colors"
                   >
                     <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <p className="text-base text-muted-foreground">Geeta Nagar, Kanpur</p>
+                    <p className="text-base text-muted-foreground">
+                      Geeta Nagar, Kanpur
+                    </p>
                   </a>
                   <a
                     href="tel:+919516001679"
                     className="flex items-center space-x-2 hover:text-primary transition-colors"
                   >
                     <Phone className="h-5 w-5 text-primary" />
-                    <p className="text-base text-muted-foreground">+91 9516001679</p>
+                    <p className="text-base text-muted-foreground">
+                      +91 9516001679
+                    </p>
                   </a>
                 </div>
               </div>
@@ -168,7 +199,9 @@ const Footer = () => {
                 className="flex items-center space-x-2 hover:text-primary transition-colors"
               >
                 <Mail className="h-5 w-5 text-primary" />
-                <p className="text-base text-muted-foreground">info@acmeacademy.com</p>
+                <p className="text-base text-muted-foreground">
+                  info@acmeacademy.com
+                </p>
               </a>
             </div>
           </div>
@@ -177,9 +210,17 @@ const Footer = () => {
         <Separator className="my-10" />
 
         <div className="flex flex-col sm:flex-row justify-between items-center">
-          <p className="text-base text-muted-foreground">
-            © 2024 ACME Academy. All rights reserved. | Designed by Jatin Rajput
+          <p className="text-base text-muted-foreground text-center sm:text-left">
+            © {new Date().getFullYear()} ACME Academy. All rights reserved. |{" "}
+            <a
+              href="mailto:xyz.codeverse@gmail.com"
+              className="text-base text-muted-foreground hover:text-primary transition-colors duration-200 underline-offset-2"
+              aria-label="Email CodeHatch"
+            >
+              Developed by CodeHatch
+            </a>
           </p>
+
           <div className="flex space-x-8 mt-4 sm:mt-0">
             <Link
               to="/privacy"

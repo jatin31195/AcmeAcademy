@@ -107,7 +107,17 @@ const HeroSection = () => {
                 variant="secondary"
                 className="glass px-4 py-2 text-sm animate-bounce-in"
               >
-                🎯 India's Most Trusted MCA Entrance Coaching
+                 🎯 India's Most Trusted 
+                <span className="bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
+                 
+                  <span className="font-extrabold text-red-600"> M</span>
+                  <span className="font-semibold ">C</span>{"A "}
+                  <span className="font-extrabold text-red-600">E</span>
+                  <span className="font-semibold">ntrance</span>{" "}
+                  <span className="font-extrabold text-red-600">Ac</span>
+                  <span className="font-semibold">ademy</span>
+                </span>
+               
               </Badge>
             </div>
 
