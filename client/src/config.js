@@ -1,1 +1,1 @@
-export const BASE_URL = "https://acmeacademy-backend.onrender.com";
+export const BASE_URL ="https://api.acmeacademy.in";
