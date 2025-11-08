@@ -174,15 +174,15 @@ const AnimatedStat = ({ icon: Icon, value, label, delay = 0 }) => {
     <><SEO
   title="Best MCA Coaching in India | Online & Offline NIMCET Preparation | ACME Academy"
   description="Join ACME Academy — India’s No.1 MCA Coaching Institute for NIMCET, CUET-PG & MAH-CET. Access India's best Online & Offline MCA coaching programs trusted by toppers nationwide."
-  url="https://www.acmeacademy.in/contact"
-  image="https://www.acmeacademy.in/assets/og-acme-mca.jpg"
+  url="https://www.acmeacademy.in/contact-acme-academy"
+  image="https://www.acmeacademy.in/public/logo.png"
   keywords="best MCA coaching in India, best online MCA coaching, best offline MCA classes, NIMCET coaching India, CUET PG MCA preparation, MAH CET MCA coaching, MCA entrance 2025, ACME Academy"
   jsonLd={{
     "@context": "https://schema.org",
     "@type": "ContactPage",
     "name": "ACME Academy - Best MCA Coaching in India",
     "description": "ACME Academy provides India's top-rated MCA entrance coaching for NIMCET, CUET-PG, MAH-CET, and other MCA exams. Learn online or offline with expert mentors and top results.",
-    "url": "https://www.acmeacademy.in/contact",
+    "url": "https://www.acmeacademy.in/contact-acme-academy",
     "publisher": {
       "@type": "EducationalOrganization",
       "name": "ACME Academy",
@@ -219,7 +219,7 @@ const AnimatedStat = ({ icon: Icon, value, label, delay = 0 }) => {
       "department": [
         {
           "@type": "EducationalOrganization",
-          "name": "ACME Academy - Online MCA Coaching",
+          "name": "ACME Academy -India's Best MCA Coaching",
           "description": "India’s best Online MCA coaching classes covering NIMCET, CUET-PG, and other MCA entrance exams. 100% live + recorded sessions.",
           "address": {
             "@type": "PostalAddress",
