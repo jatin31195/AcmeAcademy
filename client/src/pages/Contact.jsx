@@ -98,7 +98,7 @@ const Contact = () => {
       title: "Email Us",
       primary: "info@acmeacademy.com",
       secondary: "support@acmeacademy.com",
-      action: "mailto:info@acmeacademy.com",
+      action: "mailto:acmeacademy15@gmail.com",
     },
   ];
 
@@ -169,15 +169,7 @@ const AnimatedStat = ({ icon: Icon, value, label, delay = 0 }) => {
     </motion.div>
   );
 };
-
-  return (
-    <><SEO
-  title="Best MCA Coaching in India | Online & Offline NIMCET Preparation | ACME Academy"
-  description="Join ACME Academy — India’s No.1 MCA Coaching Institute for NIMCET, CUET-PG & MAH-CET. Access India's best Online & Offline MCA coaching programs trusted by toppers nationwide."
-  url="https://www.acmeacademy.in/contact-acme-academy"
-  image="https://www.acmeacademy.in/public/logo.png"
-  keywords="best MCA coaching in India, best online MCA coaching, best offline MCA classes, NIMCET coaching India, CUET PG MCA preparation, MAH CET MCA coaching, MCA entrance 2025, ACME Academy"
-  jsonLd={{
+const  jsonLd={
     "@context": "https://schema.org",
     "@type": "ContactPage",
     "name": "ACME Academy - Best MCA Coaching in India",
@@ -259,23 +251,22 @@ const AnimatedStat = ({ icon: Icon, value, label, delay = 0 }) => {
         "name": "ACME Academy Faculty Team"
       },
       "slogan": "India’s #1 MCA Coaching Institute (Online + Offline)"
-    }
-  }}
+    },
+  };
+  return (
+    <>
+    <SEO
+  title="Contact ACME Academy | Best MCA Coaching in India (Raipur & Kanpur)"
+  description="Contact ACME Academy — India's #1 MCA Entrance Coaching Institute for NIMCET, CUET, and MAH-CET. Call +91-8109977628 or +91-9516001679, Email: info@acmeacademy.com. Visit our Raipur and Kanpur centers for admissions and free counselling."
+  url="https://www.acmeacademy.in/contact-acme-academy"
+  image="https://www.acmeacademy.in/public/logo.png"
+  keywords="Contact ACME Academy, ACME Academy phone number, ACME Academy Raipur, ACME Academy Kanpur, MCA coaching contact, NIMCET help, CUET PG MCA admissions"
+    jsonLd={jsonLd} 
 />
 
+
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-pink-50 text-gray-800">
-      {/* ✅ SEO Metadata */}
-      <Helmet>
-        <title>Contact ACME Academy | Best MCA Coaching in India (Raipur & Kanpur)</title>
-        <meta
-          name="description"
-          content="Get in touch with ACME Academy — India’s top NIMCET MCA coaching institute. Visit our Kanpur or Raipur centers for expert guidance on MCA entrance preparation."
-        />
-        <meta
-          name="keywords"
-          content="Best MCA Coaching in India, NIMCET Coaching, MCA Entrance Classes, ACME Academy Kanpur, ACME Academy Raipur, Online MCA Coaching, Top MCA Institute"
-        />
-      </Helmet>
+     
 
       {/* 🌊 Hero Section */}
       <section className="relative py-16 sm:py-28 text-center overflow-hidden hero-gradient">
