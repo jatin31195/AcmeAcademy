@@ -185,7 +185,7 @@ const HeroSection = () => {
                   <span className="font-semibold">C</span>A{" "}
                   <span className="font-extrabold text-red-600">E</span>
                   <span className="font-semibold">ntrance </span>
-                  <span className="font-extrabold text-red-600">A</span>
+                  <span className="font-extrabold text-red-600">Ac</span>
                   <span className="font-semibold">ademy</span>
                 </span>
               </Badge>
