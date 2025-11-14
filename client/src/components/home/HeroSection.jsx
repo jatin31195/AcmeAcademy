@@ -88,13 +88,12 @@ const HeroSection = () => {
       startY: 100 + Math.random() * 60,
       delay: Math.random() * 2,
       duration: 6 + Math.random() * 4,
-      color: ["#ff6b6b", "#4dabf7", "#fcc419", "#9775fa", "#63e6be"][i % 5],
+      color: ["#ff6b6b", "#4dabf7", "#fcc419", "#9775fa"][i % 4],
     }));
   }, []);
 
   return (
     <div className="relative">
-
       {/* ============================= */}
       {/*        HERO MAIN SECTION      */}
       {/* ============================= */}
@@ -103,7 +102,7 @@ const HeroSection = () => {
         {/* DISCO SHIMMER */}
         <div className="disco-shimmer z-20"></div>
 
-        {/* SOFT GLOW AURA LIGHTING */}
+        {/* GLOW AURA */}
         <div className="glow-aura">
           <div className="absolute top-10 left-10 w-80 h-80 bg-pink-400 rounded-full"></div>
           <div className="absolute bottom-20 right-20 w-72 h-72 bg-blue-400 rounded-full"></div>
@@ -120,13 +119,7 @@ const HeroSection = () => {
                 left: `${Math.random() * 100}%`,
                 animationDuration: `${3 + Math.random() * 3}s`,
                 animationDelay: `${Math.random() * 2}s`,
-                "--clr": [
-                  "#ff6b6b",
-                  "#4dabf7",
-                  "#fcc419",
-                  "#9775fa",
-                  "#63e6be",
-                ][i % 5],
+                "--clr": ["#ff6b6b", "#4dabf7", "#fcc419", "#9775fa"][i % 4],
               }}
             ></div>
           ))}
@@ -142,9 +135,7 @@ const HeroSection = () => {
                 top: `${20 + Math.random() * 40}%`,
                 left: `${10 + Math.random() * 80}%`,
                 animationDelay: `${i * 1.4}s`,
-                backgroundColor: ["#fff", "#ffd43b", "#ff8787", "#a5d8ff"][
-                  i % 4
-                ],
+                backgroundColor: ["#fff", "#ffd43b", "#ff8787", "#a5d8ff"][i % 4],
               }}
             ></div>
           ))}
@@ -162,16 +153,8 @@ const HeroSection = () => {
                 height: b.size * 1.35,
                 backgroundColor: b.color,
               }}
-              initial={{
-                y: `${b.startY}vh`,
-                opacity: 0,
-                scale: 0.9,
-              }}
-              animate={{
-                y: "-20vh",
-                opacity: [0, 1, 1, 0],
-                scale: 1,
-              }}
+              initial={{ y: `${b.startY}vh`, opacity: 0, scale: 0.9 }}
+              animate={{ y: "-20vh", opacity: [0, 1, 1, 0], scale: 1 }}
               transition={{
                 duration: b.duration,
                 repeat: Infinity,
@@ -185,42 +168,43 @@ const HeroSection = () => {
         {/* ==== HERO CONTENT ==== */}
         <div className="relative z-50 max-w-7xl mx-auto px-4 pb-6">
 
-          {/* ONE-DAY FESTIVAL BANNER */}
+          {/* ONE-DAY BANNER */}
           <div className="w-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white py-3 shadow-lg animate-pulse rounded-lg mb-6">
             <p className="text-center text-lg font-bold tracking-wide">
               🎉 ACME Academy Foundation Day • Happy Children’s Day 🎈
             </p>
           </div>
 
-          {/* BADGE */}
-          <div className="flex justify-center mb-4">
-            <Badge variant="secondary" className="glass px-4 py-2 text-sm">
-              🎯 India's Most Trusted{" "}
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
-                <span className="font-extrabold text-red-600">M</span>C
-                <span className="font-extrabold text-red-600">E</span> Entrance
-                <span className="font-extrabold text-red-600"> Ac</span>ademy
-              </span>
-            </Badge>
-          </div>
-
-          {/* HEADING */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold mb-4">
-            <span className="text-white">Your Gateway to</span>
-            <br />
-            <span className="text-gray-700 text-7xl font-bold">
-              MCA Success
-            </span>
-          </h1>
-
-          {/* CURRENT EXAM ROTATION */}
-          <div className="mb-6">
-            <div className="flex justify-center items-center space-x-2">
-              <span className="text-white/80">Currently preparing for:</span>
-              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
-                <span className="text-white font-semibold text-lg animate-pulse">
-                  {exams[currentExam]}
+          {/* BADGE + HEADING */}
+          <div className="text-center">
+            <div className="flex justify-center mb-4">
+              <Badge variant="secondary" className="glass px-4 py-2 text-sm animate-bounce-in">
+                🎯 India's Most Trusted{" "}
+                <span className="bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
+                  <span className="font-extrabold text-red-600">M</span>
+                  <span className="font-semibold">C</span>A{" "}
+                  <span className="font-extrabold text-red-600">E</span>
+                  <span className="font-semibold">ntrance </span>
+                  <span className="font-extrabold text-red-600">A</span>
+                  <span className="font-semibold">ademy</span>
                 </span>
+              </Badge>
+            </div>
+
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold mb-4 animate-fade-in-up">
+              <span className="text-white">Your Gateway to</span>
+              <br />
+              <span className="text-gray-700 text-7xl font-bold">MCA Success</span>
+            </h1>
+
+            <div className="mb-6 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+              <div className="flex justify-center items-center space-x-2">
+                <span className="text-white/80">Currently preparing for:</span>
+                <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
+                  <span className="text-white font-semibold text-lg animate-pulse">
+                    {exams[currentExam]}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -260,7 +244,6 @@ const HeroSection = () => {
           <Card className="bg-white/90 backdrop-blur-md border border-blue-100 shadow-lg rounded-2xl pt-6">
             <CardContent className="pt-4">
               <form onSubmit={handleSubmit} className="space-y-5">
-
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <Label>Full Name</Label>
@@ -276,9 +259,7 @@ const HeroSection = () => {
                     <Input
                       type="email"
                       value={formData.email}
-                      onChange={(e) =>
-                        handleInputChange("email", e.target.value)
-                      }
+                      onChange={(e) => handleInputChange("email", e.target.value)}
                     />
                   </div>
                 </div>
@@ -288,18 +269,14 @@ const HeroSection = () => {
                     <Label>Phone</Label>
                     <Input
                       value={formData.phone}
-                      onChange={(e) =>
-                        handleInputChange("phone", e.target.value)
-                      }
+                      onChange={(e) => handleInputChange("phone", e.target.value)}
                       required
                     />
                   </div>
 
                   <div>
                     <Label>Preferred Center</Label>
-                    <Select
-                      onValueChange={(v) => handleInputChange("center", v)}
-                    >
+                    <Select onValueChange={(v) => handleInputChange("center", v)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select center" />
                       </SelectTrigger>
@@ -314,9 +291,7 @@ const HeroSection = () => {
 
                 <div>
                   <Label>Query Type</Label>
-                  <Select
-                    onValueChange={(v) => handleInputChange("subject", v)}
-                  >
+                  <Select onValueChange={(v) => handleInputChange("subject", v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select query type" />
                     </SelectTrigger>
@@ -341,7 +316,6 @@ const HeroSection = () => {
                     {!loading && "Send Message"}
                   </Button>
                 </div>
-
               </form>
             </CardContent>
           </Card>
