@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import HeroSection from "@/components/home/HeroSection";
 import ResultSection from "@/components/home/ResultSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
@@ -7,6 +8,8 @@ import HowItWorks from "@/components/home/HowItWorks";
 import FAQSection from "@/components/home/FAQSection";
 import TrustSection from "@/components/home/TrustSection";
 import TopVideos from "@/components/home/TopVideos";
+import JSConfetti from "js-confetti";
+
 import SEO from "../components/SEO";
 const jsonLd = {
   "@context": "https://schema.org",
@@ -59,6 +62,25 @@ const jsonLd = {
 
 
 function Home() {
+  useEffect(() => {
+  const jsConfetti = new JSConfetti();
+
+  setTimeout(() => {
+    jsConfetti.addConfetti({
+      confettiColors: [
+        '#ff6b6b',
+        '#f06595',
+        '#fcc419',
+        '#40c057',
+        '#4dabf7',
+        '#9775fa',
+      ],
+      confettiRadius: 6,
+      confettiNumber: 250,
+    });
+  }, 800); // Delay to avoid navbar shift
+}, []);
+
   return (
     <>
     <SEO

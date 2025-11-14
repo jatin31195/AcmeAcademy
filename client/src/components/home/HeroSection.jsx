@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import {
   Select,
   SelectTrigger,
@@ -18,6 +18,7 @@ import { BASE_URL } from "@/config";
 
 const HeroSection = () => {
   const [currentExam, setCurrentExam] = useState(0);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -25,6 +26,7 @@ const HeroSection = () => {
     center: "",
     subject: "",
   });
+
   const [loading, setLoading] = useState(false);
 
   const exams = [
@@ -37,7 +39,6 @@ const HeroSection = () => {
     "DU MCA",
   ];
 
-
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentExam((prev) => (prev + 1) % exams.length);
@@ -45,11 +46,9 @@ const HeroSection = () => {
     return () => clearInterval(interval);
   }, []);
 
-
   const handleInputChange = (key, value) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
+    setFormData((p) => ({ ...p, [key]: value }));
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,8 +61,7 @@ const HeroSection = () => {
         body: JSON.stringify(formData),
       });
 
-      if (!res.ok) throw new Error("Network response was not ok");
-      const data = await res.json();
+      if (!res.ok) throw new Error("Network error");
 
       toast.success("Message sent Successfully");
 
@@ -74,79 +72,162 @@ const HeroSection = () => {
         center: "",
         subject: "",
       });
-    } catch (err) {
-    toast.error("❌ Error sending message:", err);
-   
+    } catch {
+      toast.error("❌ Error sending message.");
     } finally {
       setLoading(false);
     }
   };
 
+  /* PRE-GENERATED BALLOONS */
+  const balloons = useMemo(() => {
+    return [...Array(20)].map((_, i) => ({
+      id: i,
+      left: Math.random() * 90,
+      size: 35 + Math.random() * 25,
+      startY: 100 + Math.random() * 60,
+      delay: Math.random() * 2,
+      duration: 6 + Math.random() * 4,
+      color: ["#ff6b6b", "#4dabf7", "#fcc419", "#9775fa", "#63e6be"][i % 5],
+    }));
+  }, []);
+
   return (
     <div className="relative">
-   
-      <section className="relative py-16 sm:py-24 text-center overflow-hidden hero-gradient z-10">
-    
-        <div className="absolute inset-0 hero-gradient">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
-          <div className="absolute top-20 left-20 w-72 h-72 bg-primary/20 rounded-full mix-blend-multiply filter blur-xl animate-float"></div>
-          <div
-            className="absolute top-40 right-20 w-64 h-64 bg-accent/20 rounded-full mix-blend-multiply filter blur-xl animate-float"
-            style={{ animationDelay: "2s" }}
-          ></div>
-          <div
-            className="absolute bottom-20 left-1/2 w-80 h-80 bg-primary-glow/10 rounded-full mix-blend-multiply filter blur-xl animate-float"
-            style={{ animationDelay: "4s" }}
-          ></div>
+
+      {/* ============================= */}
+      {/*        HERO MAIN SECTION      */}
+      {/* ============================= */}
+      <section className="relative py-16 sm:py-24 text-center overflow-hidden hero-festival-gradient z-10">
+
+        {/* DISCO SHIMMER */}
+        <div className="disco-shimmer z-20"></div>
+
+        {/* SOFT GLOW AURA LIGHTING */}
+        <div className="glow-aura">
+          <div className="absolute top-10 left-10 w-80 h-80 bg-pink-400 rounded-full"></div>
+          <div className="absolute bottom-20 right-20 w-72 h-72 bg-blue-400 rounded-full"></div>
+          <div className="absolute top-1/3 left-1/2 w-96 h-96 bg-yellow-400 rounded-full"></div>
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
-          <div className="text-center">
-            <div className="flex justify-center mb-4">
-              <Badge
-                variant="secondary"
-                className="glass px-4 py-2 text-sm animate-bounce-in"
-              >
-                 🎯 India's Most Trusted 
-                <span className="bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
-                 
-                  <span className="font-extrabold text-red-600"> M</span>
-                  <span className="font-semibold ">C</span>{"A "}
-                  <span className="font-extrabold text-red-600">E</span>
-                  <span className="font-semibold">ntrance</span>{" "}
-                  <span className="font-extrabold text-red-600">Ac</span>
-                  <span className="font-semibold">ademy</span>
-                </span>
-               
-              </Badge>
-            </div>
-
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold mb-4 animate-fade-in-up">
-              <span className="text-white">Your Gateway to</span>
-              <br />
-              <span className="text-gray-700 text-7xl font-bold">
-                MCA Success
-              </span>
-            </h1>
-
+        {/* CONFETTI */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-30">
+          {[...Array(25)].map((_, i) => (
             <div
-              className="mb-6 animate-fade-in-up"
-              style={{ animationDelay: "0.2s" }}
-            >
-              <div className="flex justify-center items-center space-x-2">
-                <span className="text-white/80">Currently preparing for:</span>
-                <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
-                  <span className="text-white font-semibold text-lg animate-pulse">
-                    {exams[currentExam]}
-                  </span>
-                </div>
+              key={i}
+              className="confetti"
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDuration: `${3 + Math.random() * 3}s`,
+                animationDelay: `${Math.random() * 2}s`,
+                "--clr": [
+                  "#ff6b6b",
+                  "#4dabf7",
+                  "#fcc419",
+                  "#9775fa",
+                  "#63e6be",
+                ][i % 5],
+              }}
+            ></div>
+          ))}
+        </div>
+
+        {/* FIREWORKS */}
+        <div className="absolute inset-0 pointer-events-none z-10">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="firework"
+              style={{
+                top: `${20 + Math.random() * 40}%`,
+                left: `${10 + Math.random() * 80}%`,
+                animationDelay: `${i * 1.4}s`,
+                backgroundColor: ["#fff", "#ffd43b", "#ff8787", "#a5d8ff"][
+                  i % 4
+                ],
+              }}
+            ></div>
+          ))}
+        </div>
+
+        {/* FLOATING BALLOONS */}
+        <div className="absolute inset-0 pointer-events-none select-none z-40 overflow-hidden">
+          {balloons.map((b) => (
+            <motion.div
+              key={b.id}
+              className="balloon absolute"
+              style={{
+                left: `${b.left}%`,
+                width: b.size,
+                height: b.size * 1.35,
+                backgroundColor: b.color,
+              }}
+              initial={{
+                y: `${b.startY}vh`,
+                opacity: 0,
+                scale: 0.9,
+              }}
+              animate={{
+                y: "-20vh",
+                opacity: [0, 1, 1, 0],
+                scale: 1,
+              }}
+              transition={{
+                duration: b.duration,
+                repeat: Infinity,
+                ease: "easeOut",
+                delay: b.delay,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* ==== HERO CONTENT ==== */}
+        <div className="relative z-50 max-w-7xl mx-auto px-4 pb-6">
+
+          {/* ONE-DAY FESTIVAL BANNER */}
+          <div className="w-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white py-3 shadow-lg animate-pulse rounded-lg mb-6">
+            <p className="text-center text-lg font-bold tracking-wide">
+              🎉 ACME Academy Foundation Day • Happy Children’s Day 🎈
+            </p>
+          </div>
+
+          {/* BADGE */}
+          <div className="flex justify-center mb-4">
+            <Badge variant="secondary" className="glass px-4 py-2 text-sm">
+              🎯 India's Most Trusted{" "}
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
+                <span className="font-extrabold text-red-600">M</span>C
+                <span className="font-extrabold text-red-600">E</span> Entrance
+                <span className="font-extrabold text-red-600"> Ac</span>ademy
+              </span>
+            </Badge>
+          </div>
+
+          {/* HEADING */}
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold mb-4">
+            <span className="text-white">Your Gateway to</span>
+            <br />
+            <span className="text-gray-700 text-7xl font-bold">
+              MCA Success
+            </span>
+          </h1>
+
+          {/* CURRENT EXAM ROTATION */}
+          <div className="mb-6">
+            <div className="flex justify-center items-center space-x-2">
+              <span className="text-white/80">Currently preparing for:</span>
+              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
+                <span className="text-white font-semibold text-lg animate-pulse">
+                  {exams[currentExam]}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Wavy Bottom */}
-        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] z-30">
+        {/* WAVY BOTTOM */}
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] z-50">
           <svg
             className="relative block w-full h-20"
             xmlns="http://www.w3.org/2000/svg"
@@ -161,7 +242,7 @@ const HeroSection = () => {
         </div>
       </section>
 
-     
+      {/* FORM SECTION */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -172,33 +253,28 @@ const HeroSection = () => {
           <h2 className="text-3xl font-bold text-gray-800">
             Book a Free Counselling Now...
           </h2>
-          <div className="mt-2 h-1 w-24 bg-gradient-to-r from-blue-600 to-red-400 mx-auto rounded-full"></div>
         </div>
 
+        {/* FORM */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-       
           <Card className="bg-white/90 backdrop-blur-md border border-blue-100 shadow-lg rounded-2xl pt-6">
             <CardContent className="pt-4">
               <form onSubmit={handleSubmit} className="space-y-5">
+
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label>Full Name</Label>
                     <Input
-                      id="name"
-                      placeholder="Your full name"
                       value={formData.name}
-                      onChange={(e) =>
-                        handleInputChange("name", e.target.value)
-                      }
+                      onChange={(e) => handleInputChange("name", e.target.value)}
                       required
                     />
                   </div>
+
                   <div>
-                    <Label htmlFor="email">Email (optional)</Label>
+                    <Label>Email (optional)</Label>
                     <Input
-                      id="email"
                       type="email"
-                      placeholder="your@email.com"
                       value={formData.email}
                       onChange={(e) =>
                         handleInputChange("email", e.target.value)
@@ -209,10 +285,8 @@ const HeroSection = () => {
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label>Phone</Label>
                     <Input
-                      id="phone"
-                      placeholder="Your phone number"
                       value={formData.phone}
                       onChange={(e) =>
                         handleInputChange("phone", e.target.value)
@@ -220,12 +294,11 @@ const HeroSection = () => {
                       required
                     />
                   </div>
+
                   <div>
-                    <Label htmlFor="center">Preferred Center</Label>
+                    <Label>Preferred Center</Label>
                     <Select
-                      onValueChange={(value) =>
-                        handleInputChange("center", value)
-                      }
+                      onValueChange={(v) => handleInputChange("center", v)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select center" />
@@ -240,19 +313,15 @@ const HeroSection = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="subject">Query Type</Label>
+                  <Label>Query Type</Label>
                   <Select
-                    onValueChange={(value) =>
-                      handleInputChange("subject", value)
-                    }
+                    onValueChange={(v) => handleInputChange("subject", v)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select query type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="counselling">
-                        Free Counselling
-                      </SelectItem>
+                      <SelectItem value="counselling">Free Counselling</SelectItem>
                       <SelectItem value="course">Course Inquiry</SelectItem>
                       <SelectItem value="admission">Admission</SelectItem>
                       <SelectItem value="feedback">Feedback</SelectItem>
@@ -266,19 +335,17 @@ const HeroSection = () => {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className={`bg-gradient-to-r from-blue-600 via-pink-400 to-red-400 text-white rounded-full shadow-md hover:scale-105 hover:shadow-lg transition-all flex items-center justify-center gap-2 px-6 py-2 ${
-                      loading ? "opacity-70 cursor-not-allowed" : ""
-                    }`}
+                    className="bg-gradient-to-r from-blue-600 via-pink-400 to-red-400 text-white px-6 py-2 rounded-full shadow-md"
                   >
                     {loading ? "Sending..." : <Send className="h-4 w-4" />}
                     {!loading && "Send Message"}
                   </Button>
                 </div>
+
               </form>
             </CardContent>
           </Card>
 
-          
           <div className="flex justify-center">
             <img
               src="https://res.cloudinary.com/dwqvrtvu1/image/upload/v1762278134/mobileapp01.jpg_g3lhyt.webp"
