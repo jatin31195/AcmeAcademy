@@ -132,7 +132,7 @@ const ResultsSection = () => {
               </div>
             )}
           </div>
-
+            
           {/* 🗒️ Notice Board */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
@@ -174,6 +174,14 @@ const ResultsSection = () => {
             </Card>
           </motion.div>
         </div>
+<div className="w-full text-center mt-6">
+  <a
+    href="/acme-academy-results/nimcet/2025"
+    className="inline-block bg-gradient-to-r from-blue-600 via-pink-400 to-red-400 text-white font-semibold px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+  >
+    View Complete Results →
+  </a>
+</div>
 
         <div className="text-center mt-12 px-4">
           <h2 className="text-2xl md:text-3xl font-bold">
