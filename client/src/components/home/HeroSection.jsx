@@ -97,20 +97,20 @@ const HeroSection = () => {
       {/* ============================= */}
       {/*        HERO MAIN SECTION      */}
       {/* ============================= */}
-      <section className="relative py-16 sm:py-24 text-center overflow-hidden hero-festival-gradient z-10">
-
+      {/* <section className="relative py-16 sm:py-24 text-center overflow-hidden hero-festival-gradient z-10"> */}
+      <section className="relative py-16 sm:py-24 text-center overflow-hidden hero-gradient z-10">
         {/* DISCO SHIMMER */}
-        <div className="disco-shimmer z-20"></div>
+        {/* <div className="disco-shimmer z-20"></div> */}
 
         {/* GLOW AURA */}
-        <div className="glow-aura">
+        {/* <div className="glow-aura">
           <div className="absolute top-10 left-10 w-80 h-80 bg-pink-400 rounded-full"></div>
           <div className="absolute bottom-20 right-20 w-72 h-72 bg-blue-400 rounded-full"></div>
           <div className="absolute top-1/3 left-1/2 w-96 h-96 bg-yellow-400 rounded-full"></div>
-        </div>
+        </div> */}
 
         {/* CONFETTI */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-30">
+        {/* <div className="absolute inset-0 overflow-hidden pointer-events-none z-30">
           {[...Array(25)].map((_, i) => (
             <div
               key={i}
@@ -123,10 +123,10 @@ const HeroSection = () => {
               }}
             ></div>
           ))}
-        </div>
+        </div> */}
 
         {/* FIREWORKS */}
-        <div className="absolute inset-0 pointer-events-none z-10">
+        {/* <div className="absolute inset-0 pointer-events-none z-10">
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
@@ -139,10 +139,10 @@ const HeroSection = () => {
               }}
             ></div>
           ))}
-        </div>
+        </div> */}
 
         {/* FLOATING BALLOONS */}
-        <div className="absolute inset-0 pointer-events-none select-none z-40 overflow-hidden">
+        {/* <div className="absolute inset-0 pointer-events-none select-none z-40 overflow-hidden">
           {balloons.map((b) => (
             <motion.div
               key={b.id}
@@ -163,17 +163,17 @@ const HeroSection = () => {
               }}
             />
           ))}
-        </div>
+        </div> */}
 
         {/* ==== HERO CONTENT ==== */}
         <div className="relative z-50 max-w-7xl mx-auto px-4 pb-6">
 
           {/* ONE-DAY BANNER */}
-          <div className="w-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white py-3 shadow-lg animate-pulse rounded-lg mb-6">
+          {/* <div className="w-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white py-3 shadow-lg animate-pulse rounded-lg mb-6">
             <p className="text-center text-lg font-bold tracking-wide">
               🎉 ACME Academy Foundation Day • Happy Children’s Day 🎈
             </p>
-          </div>
+          </div> */}
 
           {/* BADGE + HEADING */}
           <div className="text-center">
