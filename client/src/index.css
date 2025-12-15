@@ -588,7 +588,7 @@ button[role="button"][data-state] {
 /* ========================= */
 
 /* Smooth Luxury Gradient */
-@keyframes pulseGradient {
+/* @keyframes pulseGradient {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
@@ -610,14 +610,14 @@ button[role="button"][data-state] {
 }
 
 /* Balloon Shape */
-.balloon {
+/* .balloon {
   border-radius: 50% 50% 45% 45%;
   opacity: 0.85;
   box-shadow: inset -4px -8px 12px rgba(0,0,0,0.15);
-}
+} */
 
 /* Balloon string */
-.balloon::after {
+/* .balloon::after {
   content: "";
   position: absolute;
   bottom: -18px;
@@ -627,10 +627,10 @@ button[role="button"][data-state] {
   background: rgba(0,0,0,0.25);
   border-radius: 50%;
   transform: translateX(-50%);
-}
+} */
 
 /* CONFETTI */
-.confetti {
+/* .confetti {
   position: absolute;
   width: 8px;
   height: 14px;
@@ -638,31 +638,31 @@ button[role="button"][data-state] {
   opacity: 0.75;
   background: var(--clr);
   animation: confettiFall linear infinite;
-}
+} */
 
-@keyframes confettiFall {
+/* @keyframes confettiFall {
   0%   { transform: translateY(0) rotate(0deg); }
   100% { transform: translateY(110vh) rotate(360deg); }
-}
+} */
 
 /* FIREWORKS */
-.firework {
+/* .firework {
   position: absolute;
   width: 4px;
   height: 4px;
   opacity: 0;
   border-radius: 50%;
   animation: fireworkBoom 1.4s ease-out infinite;
-}
+} */
 
-@keyframes fireworkBoom {
+/* @keyframes fireworkBoom {
   0% { opacity: 1; transform: scale(0); }
   70% { opacity: 1; transform: scale(6); }
   100% { opacity: 0; transform: scale(0); }
-}
+} */
 
 /* DISCO SHIMMER */
-.disco-shimmer {
+/* .disco-shimmer {
   position: absolute;
   inset: 0;
   background:
@@ -670,20 +670,20 @@ button[role="button"][data-state] {
     radial-gradient(circle at 80% 70%, rgba(255,255,255,0.15), transparent 60%);
   animation: shimmerMove 8s ease-in-out infinite;
   mix-blend-mode: soft-light;
-}
+} */
 
-@keyframes shimmerMove {
+/* @keyframes shimmerMove {
   0% { transform: scale(1) translateX(-20px); }
   50% { transform: scale(1.1) translateX(20px); }
   100% { transform: scale(1) translateX(-20px); }
-}
+} */
 
 /* Soft Glow Aura Lights */
-.glow-aura {
+/* .glow-aura {
   position: absolute;
   inset: 0;
   pointer-events: none;
   filter: blur(90px);
   opacity: 0.45;
   z-index: 12;
-}
+}  */
