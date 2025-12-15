@@ -8,14 +8,21 @@ const ResultsSection = () => {
   const [resultImages, setResultImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [current, setCurrent] = useState(0);
+  const [notices, setNotices] = useState([]);
   const marqueeRef = useRef(null);
 
-  const notices = [
-    { title: "NIMCET 2025 Test Series Released!", date: "Nov 2, 2025", link: "#" },
-    { title: "Offline Batch Admissions Open for Raipur", date: "Nov 1, 2025", link: "#" },
-    { title: "Top 50 AIR Results Published!", date: "Oct 30, 2025", link: "#" },
-    { title: "Download Updated Syllabus PDF", date: "Oct 28, 2025", link: "#" },
-  ];
+  useEffect(() => {
+  const fetchNotices = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/api/get-notices`);
+      setNotices(res.data);
+    } catch (error) {
+      console.error("Error fetching notices:", error);
+    }
+  };
+
+  fetchNotices();
+}, []);
 
   // 🔹 Fetch images from your backend
   useEffect(() => {
@@ -151,23 +158,50 @@ const ResultsSection = () => {
               <CardContent className="relative px-4 py-4 flex-1 overflow-hidden">
                 <div ref={marqueeRef} className="h-full overflow-hidden">
                   <div className="space-y-3">
-                    {notices.concat(notices).map((notice, i) => (
-                      <motion.a
-                        key={i}
-                        href={notice.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block bg-white/85 border border-gray-200/60 backdrop-blur-md p-3 rounded-lg shadow-sm hover:shadow-md hover:border-indigo-400/60 transition-all duration-300 group"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.05 }}
-                      >
-                        <h5 className="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors">
-                          {notice.title}
-                        </h5>
-                        <p className="text-xs text-gray-500 mt-1">{notice.date}</p>
-                      </motion.a>
-                    ))}
+                    {notices.length > 0 ? (
+  notices.concat(notices).map((notice, i) => (
+    <motion.a
+      key={`${notice._id}-${i}`}
+      href={notice.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block bg-white/85 border border-gray-200/60 backdrop-blur-md p-3 rounded-lg shadow-sm hover:shadow-md hover:border-indigo-400/60 transition-all duration-300 group"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ delay: i * 0.05 }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <h5 className="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors">
+          {notice.title}
+        </h5>
+
+        <span
+          className={`text-[10px] px-2 py-0.5 rounded-full font-medium capitalize
+            ${
+              notice.tag === "exam" &&
+              "bg-blue-100 text-blue-700"
+            }
+            ${
+              notice.tag === "result" &&
+              "bg-green-100 text-green-700"
+            }
+            ${
+              notice.tag === "video" &&
+              "bg-red-100 text-red-700"
+            }
+          `}
+        >
+          {notice.tag}
+        </span>
+      </div>
+    </motion.a>
+  ))
+) : (
+  <p className="text-sm text-gray-500 text-center">
+    No notices available
+  </p>
+)}
+
                   </div>
                 </div>
               </CardContent>
