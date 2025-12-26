@@ -93,3 +93,67 @@ export const getTopicById = async (req, res) => {
     });
   }
 };
+
+export const updatePracticeTopic = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updated = await PracticeTopic.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        message: "PracticeTopic not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "PracticeTopic updated successfully",
+      data: updated,
+    });
+  } catch (err) {
+    console.error("❌ Error updating PracticeTopic:", err);
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating PracticeTopic",
+    });
+  }
+};
+
+
+export const deletePracticeTopic = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const topic = await PracticeTopic.findById(id);
+    if (!topic) {
+      return res.status(404).json({
+        success: false,
+        message: "PracticeTopic not found",
+      });
+    }
+
+    
+    await PracticeSet.findByIdAndUpdate(topic.practiceSet, {
+      $pull: { topics: id },
+    });
+
+    await PracticeTopic.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: "PracticeTopic deleted successfully",
+    });
+  } catch (err) {
+    console.error("❌ Error deleting PracticeTopic:", err);
+    res.status(500).json({
+      success: false,
+      message: "Server error while deleting PracticeTopic",
+    });
+  }
+};

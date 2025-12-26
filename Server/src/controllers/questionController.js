@@ -118,6 +118,39 @@ export const searchQuestions = async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to search questions" });
   }
 };
+export const deleteQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const question = await Question.findById(id);
+    if (!question) {
+      return res.status(404).json({
+        success: false,
+        error: "Question not found",
+      });
+    }
+
+    // Remove reference from PracticeTopic if exists
+    if (question.practiceTopic) {
+      await PracticeTopic.findByIdAndUpdate(question.practiceTopic, {
+        $pull: { generalQuestions: id },
+      });
+    }
+
+    await Question.findByIdAndDelete(id);
+
+    res.json({
+      success: true,
+      message: "Question deleted successfully",
+    });
+  } catch (err) {
+    console.error("❌ Error deleting question:", err);
+    res.status(500).json({
+      success: false,
+      error: "Failed to delete question",
+    });
+  }
+};
 
 export const getAllQuestions = async (req, res) => {
   try {

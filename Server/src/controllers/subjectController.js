@@ -40,3 +40,40 @@ export const getSubjectById = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+export const updateSubject = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updatedSubject = await Subject.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedSubject)
+      return res.status(404).json({ error: "Subject not found" });
+
+    res.json(updatedSubject);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+export const deleteSubject = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const subject = await Subject.findById(id);
+    if (!subject)
+      return res.status(404).json({ error: "Subject not found" });
+
+    await Course.findByIdAndUpdate(subject.course, {
+      $pull: { subjects: id },
+    });
+
+    await Subject.deleteOne({ _id: id });
+
+    res.json({ message: "Subject deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

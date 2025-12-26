@@ -81,6 +81,27 @@ export const uploadResultPhoto = async (req, res) => {
     res.status(500).json({ error: "Failed to upload result photo" });
   }
 };
+export const deleteResultImageById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await Result.findById(id);
+    if (!result) {
+      return res.status(404).json({ message: "Result not found" });
+    }
+
+   
+
+    await Result.deleteOne({ _id: id });
+
+    res.status(200).json({
+      message: "Result image deleted successfully",
+    });
+  } catch (err) {
+    console.error("Error deleting result image:", err);
+    res.status(500).json({ error: "Failed to delete result image" });
+  }
+};
 
 
 
@@ -161,6 +182,76 @@ export const getCombinedResultImages = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch combined result images" });
   }
 };
+export const addCombinedResultImage = async (req, res) => {
+  try {
+    const { name, exam, year, rank, score } = req.body;
+
+    const cloudUrl = await uploadToCloudinary(req.file?.path, "results");
+    if (!cloudUrl) {
+      return res.status(400).json({ error: "Failed to upload image" });
+    }
+
+    const identifier = rank
+      ? `air-${rank}`
+      : score
+      ? `score-${score}`
+      : "unranked";
+
+    const slug = slugify(
+      `${exam || "combined"}-${year || "undefined"}-${identifier}-${name || "undefined"}-${Date.now()}`,
+      { lower: true, strict: true }
+    );
+
+    const combinedResult = new Result({
+      name: name || null,
+      exam: exam?.toLowerCase() || "combined",
+      year: year || null,
+      rank: rank || null,
+      score: score || null,
+      photoUrl: cloudUrl,
+      photoType: "combined",
+      slug,
+    });
+
+    await combinedResult.save();
+
+    res.status(201).json({
+      message: "Combined result image added successfully",
+      result: combinedResult,
+    });
+  } catch (err) {
+    console.error("Error adding combined result image:", err);
+    res.status(500).json({ error: "Failed to add combined result image" });
+  }
+};
+export const deleteCombinedResultImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const combinedImage = await Result.findOne({
+      _id: id,
+      photoType: { $regex: /^combined$/i },
+    });
+
+    if (!combinedImage) {
+      return res.status(404).json({
+        message: "Combined image not found",
+      });
+    }
+
+    // OPTIONAL: delete from Cloudinary if you store public_id
+    // await deleteFromCloudinary(combinedImage.photoUrl);
+
+    await Result.deleteOne({ _id: id });
+
+    res.status(200).json({
+      message: "Combined image deleted successfully",
+    });
+  } catch (err) {
+    console.error("Error deleting combined image:", err);
+    res.status(500).json({ error: "Failed to delete combined image" });
+  }
+};
 
 
 export const getAvailableYearsByExam = async (req, res) => {
@@ -218,3 +309,69 @@ export const getHomeResultImages = async (req, res) => {
   }
 };
 
+export const addHomeResultImage = async (req, res) => {
+  try {
+    const { name, exam, year, rank, score } = req.body;
+
+    const cloudUrl = await uploadToCloudinary(req.file?.path, "results");
+    if (!cloudUrl) {
+      return res.status(400).json({ error: "Failed to upload image" });
+    }
+
+    // slug
+    const baseSlug = slugify(
+      `${exam || "home"}-${year || ""}-${rank || ""}-${name || "image"}-${Date.now()}`,
+      { lower: true, strict: true }
+    );
+
+    const homeResult = new Result({
+      name,
+      exam: exam?.toLowerCase() || "home",
+      year: year || null,
+      rank: rank || null,
+      score: score || null,
+      photoUrl: cloudUrl,
+      photoType: "home",
+      slug: baseSlug,
+    });
+
+    await homeResult.save();
+
+    res.status(201).json({
+      message: "Home image added successfully",
+      result: homeResult,
+    });
+  } catch (err) {
+    console.error("Error adding home image:", err);
+    res.status(500).json({ error: "Failed to add home image" });
+  }
+};
+
+export const deleteHomeResultImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const homeImage = await Result.findOne({
+      _id: id,
+      photoType: { $regex: /^home$/i },
+    });
+
+    if (!homeImage) {
+      return res.status(404).json({
+        message: "Home image not found",
+      });
+    }
+
+    // OPTIONAL: delete from Cloudinary if you store public_id
+    // await deleteFromCloudinary(homeImage.photoUrl);
+
+    await Result.deleteOne({ _id: id });
+
+    res.status(200).json({
+      message: "Home image deleted successfully",
+    });
+  } catch (err) {
+    console.error("Error deleting home image:", err);
+    res.status(500).json({ error: "Failed to delete home image" });
+  }
+};

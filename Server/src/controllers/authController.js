@@ -507,3 +507,41 @@ export const getUserTestAttempts = async (req, res) => {
     });
   }
 };
+
+
+export const adminLogin = (req, res) => {
+  const { email, password } = req.body;
+
+  if (
+    email !== process.env.ADMIN_EMAIL ||
+    password !== process.env.ADMIN_PASSWORD
+  ) {
+    return res.status(401).json({
+      message: "Invalid admin credentials",
+    });
+  }
+
+  const adminToken = jwt.sign(
+    {
+      email,
+      role: "admin",
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" }
+  );
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+    path: "/", // important
+  };
+
+  res
+    .cookie("adminToken", adminToken, cookieOptions)
+    .status(200)
+    .json({
+      message: "Admin login successful",
+    });
+};

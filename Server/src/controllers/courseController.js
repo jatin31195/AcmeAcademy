@@ -32,3 +32,35 @@ export const createCourse = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+export const deleteCourse = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const course = await Course.findById(id);
+    if (!course) return res.status(404).json({ error: "Course not found" });
+
+    await Course.deleteOne({ _id: id });
+
+    res.json({ message: "Course deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+export const updateCourse = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updatedCourse = await Course.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedCourse)
+      return res.status(404).json({ error: "Course not found" });
+
+    res.json(updatedCourse);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
