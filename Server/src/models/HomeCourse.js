@@ -6,7 +6,10 @@ const homeCourseSchema = new mongoose.Schema(
     description: { type: String, required: true },
     duration: { type: String },
     mode: { type: String },
-
+    exams: {
+      type: [String], 
+      default: [],
+    },
     courseType: { type: String }, 
 
     icon: { type: String },
