@@ -15,7 +15,10 @@ import practiceSetTopicQuestionRoute from "./admin/practiceSetTopicQuestionRoute
 import sendMailRoute from "./admin/sendMailRoute.js";
 import testTrackRoute from "./admin/testTrackRoute.js";
 import pyqRoute from "./admin/pyqRoute.js"
+import dashboardRoute from "./admin/dashboardRoute.js"
+import userRoute from "./admin/userRoute.js"
 const router = express.Router();
+router.use("/users", userRoute);
 router.use("/auth", authRoute);
 router.use("/selfstudy", selfStudyCourseRoute);
 router.use("/selfstudy/subjects", selfStudyCourseSubjectRoute);
@@ -32,5 +35,5 @@ router.use("/practice-set/t/q",practiceSetTopicQuestionRoute);
 router.use("/mail",sendMailRoute);
 router.use("/test",testTrackRoute);
 router.use("/pyq",pyqRoute);
-
+router.use("/dashboard", dashboardRoute);
 export default router;

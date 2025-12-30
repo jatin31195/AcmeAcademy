@@ -15,6 +15,7 @@ import resultRoutes from "./src/routes/resultRoute.js";
 import practiceTopicRoutes from "./src/routes/practiceTopicRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js"
 import noticeRoute from "./src/routes/noticeRoute.js"
+import homeCourseRoute from "./src/routes/homeCourseRoute.js"
 import sitemapRoutes from "./src/routes/sitemap.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -56,6 +57,7 @@ app.use("/api/mail", mailRoutes);
 app.use("/api/practice-set", practiceSetRoutes);
 app.use("/api/practice-topic", practiceTopicRoutes);
 app.use("/api/get-notices",noticeRoute)
+app.use("/api/get-course",homeCourseRoute)
 app.use(express.static(path.join(__dirname, "./public")));
 app.use("/", sitemapRoutes);
 app.use("/api/admin",adminRoutes);
