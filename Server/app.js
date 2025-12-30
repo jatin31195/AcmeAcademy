@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import prerender from "prerender-node";
+import adminRoutes from "./src/routes/adminRoutes.js"
 import practiceSetRoutes from "./src/routes/practiceSetRoute.js";
 import authRoute from "./src/routes/authRoute.js";
 import mailRoutes from "./src/routes/mailRoute.js"
@@ -14,6 +15,9 @@ import testRoute from "./src/routes/testRoute.js";
 import questionRoutes from "./src/routes/questionRoute.js";
 import resultRoutes from "./src/routes/resultRoute.js";
 import practiceTopicRoutes from "./src/routes/practiceTopicRoutes.js";
+import adminRoutes from "./src/routes/adminRoutes.js"
+import noticeRoute from "./src/routes/noticeRoute.js"
+import homeCourseRoute from "./src/routes/homeCourseRoute.js"
 import sitemapRoutes from "./src/routes/sitemap.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -65,8 +69,12 @@ app.use("/api/results", resultRoutes);
 app.use("/api/mail", mailRoutes);
 app.use("/api/practice-set", practiceSetRoutes);
 app.use("/api/practice-topic", practiceTopicRoutes);
+app.use("/api/get-notices",noticeRoute)
+app.use("/api/get-course",homeCourseRoute)
+
 app.use(express.static(path.join(__dirname, "./public")));
 app.use("/", sitemapRoutes);
+app.use("/api/admin",adminRoutes);
 /* ------------------------- 🔹 Root Route ------------------------- */
 app.get("/", (req, res) => {
   res.send("🚀 ACME Academy Backend is running!");

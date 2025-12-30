@@ -72,3 +72,54 @@ export const getPracticeSetById = async (req, res) => {
     });
   }
 };
+
+export const updatePracticeSet = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updated = await PracticeSet.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "PracticeSet not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "PracticeSet updated successfully",
+      data: updated,
+    });
+  } catch (err) {
+    console.error("❌ Error updating PracticeSet:", err);
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating PracticeSet",
+    });
+  }
+};
+
+
+export const deletePracticeSet = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await PracticeSet.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "PracticeSet not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "PracticeSet deleted successfully",
+    });
+  } catch (err) {
+    console.error("❌ Error deleting PracticeSet:", err);
+    res.status(500).json({
+      success: false,
+      message: "Server error while deleting PracticeSet",
+    });
+  }
+};

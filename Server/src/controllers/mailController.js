@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import User from "../models/User.js";
 import dotenv from "dotenv";
 dotenv.config();
 export const sendCounsellingMail = async (req, res) => {
@@ -94,5 +95,66 @@ export const sendCounsellingMail = async (req, res) => {
   } catch (err) {
     console.error("Mail Error:", err);
     res.status(500).json({ error: "Failed to send mail" });
+  }
+};
+
+export const sendAdminMail = async (req, res) => {
+  try {
+    const { subject, message, emails, sendToAll } = req.body;
+
+    if (!subject || !message) {
+      return res.status(400).json({ error: "Subject and message are required" });
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    let recipients = [];
+
+    // ✅ Option 1: Send to ALL users
+    if (sendToAll === true) {
+      const users = await User.find({}, "email");
+      recipients = users.map((u) => u.email).filter(Boolean);
+    }
+
+    // ✅ Option 2: Send to selected emails
+    if (Array.isArray(emails) && emails.length > 0) {
+      recipients = emails;
+    }
+
+    if (recipients.length === 0) {
+      return res.status(400).json({ error: "No recipients found" });
+    }
+
+    const mailHTML = `
+      <div style="font-family: Arial; padding:20px;">
+        <h2 style="color:#2b2d42;">📢 ACME Academy Notification</h2>
+        <p style="font-size:15px; line-height:1.6;">${message}</p>
+        <hr/>
+        <p style="font-size:12px;color:#666;">
+          This is an official communication from ACME Academy.
+        </p>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: `"ACME Academy" <${process.env.EMAIL_USER}>`,
+      bcc: recipients, // ✅ BCC to avoid exposing emails
+      subject,
+      html: mailHTML,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Mail sent to ${recipients.length} recipient(s)`,
+    });
+  } catch (err) {
+    console.error("Admin Mail Error:", err);
+    res.status(500).json({ error: "Failed to send admin mail" });
   }
 };

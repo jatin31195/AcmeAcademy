@@ -10,17 +10,29 @@ import {
   getAvailableYearsByExam,
   getAvailableExams,
    getHomeResultImages,
+   addHomeResultImage,
+   addCombinedResultImage,
+   deleteCombinedResultImage
 } from "../controllers/resultController.js";
 import { upload } from "../utils/multerCloudinary.js";
 const router = express.Router();
 router.get("/top/all", getTopResults);
 router.get("/gallery/all", getGalleryImages);
 router.get("/home/result", getHomeResultImages);
+router.post("/home/add-result",upload.single("photo"),addHomeResultImage
+);
 router.post("/upload", upload.single("photo"), uploadResultPhoto);
 router.post("/gallery/add", upload.single("photo"), addGalleryImage);
 router.get("/years/:exam", getAvailableYearsByExam);
 router.get("/exams", getAvailableExams);
 router.get("/combined", getCombinedResultImages);
+router.post(
+  "/combined",upload.single("image"),addCombinedResultImage
+);
+
+router.delete("/combined/:id",deleteCombinedResultImage
+);
+
 router.get("/:exam/:year/air-:rank", getResultByRank);
 router.get("/:exam/:year", getResultsByYear);
 

@@ -9,16 +9,20 @@ pnpm-debug.log*
 node_modules/
 client/node_modules/
 Server/node_modules/
+Admin/node_modules/
 
 # Environment variables
 client/.env
 Server/.env
+Admin/.env
 
 # Build outputs
 client/dist/
 client/build/
 Server/dist/
 Server/build/
+Admin/dist/
+Admin/build/
 
 # Vite and cache
 .vite/
