@@ -17,6 +17,17 @@ router.post(
   upload.array("pdfs"),
   pyqController.addBulkPYQController
 );
+router.put(
+  "/:id",
+  verifyAdmin,
+  upload.single("file"), 
+  pyqController.updatePYQController
+);
 router.get("/", pyqController.getPYQs);
 router.get("/:id", pyqController.getPYQ);
+router.delete(
+  "/:id",
+  verifyAdmin,
+  pyqController.deletePYQController
+);
 export default router;

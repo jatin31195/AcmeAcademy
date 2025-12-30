@@ -5,7 +5,7 @@ import UserTestAttempt from "../models/UserTestAttempt.js";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
-
+import crypto from "crypto";
 const otpStore = new Map();
 const verifiedEmails = new Set();
 export const sendEmailOtp = async (req, res) => {
@@ -516,15 +516,17 @@ export const adminLogin = (req, res) => {
     email !== process.env.ADMIN_EMAIL ||
     password !== process.env.ADMIN_PASSWORD
   ) {
-    return res.status(401).json({
-      message: "Invalid admin credentials",
-    });
+    return res.status(401).json({ message: "Invalid admin credentials" });
   }
+
+  // ✅ Generate session token
+  const sessionToken = crypto.randomBytes(32).toString("hex");
 
   const adminToken = jwt.sign(
     {
       email,
       role: "admin",
+      sessionToken,
     },
     process.env.JWT_SECRET,
     { expiresIn: "1d" }
@@ -534,14 +536,59 @@ export const adminLogin = (req, res) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
-    path: "/", // important
+    maxAge: 24 * 60 * 60 * 1000,
+    path: "/",
   };
 
   res
     .cookie("adminToken", adminToken, cookieOptions)
+    .cookie("adminSession", sessionToken, cookieOptions) // ✅ important
     .status(200)
-    .json({
-      message: "Admin login successful",
+    .json({ message: "Admin login successful" });
+};
+
+export const getAdminMe = (req, res) => {
+  const token = req.cookies.adminToken;
+  const sessionToken = req.cookies.adminSession;
+
+  if (!token || !sessionToken) {
+    return res.status(401).json({ admin: null });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // ✅ session validation
+    if (decoded.sessionToken !== sessionToken) {
+      return res.status(401).json({ admin: null });
+    }
+
+    res.status(200).json({
+      admin: {
+        email: decoded.email,
+        role: decoded.role,
+      },
     });
+  } catch (err) {
+    return res.status(401).json({ admin: null });
+  }
+};
+
+/**
+ * POST /api/admin/logout
+ * Clear admin cookies
+ */
+export const adminLogout = (req, res) => {
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    path: "/",
+  };
+
+  res
+    .clearCookie("adminToken", cookieOptions)
+    .clearCookie("adminSession", cookieOptions)
+    .status(200)
+    .json({ message: "Admin logged out successfully" });
 };

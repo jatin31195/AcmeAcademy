@@ -77,3 +77,62 @@ export const addBulkPYQController = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+export const deletePYQController = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await pyqService.deletePYQ(id);
+
+    res.status(200).json({
+      success: true,
+      message: "PYQ deleted successfully",
+    });
+  } catch (err) {
+    console.error("Delete PYQ error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const updatePYQController = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      title,
+      exam,
+      year,
+      description,
+      fileSize,
+      difficulty,
+      questions,
+    } = req.body;
+
+    const existingPYQ = await pyqService.getPYQById(id);
+    if (!existingPYQ) {
+      return res.status(404).json({ message: "PYQ not found" });
+    }
+
+    let pdfUrl = existingPYQ.pdfUrl;
+
+    // ✅ If new file uploaded, replace PDF
+    if (req.file) {
+      pdfUrl = await uploadToCloudinary(req.file.path, "pyqs");
+    }
+
+    const updatedPYQ = await pyqService.updatePYQ(id, {
+      title: title ?? existingPYQ.title,
+      exam: exam ?? existingPYQ.exam,
+      year: year ?? existingPYQ.year,
+      description: description ?? existingPYQ.description,
+      pdfUrl,
+      fileSize: fileSize ?? existingPYQ.fileSize,
+      difficulty: difficulty ?? existingPYQ.difficulty,
+      questions: questions ?? existingPYQ.questions,
+    });
+
+    res.status(200).json(updatedPYQ);
+  } catch (err) {
+    console.error("Update PYQ error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
