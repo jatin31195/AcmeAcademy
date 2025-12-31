@@ -567,31 +567,25 @@ export const adminLogin = async (req, res) => {
 
 
 export const getAdminMe = (req, res) => {
-  const token = req.cookies.adminToken;
-  const sessionToken = req.cookies.adminSession;
+  const accessToken = req.cookies.adminAccessToken;
 
-  if (!token || !sessionToken) {
+  if (!accessToken) {
     return res.status(401).json({ admin: null });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // ✅ session validation
-    if (decoded.sessionToken !== sessionToken) {
-      return res.status(401).json({ admin: null });
-    }
+    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
 
     res.status(200).json({
       admin: {
         email: decoded.email,
-        role: decoded.role,
       },
     });
   } catch (err) {
     return res.status(401).json({ admin: null });
   }
 };
+
 
 /**
  * POST /api/admin/logout
@@ -606,8 +600,9 @@ export const adminLogout = (req, res) => {
   };
 
   res
-    .clearCookie("adminToken", cookieOptions)
-    .clearCookie("adminSession", cookieOptions)
+    .clearCookie("adminAccessToken", cookieOptions)
+    .clearCookie("adminRefreshToken", cookieOptions)
     .status(200)
     .json({ message: "Admin logged out successfully" });
 };
+
