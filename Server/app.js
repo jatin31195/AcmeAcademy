@@ -47,6 +47,7 @@ app.use(
     origin: [
       "https://www.acmeacademy.in", // for Vite dev
       "https://acmeacademy.onrender.com", // optional tunnel
+      "https://acme-academy-rd7v.vercel.app"
     ],
     methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
     credentials: true,
