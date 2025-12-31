@@ -16,8 +16,6 @@ import questionRoutes from "./src/routes/questionRoute.js";
 import resultRoutes from "./src/routes/resultRoute.js";
 import noticeRoute from "./src/routes/noticeRoute.js"
 import practiceTopicRoutes from "./src/routes/practiceTopicRoutes.js";
-import adminRoutes from "./src/routes/adminRoutes.js"
-import noticeRoute from "./src/routes/noticeRoute.js"
 import homeCourseRoute from "./src/routes/homeCourseRoute.js"
 import sitemapRoutes from "./src/routes/sitemap.js";
 import path from "path";
