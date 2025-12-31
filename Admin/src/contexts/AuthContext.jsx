@@ -6,44 +6,34 @@ const AuthContext = createContext(null);
 
 const api = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true, // REQUIRED
+  withCredentials: true,
 });
 
 export const AuthProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔐 Login
   const login = async (email, password) => {
     try {
-      const res = await api.post("/api/admin/auth/login", {
-        email,
-        password,
-      });
-
+      const res = await api.post("/api/admin/auth/login", { email, password });
       if (res.status === 200) {
         setAdmin({ email });
         return true;
       }
       return false;
-    } catch (error) {
-      console.error("Admin login failed:", error);
+    } catch (err) {
       return false;
     }
   };
 
-  // 🚪 Logout
   const logout = async () => {
     try {
       await api.post("/api/admin/auth/logout");
-    } catch (err) {
-      console.error("Logout error:", err);
     } finally {
       setAdmin(null);
     }
   };
 
-  // ♻️ Restore session on refresh
   const checkAuth = async () => {
     try {
       const res = await api.get("/api/admin/auth/me");
@@ -51,7 +41,7 @@ export const AuthProvider = ({ children }) => {
     } catch {
       setAdmin(null);
     } finally {
-      setLoading(false); // 🔥 VERY IMPORTANT
+      setLoading(false);
     }
   };
 
@@ -66,7 +56,7 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         loading,
-        isAuthenticated: !!admin,
+        isAuthenticated: Boolean(admin),
       }}
     >
       {children}
@@ -74,10 +64,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used inside AuthProvider");
-  }
-  return ctx;
-};
+export const useAuth = () => useContext(AuthContext);

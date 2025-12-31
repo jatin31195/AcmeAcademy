@@ -43,7 +43,7 @@ const Login = () => {
           title: 'Welcome back!',
           description: 'You have successfully logged in.',
         });
-        navigate('/admin');
+       
       } else {
         toast({
           title: 'Authentication Failed',
