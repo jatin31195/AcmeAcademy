@@ -26,7 +26,7 @@ const menuItems = [
   { icon: BookOpen, label: "Free Self Study Courses", path: "/admin/courses" },
   
   { icon: Layers, label: "Practice Sets", path: "/admin/practice-sets" },
-  { icon: HelpCircle, label: "Questions", path: "/admin/questions" },
+  
   { icon: Trophy, label: "Yearly Results", path: "/admin/results" },
   { icon: FileQuestion, label: "PYQs", path: "/admin/pyqs" },
   { icon: Mail, label: "Mails", path: "/admin/mails" },
