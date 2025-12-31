@@ -606,3 +606,34 @@ export const adminLogout = (req, res) => {
     .json({ message: "Admin logged out successfully" });
 };
 
+export const adminRefresh = (req, res) => {
+  try {
+    const refreshToken = req.cookies.adminRefreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: "No refresh token" });
+    }
+
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_SECRET
+    );
+
+    const newAccessToken = jwt.sign(
+      { email: decoded.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    res.cookie("adminAccessToken", newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    return res.status(401).json({ message: "Refresh token expired" });
+  }
+};

@@ -1,6 +1,6 @@
 import express from "express";
 import { adminLogin,getAdminMe,
-  adminLogout, } from "../../controllers/authController.js";
+  adminLogout, adminRefresh} from "../../controllers/authController.js";
 
 const router = express.Router();
 
@@ -8,4 +8,6 @@ const router = express.Router();
 router.post("/login", adminLogin);
 router.get("/me", getAdminMe);
 router.post("/logout", adminLogout);
+router.post("/refresh", adminRefresh);
+
 export default router;
