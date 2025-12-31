@@ -1,26 +1,19 @@
 import jwt from "jsonwebtoken";
 
 export const verifyAdmin = (req, res, next) => {
-  const token = req.cookies?.adminToken;
-  const sessionToken = req.cookies?.adminSession;
+  const accessToken = req.cookies?.adminAccessToken;
 
-  // ❌ Missing cookies
-  if (!token || !sessionToken) {
+  // ❌ No access token
+  if (!accessToken) {
     return res.status(401).json({ message: "Admin not authenticated" });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
 
-    // ❌ Session mismatch → logout on refresh protection
-    if (decoded.sessionToken !== sessionToken) {
-      return res.status(401).json({ message: "Admin session expired" });
-    }
-
-    // ✅ Attach admin data (whatever you stored in token)
+    // ✅ Attach admin info
     req.admin = {
       email: decoded.email,
-      sessionToken: decoded.sessionToken,
     };
 
     next();
