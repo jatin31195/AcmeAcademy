@@ -46,6 +46,7 @@ app.use(
   cors({
     origin: [
       "https://www.acmeacademy.in", // for Vite dev
+      "https://admin.acmeacademy.in",
       "https://acmeacademy.onrender.com", // optional tunnel
       "https://acme-academy-rd7v.vercel.app"
     ],
