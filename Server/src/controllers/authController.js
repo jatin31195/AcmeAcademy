@@ -509,7 +509,7 @@ export const getUserTestAttempts = async (req, res) => {
 };
 
 
-import jwt from "jsonwebtoken";
+
 
 export const adminLogin = async (req, res) => {
   try {
