@@ -32,7 +32,7 @@ function App() {
         expand
       />
 
-      <AuthProvider>
+ 
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Login />} />
@@ -98,7 +98,7 @@ function App() {
           {/* Fallback */}
           <Route path="*" element={<div>Page Not Found</div>} />
         </Routes>
-      </AuthProvider>
+   
     </>
   );
 }

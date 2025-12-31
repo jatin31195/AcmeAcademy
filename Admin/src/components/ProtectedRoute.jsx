@@ -5,26 +5,29 @@ const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
 
-  // ⏳ WAIT for auth check to finish
+  // ⏳ Wait until auth check completes
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Checking session...</p>
+        <p className="text-muted-foreground text-sm">
+          Checking session...
+        </p>
       </div>
     );
   }
 
-  
+  // 🔐 Not authenticated → redirect to login
   if (!isAuthenticated) {
     return (
       <Navigate
         to="/login"
-        state={{ from: location }}
         replace
+        state={{ from: location.pathname }}
       />
     );
   }
 
+ 
   return children;
 };
 
