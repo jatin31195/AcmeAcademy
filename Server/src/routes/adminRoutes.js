@@ -31,7 +31,7 @@ router.use("/yearly-result",yearlyResultRoute);
 router.use("/home-course",homeCourseRoute);
 router.use("/practice-set",practiceSetRoute);
 router.use("/practice-set/t",practiceSetTopicRoute);
-router.use("/practice-set/t/q",practiceSetTopicQuestionRoute);
+router.use("/practice-set/topic/q",practiceSetTopicQuestionRoute);
 router.use("/mail",sendMailRoute);
 router.use("/test",testTrackRoute);
 router.use("/pyq",pyqRoute);

@@ -154,16 +154,27 @@ export const deleteQuestion = async (req, res) => {
 
 export const getAllQuestions = async (req, res) => {
   try {
-    const { topic, section } = req.query;
+    const { topic, section, practiceTopic } = req.query;
+
     const filter = {};
     if (topic) filter.topic = topic;
     if (section) filter.section = section;
-    const questions = await Question.find(filter).sort({ createdAt: -1 }).limit(200);
+    if (practiceTopic) filter.practiceTopic = practiceTopic; // ✅ FIX
+
+    const questions = await Question.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(200);
+
     res.json({ success: true, data: questions });
   } catch (err) {
-    res.status(500).json({ success: false, error: "Failed to fetch questions" });
+    console.error("❌ getAllQuestions error:", err);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch questions",
+    });
   }
 };
+
 
 
 

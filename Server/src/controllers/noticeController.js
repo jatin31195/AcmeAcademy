@@ -82,3 +82,30 @@ export const getNotices = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch notices" });
   }
 };
+// UPDATE NOTICE (ADMIN)
+export const updateNotice = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, tag, link, isActive } = req.body;
+
+    const notice = await Notice.findById(id);
+    if (!notice) {
+      return res.status(404).json({ error: "Notice not found" });
+    }
+
+    if (title !== undefined) notice.title = title;
+    if (tag !== undefined) notice.tag = tag;
+    if (link !== undefined) notice.link = link;
+    if (isActive !== undefined) notice.isActive = isActive;
+
+    await notice.save();
+
+    res.status(200).json({
+      message: "Notice updated successfully",
+      notice,
+    });
+  } catch (err) {
+    console.error("Error updating notice:", err);
+    res.status(500).json({ error: "Failed to update notice" });
+  }
+};

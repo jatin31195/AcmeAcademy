@@ -177,3 +177,31 @@
     transform: translateX(0);
   }
 }
+button,
+[role="button"] {
+  cursor: pointer;
+}
+/* Force native form controls to dark mode */
+select,
+select option {
+  color-scheme: dark;
+}
+/* =========================
+   DARK SELECT FIX (CRITICAL)
+========================= */
+select {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+}
+
+select option {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+}
+
+/* Fix hover/selected option visibility */
+select option:checked,
+select option:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}

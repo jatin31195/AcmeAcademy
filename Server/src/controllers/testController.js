@@ -707,3 +707,139 @@ export const getUserTestResultByAttempt = async (req, res) => {
   }
 };
 
+export const getTestsByTopic = async (req, res) => {
+  try {
+    const { topicId } = req.params;
+
+    const tests = await Test.find({ topic: topicId })
+      .select("title totalQuestions totalMarks totalDurationMinutes createdAt")
+      .sort({ createdAt: -1 });
+
+    res.json(tests);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+export const getTestByIdAdmin = async (req, res) => {
+  try {
+    const test = await Test.findById(req.params.testId)
+      .populate("topic", "title");
+
+    if (!test) {
+      return res.status(404).json({ message: "Test not found" });
+    }
+
+    res.json(test);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+export const updateTest = async (req, res) => {
+  try {
+    const { testId } = req.params;
+
+    const updated = await Test.findByIdAndUpdate(
+      testId,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Test not found" });
+    }
+
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+export const deleteTest = async (req, res) => {
+  try {
+    const { testId } = req.params;
+
+    const test = await Test.findById(testId);
+    if (!test) {
+      return res.status(404).json({ message: "Test not found" });
+    }
+
+    // remove test ref from topic
+    if (test.topic) {
+      await Topic.findByIdAndUpdate(test.topic, {
+        $pull: { tests: testId },
+      });
+    }
+
+    await Test.deleteOne({ _id: testId });
+
+    res.json({ message: "Test deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+/* =========================
+   UPDATE QUESTION (ADMIN)
+========================= */
+export const updateQuestion = async (req, res) => {
+  try {
+    const { testId, questionId } = req.params;
+
+    const test = await Test.findById(testId);
+    if (!test) {
+      return res.status(404).json({ message: "Test not found" });
+    }
+
+    const question = test.questions.id(questionId);
+    if (!question) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    // update fields
+    question.text = req.body.text ?? question.text;
+    question.options = req.body.options ?? question.options;
+    question.correctAnswer =
+      req.body.correctAnswer ?? question.correctAnswer;
+
+    await test.save();
+
+    res.json({
+      message: "Question updated successfully",
+      question,
+    });
+  } catch (err) {
+    console.error("Update question error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/* =========================
+   DELETE QUESTION (ADMIN)
+========================= */
+export const deleteQuestion = async (req, res) => {
+  try {
+    const { testId, questionId } = req.params;
+
+    const test = await Test.findById(testId);
+    if (!test) {
+      return res.status(404).json({ message: "Test not found" });
+    }
+
+    const question = test.questions.id(questionId);
+    if (!question) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    // remove question
+    question.deleteOne();
+
+    // recalc totals
+    test.totalQuestions = test.questions.length;
+    test.totalMarks = test.questions.length;
+
+    await test.save();
+
+    res.json({ message: "Question deleted successfully" });
+  } catch (err) {
+    console.error("Delete question error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};

@@ -132,19 +132,83 @@ export const sendAdminMail = async (req, res) => {
     }
 
     const mailHTML = `
-      <div style="font-family: Arial; padding:20px;">
-        <h2 style="color:#2b2d42;">📢 ACME Academy Notification</h2>
-        <p style="font-size:15px; line-height:1.6;">${message}</p>
-        <hr/>
-        <p style="font-size:12px;color:#666;">
-          This is an official communication from ACME Academy.
+  <div style="
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #f4f6fb;
+    padding: 30px;
+  ">
+    <div style="
+      max-width: 600px;
+      margin: auto;
+      background: #ffffff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    ">
+
+      <!-- HEADER -->
+      <div style="
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        padding: 20px;
+        text-align: center;
+        color: #ffffff;
+      ">
+        <h1 style="margin:0;font-size:22px;">ACME Academy</h1>
+        <p style="margin:5px 0 0;font-size:14px;">
+          Official Notification
         </p>
       </div>
-    `;
+
+      <!-- BODY -->
+      <div style="padding: 25px; color: #333;">
+        <h2 style="
+          margin-top:0;
+          color:#2b2d42;
+          font-size:18px;
+        ">
+          ${subject}
+        </h2>
+
+        <p style="
+          font-size:15px;
+          line-height:1.7;
+          margin:15px 0;
+        ">
+          ${message.replace(/\n/g, "<br/>")}
+        </p>
+
+        <div style="
+          margin-top:25px;
+          padding:15px;
+          background:#f8f9fc;
+          border-left:4px solid #4f46e5;
+          font-size:14px;
+        ">
+          💡 Please do not reply to this email.  
+          This is an automated message from ACME Academy.
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div style="
+        background:#f1f3f8;
+        text-align:center;
+        padding:15px;
+        font-size:12px;
+        color:#666;
+      ">
+        © ${new Date().getFullYear()} ACME Academy  
+        <br/>
+        All rights reserved.
+      </div>
+    </div>
+  </div>
+`;
+
 
     await transporter.sendMail({
       from: `"ACME Academy" <${process.env.EMAIL_USER}>`,
-      bcc: recipients, // ✅ BCC to avoid exposing emails
+      bcc: recipients, 
       subject,
       html: mailHTML,
     });

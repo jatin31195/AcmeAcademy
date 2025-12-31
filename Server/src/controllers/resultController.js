@@ -81,6 +81,45 @@ export const uploadResultPhoto = async (req, res) => {
     res.status(500).json({ error: "Failed to upload result photo" });
   }
 };
+// UPDATE RESULT (ADMIN)
+export const updateResultById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, exam, year, rank, score } = req.body;
+
+    const result = await Result.findById(id);
+    if (!result) {
+      return res.status(404).json({ message: "Result not found" });
+    }
+
+    // Optional: upload new photo
+    if (req.file?.path) {
+      const cloudUrl = await uploadToCloudinary(req.file.path, "results");
+      if (!cloudUrl) {
+        return res.status(400).json({ error: "Image upload failed" });
+      }
+      result.photoUrl = cloudUrl;
+    }
+
+    // Update fields (only if provided)
+    if (name !== undefined) result.name = name;
+    if (exam !== undefined) result.exam = exam.toLowerCase();
+    if (year !== undefined) result.year = year;
+    if (rank !== undefined) result.rank = rank;
+    if (score !== undefined) result.score = score;
+
+    await result.save();
+
+    res.status(200).json({
+      message: "Result updated successfully",
+      result,
+    });
+  } catch (err) {
+    console.error("Error updating result:", err);
+    res.status(500).json({ error: "Failed to update result" });
+  }
+};
+
 export const deleteResultImageById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -184,30 +223,24 @@ export const getCombinedResultImages = async (req, res) => {
 };
 export const addCombinedResultImage = async (req, res) => {
   try {
-    const { name, exam, year, rank, score } = req.body;
+    const { exam } = req.body;
+
+    if (!exam) {
+      return res.status(400).json({ error: "Exam is required" });
+    }
 
     const cloudUrl = await uploadToCloudinary(req.file?.path, "results");
     if (!cloudUrl) {
       return res.status(400).json({ error: "Failed to upload image" });
     }
 
-    const identifier = rank
-      ? `air-${rank}`
-      : score
-      ? `score-${score}`
-      : "unranked";
-
     const slug = slugify(
-      `${exam || "combined"}-${year || "undefined"}-${identifier}-${name || "undefined"}-${Date.now()}`,
+      `${exam}-combined-${Date.now()}`,
       { lower: true, strict: true }
     );
 
     const combinedResult = new Result({
-      name: name || null,
-      exam: exam?.toLowerCase() || "combined",
-      year: year || null,
-      rank: rank || null,
-      score: score || null,
+      exam: exam.toLowerCase(),
       photoUrl: cloudUrl,
       photoType: "combined",
       slug,
@@ -216,14 +249,15 @@ export const addCombinedResultImage = async (req, res) => {
     await combinedResult.save();
 
     res.status(201).json({
-      message: "Combined result image added successfully",
+      message: "Combined image added successfully",
       result: combinedResult,
     });
   } catch (err) {
-    console.error("Error adding combined result image:", err);
-    res.status(500).json({ error: "Failed to add combined result image" });
+    console.error("Error adding combined image:", err);
+    res.status(500).json({ error: "Failed to add combined image" });
   }
 };
+
 export const deleteCombinedResultImage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -311,28 +345,27 @@ export const getHomeResultImages = async (req, res) => {
 
 export const addHomeResultImage = async (req, res) => {
   try {
-    const { name, exam, year, rank, score } = req.body;
+    const { exam } = req.body;
+
+    if (!exam) {
+      return res.status(400).json({ error: "Exam is required" });
+    }
 
     const cloudUrl = await uploadToCloudinary(req.file?.path, "results");
     if (!cloudUrl) {
       return res.status(400).json({ error: "Failed to upload image" });
     }
 
-    // slug
-    const baseSlug = slugify(
-      `${exam || "home"}-${year || ""}-${rank || ""}-${name || "image"}-${Date.now()}`,
+    const slug = slugify(
+      `${exam}-home-${Date.now()}`,
       { lower: true, strict: true }
     );
 
     const homeResult = new Result({
-      name,
-      exam: exam?.toLowerCase() || "home",
-      year: year || null,
-      rank: rank || null,
-      score: score || null,
+      exam: exam.toLowerCase(),
       photoUrl: cloudUrl,
       photoType: "home",
-      slug: baseSlug,
+      slug,
     });
 
     await homeResult.save();
@@ -346,6 +379,7 @@ export const addHomeResultImage = async (req, res) => {
     res.status(500).json({ error: "Failed to add home image" });
   }
 };
+
 
 export const deleteHomeResultImage = async (req, res) => {
   try {

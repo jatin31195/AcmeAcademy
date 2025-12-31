@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Users,
   BookOpen,
@@ -7,33 +8,172 @@ import {
   TrendingUp,
   Activity,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 import PageHeader from "@/components/PageHeader";
 import StatsCard from "@/components/StatsCard";
 import DataTable from "@/components/DataTable";
+import { BASE_URL } from "@/config";
 
-const stats = [
-  { title: "Total Users", value: "2,847", icon: Users, trend: { value: 12.5, isPositive: true } },
-  { title: "Active Courses", value: "48", icon: BookOpen, trend: { value: 8.2, isPositive: true } },
-  { title: "Total Tests", value: "156", icon: ClipboardList, trend: { value: 4.1, isPositive: true } },
-  { title: "Questions Bank", value: "5,420", icon: HelpCircle, trend: { value: 15.3, isPositive: true } },
-];
+/* ---------- SIMPLE MODAL ---------- */
+/* ---------- USER DETAILS MODAL ---------- */
+const UserModal = ({ user, onClose }) => {
+  if (!user) return null;
 
-const recentActivity = [
-  { id: 1, user: "John Doe", action: "Completed Python Basics Test", time: "5 minutes ago", score: "85%" },
-  { id: 2, user: "Jane Smith", action: "Enrolled in Data Science", time: "12 minutes ago", score: "-" },
-  { id: 3, user: "Mike Johnson", action: "Submitted Practice Set", time: "28 minutes ago", score: "92%" },
-  { id: 4, user: "Sarah Wilson", action: "Started JavaScript Course", time: "45 minutes ago", score: "-" },
-  { id: 5, user: "Alex Brown", action: "Completed Mock Exam", time: "1 hour ago", score: "78%" },
-];
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div
+        className="w-[420px] rounded-xl border shadow-2xl"
+        style={{
+          backgroundColor: "hsl(var(--card))",
+          borderColor: "hsl(var(--border))",
+        }}
+      >
+        {/* Header */}
+        <div
+          className="px-6 py-4 border-b"
+          style={{ borderColor: "hsl(var(--border))" }}
+        >
+          <h3
+            className="text-lg font-semibold"
+            style={{ color: "hsl(var(--foreground))" }}
+          >
+            User Details
+          </h3>
+        </div>
 
-const topPerformers = [
-  { id: 1, name: "Emily Chen", course: "Machine Learning", score: 98, tests: 12 },
-  { id: 2, name: "David Park", course: "Web Development", score: 96, tests: 15 },
-  { id: 3, name: "Lisa Wang", course: "Data Structures", score: 94, tests: 10 },
-  { id: 4, name: "James Miller", course: "Python Advanced", score: 92, tests: 8 },
-];
+        {/* Body */}
+        <div className="px-6 py-5 space-y-3 text-sm">
+          <div className="flex justify-between">
+            <span style={{ color: "hsl(var(--muted-foreground))" }}>
+              Name
+            </span>
+            <span
+              className="font-medium"
+              style={{ color: "hsl(var(--foreground))" }}
+            >
+              {user.name}
+            </span>
+          </div>
+
+          <div className="flex justify-between">
+            <span style={{ color: "hsl(var(--muted-foreground))" }}>
+              User ID
+            </span>
+            <span
+              className="font-mono text-xs"
+              style={{ color: "hsl(var(--foreground))" }}
+            >
+              {user.userId}
+            </span>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div
+          className="px-6 py-4 border-t flex justify-end"
+          style={{ borderColor: "hsl(var(--border))" }}
+        >
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-md text-sm font-medium transition"
+            style={{
+              backgroundColor: "hsl(var(--primary))",
+              color: "hsl(var(--primary-foreground))",
+            }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+const API = `${BASE_URL}/api/admin/dashboard/overview`;
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
+  const [stats, setStats] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [topPerformers, setTopPerformers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  /* ---------------- FETCH DASHBOARD ---------------- */
+  const fetchDashboard = async () => {
+    try {
+      const res = await fetch(API, { credentials: "include" });
+      const data = await res.json();
+
+      setStats([
+        { title: "Total Users", value: data.stats.totalUsers, icon: Users },
+        { title: "Active Courses", value: data.stats.activeCourses, icon: BookOpen },
+        { title: "Total Tests", value: data.stats.totalTests, icon: ClipboardList },
+        { title: "Questions Bank", value: data.stats.questionBank, icon: HelpCircle },
+      ]);
+
+      setRecentActivity(data.recentActivity || []);
+      setTopPerformers(data.topPerformers || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  /* ---------------- TABLE COLUMNS ---------------- */
+  const activityColumns = [
+    {
+      key: "user",
+      header: "User",
+      render: (row) => (
+        <button
+          onClick={() =>
+            setSelectedUser({ name: row.user, userId: row.userId })
+          }
+          className="text-blue-600 hover:underline"
+        >
+          {row.user}
+        </button>
+      ),
+    },
+    {
+      key: "testTitle",
+      header: "Test",
+      render: (row) => (
+        <button
+          onClick={() =>
+            navigate(
+              `/admin/tests/${row.testId}/attempt/${row.attemptNumber}`
+            )
+          }
+          className="text-blue-600 hover:underline"
+        >
+          {row.testTitle}
+        </button>
+      ),
+    },
+    {
+      key: "attemptNumber",
+      header: "Attempt",
+      render: (row) => `#${row.attemptNumber}`,
+    },
+    {
+      key: "score",
+      header: "Score",
+      render: (row) => (
+        <span className="font-medium">
+          {row.score}/{row.totalMarks} ({row.accuracy}%)
+        </span>
+      ),
+    },
+    { key: "time", header: "Time" },
+  ];
+
   return (
     <div className="animate-fade-in">
       <PageHeader
@@ -41,173 +181,71 @@ const Dashboard = () => {
         description="Welcome back! Here's an overview of ACME Academy."
       />
 
-      {/* Stats Grid */}
+      {/* ---------- STATS ---------- */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-        {stats.map((stat, index) => (
-          <div
-            key={stat.title}
-            className="animate-slide-up"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <StatsCard {...stat} />
-          </div>
+        {stats.map((s) => (
+          <StatsCard key={s.title} {...s} />
         ))}
       </div>
 
-      {/* Charts Row */}
+      {/* ---------- TOP PERFORMERS ---------- */}
       <div className="grid gap-6 lg:grid-cols-2 mb-8">
-        {/* Activity Chart */}
-        <div
-          className="rounded-xl p-6 shadow-card border"
-          style={{
-            backgroundColor: "hsl(var(--card))",
-            borderColor: "hsl(var(--border))",
-          }}
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3
-                className="text-lg font-semibold"
-                style={{ color: "hsl(var(--foreground))" }}
-              >
-                User Activity
-              </h3>
-              <p style={{ color: "hsl(var(--muted-foreground))" }} className="text-sm">
-                Last 7 days
-              </p>
-            </div>
-            <Activity style={{ color: "hsl(var(--primary))" }} className="h-5 w-5" />
+        <div className="rounded-xl p-6 border bg-card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold">Top Performers</h3>
+            <Trophy className="h-5 w-5 text-yellow-500" />
           </div>
 
-          <div
-            className="h-48 flex items-center justify-center rounded-lg"
-            style={{ backgroundColor: "hsl(var(--muted))" }}
-          >
-            <div className="text-center">
-              <TrendingUp
-                className="h-12 w-12 mx-auto mb-2"
-                style={{ color: "hsl(var(--primary))" }}
-              />
-              <p style={{ color: "hsl(var(--muted-foreground))" }} className="text-sm">
-                Activity chart visualization
+          {topPerformers.map((p, i) => (
+            <div
+              key={i}
+              onClick={() =>
+                setSelectedUser({ name: p.name, userId: p.userId })
+              }
+              className="flex justify-between p-3 rounded-lg cursor-pointer hover:bg-muted"
+            >
+              <div>
+                <p className="font-medium">{p.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {p.tests} tests
+                </p>
+              </div>
+              <p className="font-semibold text-primary">
+                Avg {p.avgScore}
               </p>
             </div>
-          </div>
+          ))}
         </div>
 
-        {/* Top Performers */}
-        <div
-          className="rounded-xl p-6 shadow-card border"
-          style={{
-            backgroundColor: "hsl(var(--card))",
-            borderColor: "hsl(var(--border))",
-          }}
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3
-                className="text-lg font-semibold"
-                style={{ color: "hsl(var(--foreground))" }}
-              >
-                Top Performers
-              </h3>
-              <p style={{ color: "hsl(var(--muted-foreground))" }} className="text-sm">
-                This month
-              </p>
-            </div>
-            <Trophy style={{ color: "hsl(var(--warning))" }} className="h-5 w-5" />
-          </div>
-
-          <div className="space-y-4">
-            {topPerformers.map((p, index) => (
-              <div
-                key={p.id}
-                className="flex items-center justify-between p-3 rounded-lg"
-                style={{ backgroundColor: "hsl(var(--muted))" }}
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
-                    style={{
-                      backgroundColor: "hsl(var(--primary) / 0.2)",
-                      color: "hsl(var(--primary))",
-                    }}
-                  >
-                    {index + 1}
-                  </span>
-                  <div>
-                    <p
-                      className="font-medium"
-                      style={{ color: "hsl(var(--foreground))" }}
-                    >
-                      {p.name}
-                    </p>
-                    <p
-                      className="text-xs"
-                      style={{ color: "hsl(var(--muted-foreground))" }}
-                    >
-                      {p.course}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <p
-                    className="font-semibold"
-                    style={{ color: "hsl(var(--primary))" }}
-                  >
-                    {p.score}%
-                  </p>
-                  <p
-                    className="text-xs"
-                    style={{ color: "hsl(var(--muted-foreground))" }}
-                  >
-                    {p.tests} tests
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Placeholder chart */}
+        <div className="rounded-xl p-6 border bg-card flex items-center justify-center">
+          <TrendingUp className="h-12 w-12 text-primary" />
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div
-        className="rounded-xl shadow-card border"
-        style={{
-          backgroundColor: "hsl(var(--card))",
-          borderColor: "hsl(var(--border))",
-        }}
-      >
-        <div
-          className="p-6 border-b"
-          style={{ borderColor: "hsl(var(--border))" }}
-        >
-          <h3
-            className="text-lg font-semibold"
-            style={{ color: "hsl(var(--foreground))" }}
-          >
-            Recent Activity
-          </h3>
-          <p
-            className="text-sm"
-            style={{ color: "hsl(var(--muted-foreground))" }}
-          >
-            Latest user actions across the platform
+      {/* ---------- RECENT ACTIVITY ---------- */}
+      <div className="rounded-xl border bg-card">
+        <div className="p-6 border-b">
+          <h3 className="font-semibold">Recent Activity</h3>
+          <p className="text-sm text-muted-foreground">
+            Click any row to explore details
           </p>
         </div>
 
         <DataTable
-          columns={[
-            { key: "user", header: "User" },
-            { key: "action", header: "Action" },
-            { key: "score", header: "Score" },
-            { key: "time", header: "Time" },
-          ]}
+          columns={activityColumns}
           data={recentActivity}
-          className="border-0 rounded-t-none shadow-none"
+          className="border-0"
         />
       </div>
+
+      {/* ---------- USER MODAL ---------- */}
+      {selectedUser && (
+        <UserModal
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+        />
+      )}
     </div>
   );
 };

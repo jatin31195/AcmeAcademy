@@ -5,6 +5,7 @@ import {
   getTopResults,
   getAvailableYearsByExam,
   getAvailableExams,
+  updateResultById,
 } from "../../controllers/resultController.js";
 import { uploadResultPhoto, deleteResultImageById } from "../../controllers/resultController.js";
 import { verifyAdmin } from "../../middlewares/adminAuthMiddleware.js";
@@ -18,6 +19,13 @@ router.get("/exams", getAvailableExams);
 router.get("/:exam/:year/air-:rank", getResultByRank);
 router.get("/:exam/:year", getResultsByYear);
 
+
+router.put(
+  "/update-result/:id",
+  verifyAdmin,
+  upload.single("photo"), 
+  updateResultById
+);
 
 router.post("/add-result", verifyAdmin, upload.single("photo"), uploadResultPhoto);
 router.delete("/delete-result/:id", verifyAdmin, deleteResultImageById);
