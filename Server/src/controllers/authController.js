@@ -519,33 +519,30 @@ export const adminLogin = (req, res) => {
     return res.status(401).json({ message: "Invalid admin credentials" });
   }
 
-  // ✅ Generate session token
   const sessionToken = crypto.randomBytes(32).toString("hex");
 
   const adminToken = jwt.sign(
-    {
-      email,
-      role: "admin",
-      sessionToken,
-    },
+    { email, role: "admin", sessionToken },
     process.env.JWT_SECRET,
     { expiresIn: "1d" }
   );
 
   const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    secure: true,
+    sameSite: "None",
+    domain: ".acmeacademy.in",
     maxAge: 24 * 60 * 60 * 1000,
     path: "/",
   };
 
   res
     .cookie("adminToken", adminToken, cookieOptions)
-    .cookie("adminSession", sessionToken, cookieOptions) // ✅ important
+    .cookie("adminSession", sessionToken, cookieOptions)
     .status(200)
     .json({ message: "Admin login successful" });
 };
+
 
 export const getAdminMe = (req, res) => {
   const token = req.cookies.adminToken;
