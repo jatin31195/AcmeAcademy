@@ -509,39 +509,61 @@ export const getUserTestAttempts = async (req, res) => {
 };
 
 
-export const adminLogin = (req, res) => {
-  const { email, password } = req.body;
+import jwt from "jsonwebtoken";
 
-  if (
-    email !== process.env.ADMIN_EMAIL ||
-    password !== process.env.ADMIN_PASSWORD
-  ) {
-    return res.status(401).json({ message: "Invalid admin credentials" });
+export const adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // 🔐 Verify admin credentials from env
+    if (
+      email !== process.env.ADMIN_EMAIL ||
+      password !== process.env.ADMIN_PASSWORD
+    ) {
+      return res.status(401).json({ message: "Invalid admin credentials" });
+    }
+
+    // 🔑 Generate tokens (same pattern as user)
+    const accessToken = jwt.sign(
+      { email },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    const refreshToken = jwt.sign(
+      { email },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
+    // 🍪 EXACT same cookie options as user
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    };
+
+    res
+      .cookie("adminAccessToken", accessToken, {
+        ...cookieOptions,
+        maxAge: 15 * 60 * 1000,
+      })
+      .cookie("adminRefreshToken", refreshToken, {
+        ...cookieOptions,
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      })
+      .status(200)
+      .json({
+        message: "Admin login successful",
+        email,
+      });
+
+  } catch (err) {
+    console.error("Admin login error:", err);
+    res.status(400).json({ message: err.message || "Admin login failed" });
   }
-
-  const sessionToken = crypto.randomBytes(32).toString("hex");
-
-  const adminToken = jwt.sign(
-    { email, role: "admin", sessionToken },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" }
-  );
-
-  const cookieOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-    domain: ".acmeacademy.in",
-    maxAge: 24 * 60 * 60 * 1000,
-    path: "/",
-  };
-
-  res
-    .cookie("adminToken", adminToken, cookieOptions)
-    .cookie("adminSession", sessionToken, cookieOptions)
-    .status(200)
-    .json({ message: "Admin login successful" });
 };
+
 
 
 export const getAdminMe = (req, res) => {
