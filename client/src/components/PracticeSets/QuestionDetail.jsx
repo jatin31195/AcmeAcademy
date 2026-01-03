@@ -8,16 +8,69 @@ import "katex/dist/katex.min.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, BookOpen, Smile, MessageSquare } from "lucide-react";
 import { BASE_URL } from "@/config";
-const renderWithMath = (text) => {
+ const renderWithMath = (text) => {
   if (!text) return "No question text";
+
+  // Split normal and math parts
   const parts = text.split(/(\$[^$]+\$)/g);
+
   return parts.map((part, i) => {
+    // Handle math segments ($...$)
     if (part.startsWith("$") && part.endsWith("$")) {
       let math = part.slice(1, -1).trim();
-      return <InlineMath key={i} math={math} />;
+      const isMatrix = /\\begin\{bmatrix\}|\\begin\{pmatrix\}|\\\\/.test(math);
+      // Normalize symbols and support C/P, etc.
+      math = math
+        .replace(/\\\\/g, "\\") // fix double backslashes
+        .replace(/\\times/g, " \\times ")
+        .replace(/\\div/g, " \\div ")
+        .replace(/\\cdot/g, " \\cdot ")
+        .replace(/\\pm/g, " \\pm ")
+        .replace(/\\le/g, " \\le ")
+        .replace(/\\ge/g, " \\ge ")
+        .replace(/\\neq/g, " \\neq ")
+        .replace(/\\infty/g, " \\infty ")
+        .replace(/\\sqrt/g, " \\sqrt ")
+        .replace(/\\frac/g, " \\frac ")
+        .replace(/\\sum/g, " \\sum ")
+        .replace(/\\to/g, " \\to ")
+        .replace(/\\alpha/g, " \\alpha ")
+        .replace(/\\beta/g, " \\beta ")
+        .replace(/\\gamma/g, " \\gamma ")
+        .replace(/\\delta/g, " \\delta ")
+        .replace(/\\theta/g, " \\theta ")
+        .replace(/\\pi/g, " \\pi ")
+        .replace(/\\phi/g, " \\phi ")
+        .replace(/\\sigma/g, " \\sigma ")
+        .replace(/\\mu/g, " \\mu ")
+        .replace(/\\lambda/g, " \\lambda ")
+        // Handle combination & permutation
+        .replace(/\{?(\d+)\s*\\choose\s*(\d+)\}?/g, "{$1 \\choose $2}")
+        .replace(/\{?(\d+)\s*[Cc]\s*(\d+)\}?/g, "{$1 \\choose $2}")
+        .replace(/\{?(\d+)\s*[Pp]\s*(\d+)\}?/g, "{$1 \\mathrm{P} $2}");
+
+      return isMatrix ? (
+        <BlockMath key={i} math={math} />
+      ) : (
+        <InlineMath key={i} math={math} />
+      );
     }
+
+    // Normal text
     return <span key={i}>{part}</span>;
   });
+};
+const renderSolutionWithParagraphs = (text) => {
+  if (!text) return null;
+
+  // split by blank lines
+  const paragraphs = text.split(/\n\s*\n/);
+
+  return paragraphs.map((para, idx) => (
+    <p key={idx} className="leading-relaxed text-gray-800">
+      {renderWithMath(para)}
+    </p>
+  ));
 };
 
 const QuestionDetails = ({
@@ -220,9 +273,14 @@ const QuestionDetails = ({
             >
               {item.solutionText || item.solutionImage ? (
                 <>
-                  <p className="text-gray-800 font-medium">
-                    🧠 Explanation: {renderWithMath(item.solutionText || "")}
-                  </p>
+                  <div className="text-gray-800 text-sm space-y-3">
+  <p className="font-medium flex items-center gap-2">
+    🧠 Explanation:
+  </p>
+
+  {renderSolutionWithParagraphs(item.solutionText)}
+</div>
+
                   {item.solutionImage && (
                     <div className="flex justify-center mt-2">
                       <img
@@ -249,37 +307,45 @@ const QuestionDetails = ({
         </AnimatePresence>
 
         {/* 🎥 Video Solution */}
-        <AnimatePresence>
-          {videoExpanded && (
-            <motion.div
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.3 }}
-              className="mt-3 p-3 rounded bg-purple-50 border border-purple-300 text-sm"
-            >
-              {item.solutionVideo ? (
-                <div className="flex justify-center">
-                  <video
-                    src={item.solutionVideo}
-                    controls
-                    className="rounded-lg border border-gray-300 max-w-full"
-                  />
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-gray-600 italic">
-                  <Smile className="text-purple-600" />
-                  <span>
-                    Video solution will be uploaded soon 🎥 Stay tuned —{" "}
-                    <span className="font-semibold text-purple-700">
-                      ACME Academy wishes you Happy Preparation!
-                    </span>
-                  </span>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+       {/* 🎥 Video Solution */}
+<AnimatePresence>
+  {videoExpanded && (
+    <motion.div
+      initial={{ opacity: 0, y: -5 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -5 }}
+      transition={{ duration: 0.3 }}
+      className="mt-3 p-4 rounded bg-purple-50 border border-purple-300 text-sm"
+    >
+      {item.solutionVideo ? (
+        <div className="flex justify-center">
+          <video
+            src={item.solutionVideo}
+            controls
+            className="rounded-lg border border-gray-300 max-w-full"
+          />
+        </div>
+      ) : (
+        <div className="flex items-start gap-3 text-purple-700">
+          <Play className="mt-1" />
+          <div>
+            <p className="font-semibold">
+              Video Solution Coming Soon 🎥
+            </p>
+            <p className="text-sm text-purple-600 mt-1">
+              Our faculty at <span className="font-semibold">ACME Academy</span> is
+              preparing a detailed video explanation for this question.
+            </p>
+            <p className="text-sm text-purple-600 mt-1">
+              Stay updated and keep practicing — success is on the way 🚀
+            </p>
+          </div>
+        </div>
+      )}
+    </motion.div>
+  )}
+</AnimatePresence>
+
 
         {/* 💬 Discussion Section */}
         <AnimatePresence>
