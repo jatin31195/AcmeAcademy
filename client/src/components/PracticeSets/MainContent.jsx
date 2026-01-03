@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, ArrowLeft } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import QuestionDetails from "./QuestionDetail";
 import "katex/dist/katex.min.css";
@@ -12,7 +12,6 @@ const MainContent = ({
   expandedQuestions = [],
   selectedSubject,
   selectedTopic,
-  setSearchTerm,
   currentPage,
   totalPages,
   setCurrentPage,
@@ -23,6 +22,25 @@ const MainContent = ({
 }) => {
   const navigate = useNavigate();
 
+  /* ---------------- TAG LOGIC ---------------- */
+
+  const allTags = useMemo(() => {
+    return Array.from(
+      new Set(expandedQuestions.map((q) => q.tag).filter(Boolean))
+    );
+  }, [expandedQuestions]);
+
+  const [selectedTag, setSelectedTag] = useState(null);
+
+  // auto-select first tag when data loads
+  useEffect(() => {
+    if (!selectedTag && allTags.length > 0) {
+      setSelectedTag(allTags[0]);
+    }
+  }, [allTags, selectedTag]);
+
+  /* ---------------- RENDER ---------------- */
+
   return (
     <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-8 pb-16">
       <motion.div
@@ -30,7 +48,7 @@ const MainContent = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        {/* 🔙 Back Button */}
+        {/* 🔙 Back */}
         <Button
           variant="ghost"
           onClick={() => navigate("/acme-academy-open-library")}
@@ -41,60 +59,62 @@ const MainContent = ({
         </Button>
 
         {/* 📘 Header */}
-        {/* 📘 Enhanced Header */}
-<motion.div
-  initial={{ opacity: 0, y: -20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.5 }}
-  className="text-center mb-10"
->
-  {/* 🎯 Main Heading */}
-  <h1 className="text-5xl font-extrabold mb-3 bg-gradient-to-r from-indigo-500 via-blue-500 to-pink-500 text-transparent bg-clip-text">
-    Practice Sets
-  </h1>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-10"
+        >
+          <h1 className="text-5xl font-extrabold mb-3 bg-gradient-to-r from-indigo-500 via-blue-500 to-pink-500 text-transparent bg-clip-text">
+            Practice Sets
+          </h1>
 
-  {/* 🧠 Context Info */}
-  {selectedSubject && selectedTopic ? (
-    <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-2">
-      <span className="px-4 py-1 text-sm font-semibold bg-blue-100 text-blue-700 rounded-full shadow-sm">
-        Set: {selectedSubject?.title || "N/A"}
-      </span>
-      <span className="px-4 py-1 text-sm font-semibold bg-purple-100 text-purple-700 rounded-full shadow-sm">
-        Category: {selectedTopic?.name || "N/A"}
-      </span>
-    </div>
-  ) : (
-    <p className="text-gray-500 text-sm mt-2">
-      Please select a <span className="font-medium text-indigo-600">Practice Set</span> and{" "}
-      <span className="font-medium text-pink-500">Category</span> to begin.
-    </p>
-  )}
+          {selectedSubject && selectedTopic && (
+            <div className="flex flex-wrap justify-center gap-2 mt-2">
+              <span className="px-4 py-1 text-sm font-semibold bg-blue-100 text-blue-700 rounded-full">
+                Set: {selectedSubject.title}
+              </span>
+              <span className="px-4 py-1 text-sm font-semibold bg-purple-100 text-purple-700 rounded-full">
+                Category: {selectedTopic.name}
+              </span>
+            </div>
+          )}
 
-  {/* 💡 Subtext / Motivation */}
-  <p className="text-gray-600 text-sm mt-4 italic">
-    Sharpen your skills one topic at a time — consistency builds mastery.
-  </p>
+          {selectedTag && (
+            <p className="mt-3 text-sm font-medium text-indigo-600">
+              Tag: {selectedTag}
+            </p>
+          )}
 
-  {/* Decorative Divider */}
-  <motion.div
-    initial={{ scaleX: 0 }}
-    animate={{ scaleX: 1 }}
-    transition={{ duration: 0.6, delay: 0.2 }}
-    className="mx-auto mt-4 h-[3px] w-32 bg-gradient-to-r from-indigo-400 via-blue-500 to-pink-500 rounded-full"
-  />
-</motion.div>
+          <p className="text-gray-600 text-sm mt-2 italic">
+            Sharpen your skills one topic at a time — consistency builds mastery.
+          </p>
 
+          <div className="mx-auto mt-4 h-[3px] w-32 bg-gradient-to-r from-indigo-400 via-blue-500 to-pink-500 rounded-full" />
+        </motion.div>
 
-        
+        {/* 🏷️ TAG SELECTOR */}
+        {allTags.length > 0 && (
+          <div className="flex justify-center gap-2 mb-8 flex-wrap">
+            {allTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setSelectedTag(tag)}
+                className={`px-4 py-1 rounded-full text-sm font-semibold border transition ${
+                  selectedTag === tag
+                    ? "bg-indigo-600 text-white border-indigo-600"
+                    : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
 
-        {/* 📚 Questions Section */}
+        {/* 📚 QUESTIONS */}
         {loading ? (
           <p className="text-center text-gray-500 mt-10">Loading...</p>
-        ) : !Array.isArray(paginatedExpanded) ||
-          paginatedExpanded.length === 0 ? (
-          <p className="text-center text-gray-500 mt-10">
-            
-          </p>
         ) : (
           <motion.div
             key={currentPage}
@@ -103,44 +123,24 @@ const MainContent = ({
             transition={{ duration: 0.3 }}
             className="space-y-6"
           >
-            {paginatedExpanded.map((item, idx) => {
-              const mainQuestionNumber =
-                (currentPage - 1) * QUESTIONS_PER_PAGE + idx + 1;
-              let parentMainNumber = null;
-              let subIndex = null;
+            {paginatedExpanded
+              .filter((q) => !selectedTag || q.tag === selectedTag)
+              .map((item, idx) => {
+                const mainQuestionNumber =
+                  (currentPage - 1) * QUESTIONS_PER_PAGE + idx + 1;
 
-              if (item.isSub && item.parentId) {
-                const parent = expandedQuestions.find(
-                  (q) => q._id === item.parentId
+                return (
+                  <QuestionDetails
+                    key={item._id || idx}
+                    item={item}
+                    idx={idx}
+                    handleOptionClick={handleOptionClick}
+                    getOptionStyle={getOptionStyle}
+                    showSolution={showSolution}
+                    mainQuestionNumber={mainQuestionNumber}
+                  />
                 );
-                if (parent && Array.isArray(parent.subQuestions)) {
-                  subIndex = parent.subQuestions.findIndex(
-                    (sub) => sub.question === item.question
-                  );
-                }
-                const parentExpandedIndex = expandedQuestions.findIndex(
-                  (q) => q._id === item.parentId
-                );
-                parentMainNumber = parentExpandedIndex + 1;
-              }
-
-              return (
-                <QuestionDetails
-                  key={item._id || `${item.parentId}-${idx}`}
-                  item={item}
-                  idx={idx}
-                  currentPage={currentPage}
-                  QUESTIONS_PER_PAGE={QUESTIONS_PER_PAGE}
-                  handleOptionClick={handleOptionClick}
-                  getOptionStyle={getOptionStyle}
-                  showSolution={showSolution}
-                  mainQuestionNumber={
-                    item.isSub ? parentMainNumber : mainQuestionNumber
-                  }
-                  subIndex={item.isSub ? subIndex : null}
-                />
-              );
-            })}
+              })}
           </motion.div>
         )}
 
@@ -150,7 +150,7 @@ const MainContent = ({
             <Button
               variant="outline"
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => prev - 1)}
+              onClick={() => setCurrentPage((p) => p - 1)}
             >
               Previous
             </Button>
@@ -160,7 +160,7 @@ const MainContent = ({
             <Button
               variant="outline"
               disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((prev) => prev + 1)}
+              onClick={() => setCurrentPage((p) => p + 1)}
             >
               Next
             </Button>

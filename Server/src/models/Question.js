@@ -57,7 +57,7 @@ const questionSchema = new mongoose.Schema(
     solutionVideo: String,
     solutionImage: String,
     image: String,
-    tags: [String],
+    tag: String,
     practiceTopic: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "PracticeTopic",

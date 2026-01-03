@@ -44,11 +44,10 @@ export const addQuestion = async (req, res) => {
         solutionVideo: item.solutionVideo || "",
         solutionImage: solutionImageUrl,
         image: item.image || "",
-        tags: item.tags
-          ? typeof item.tags === "string"
-            ? item.tags.split(",").map((t) => t.trim())
-            : item.tags
-          : [],
+
+        // ✅ FIXED TAG HANDLING
+        tag: typeof item.tag === "string" ? item.tag.trim() : "",
+
         topic: item.topic || "",
         section: item.section || "",
         practiceTopic: item.practiceTopic,
@@ -72,9 +71,14 @@ export const addQuestion = async (req, res) => {
       data: savedQuestions,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: "Failed to add question(s)" });
+    console.error("❌ addQuestion error:", err);
+    res.status(500).json({
+      success: false,
+      error: "Failed to add question(s)",
+    });
   }
 };
+
 
 export const updateQuestion = async (req, res) => {
   try {
@@ -184,7 +188,7 @@ export const getQuestionsByPracticeTopicAndTopic = async (req, res) => {
     const questions = await Question.find({
       practiceTopic: practiceTopicId,
       topic: new RegExp(`^${topic}$`, "i"),
-    }).sort({ createdAt: -1 });
+    }).sort({ createdAt: 1 });
 
     res.json({
       success: true,
