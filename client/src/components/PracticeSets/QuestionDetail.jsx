@@ -91,7 +91,7 @@ const QuestionDetails = ({
 
   const isSub = item.isSub;
   const uniqueId = isSub ? `${item.parentId}-${idx}` : item._id;
-  console.log(item)
+ 
   const isImageUrl = (str) =>
     typeof str === "string" &&
     str.match(/\.(jpeg|jpg|png|gif|webp)$/i) &&
