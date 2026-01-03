@@ -3,7 +3,7 @@ import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { InlineMath } from "react-katex";
+import { InlineMath ,BlockMath} from "react-katex";
 import "katex/dist/katex.min.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, BookOpen, Smile, MessageSquare } from "lucide-react";
