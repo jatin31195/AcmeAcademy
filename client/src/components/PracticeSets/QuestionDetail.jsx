@@ -192,16 +192,26 @@ const QuestionDetails = ({
                       item.answer,
                       optionValue
                     )} ${correctHighlightClass}`}
-                    onClick={() =>
-                      handleOptionClick(
-                        uniqueId,
-                        optionValue,
-                        item.answer,
-                        item.solutionText,
-                        item.solutionImage,
-                        item.solutionVideo
-                      )
-                    }
+                    onClick={() => {
+  // existing logic
+  handleOptionClick(
+    uniqueId,
+    optionValue,
+    item.answer,
+    item.solutionText,
+    item.solutionImage,
+    item.solutionVideo
+  );
+
+  // 🔥 force open solution
+  setExpanded(true);
+  setHighlightCorrect(true);
+
+  // optional UX cleanup
+  setVideoExpanded(false);
+  setDiscussionExpanded(false);
+}}
+
                   >
                     <div className="flex items-center gap-3 mt-1">
                       <span className="font-medium">

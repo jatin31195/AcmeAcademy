@@ -79,6 +79,13 @@ function App() {
         <Route path="/acme-player" element={<AcmePlayer />} />
         <Route path="/acme-free-courses" element={<FreeCourses />} />
         <Route path="/acme-practice-sets" element={<PracticeSets />} />
+<Route path="/acme-practice-sets/:setId" element={<PracticeSets />} />
+<Route path="/acme-practice-sets/:setId/:categoryId" element={<PracticeSets />} />
+<Route
+  path="/acme-practice-sets/:setId/:categoryId/:topicName"
+  element={<PracticeSets />}
+/>
+
         <Route path="/questions/:slug" element={<QuestionSEOPage />} />
          <Route path="/home" element={<Home />} />
          <Route path="/about" element={<About />} />

@@ -1,107 +1,125 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { Helmet } from "react-helmet-async";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import MainContent from "@/components/PracticeSets/MainContent";
-import "katex/dist/katex.min.css";
-import { BASE_URL } from "../config";
 import SEO from "../components/SEO";
+import { BASE_URL } from "../config";
+import "katex/dist/katex.min.css";
 
 const QUESTIONS_PER_PAGE = 5;
 
 const PracticeSets = () => {
+  const navigate = useNavigate();
+  const { setId, categoryId, topicName } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const tagFromUrl = searchParams.get("tag");
+  const pageFromUrl = Number(searchParams.get("page")) || 1;
+
+  /* ---------------- STATE ---------------- */
+
   const [practiceSets, setPracticeSets] = useState([]);
-  const [selectedPracticeSet, setSelectedPracticeSet] = useState(null);
-
   const [practiceTopics, setPracticeTopics] = useState([]);
-  const [selectedPracticeTopic, setSelectedPracticeTopic] = useState(null);
-
   const [topics, setTopics] = useState([]);
+
+  const [selectedPracticeSet, setSelectedPracticeSet] = useState(null);
+  const [selectedPracticeTopic, setSelectedPracticeTopic] = useState(null);
   const [selectedTopic, setSelectedTopic] = useState(null);
 
   const [questions, setQuestions] = useState([]);
   const [expandedSubjects, setExpandedSubjects] = useState({});
+
   const [selectedOptions, setSelectedOptions] = useState({});
   const [showSolution, setShowSolution] = useState({});
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [showTopics, setShowTopics] = useState(true);
 
-  // 🟢 Fetch all Practice Sets
-  useEffect(() => {
-    const fetchPracticeSets = async () => {
-      try {
-        const res = await axios.get(`${BASE_URL}/api/practice-set`);
-        const sets = res.data?.data || [];
-        setPracticeSets(sets);
+  const [currentPage, setCurrentPage] = useState(pageFromUrl);
 
-        if (sets.length > 0) {
-          setSelectedPracticeSet(sets[0]);
-          await fetchPracticeTopics(sets[0]._id);
-        }
-      } catch (err) {
-        console.error("❌ Error fetching practice sets:", err);
-      }
-    };
-    fetchPracticeSets();
+  /* ---------------- FETCH PRACTICE SETS ---------------- */
+
+  useEffect(() => {
+    axios.get(`${BASE_URL}/api/practice-set`).then((res) => {
+      setPracticeSets(res.data?.data || []);
+    });
   }, []);
 
-  // 🟡 Fetch Practice Topics (like Mathematics, Logical Reasoning)
-  const fetchPracticeTopics = async (practiceSetId) => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${BASE_URL}/api/practice-topic/${practiceSetId}`);
-      const data = res.data?.data || [];
-      setPracticeTopics(data);
-      setSelectedPracticeTopic(null);
-      setTopics([]);
-      setSelectedTopic(null);
-      setQuestions([]);
-    } catch (err) {
-      console.error("❌ Error fetching practice topics:", err);
-    } finally {
-      setLoading(false);
-    }
+  /* ---------------- FETCH PRACTICE TOPICS ---------------- */
+
+  const fetchPracticeTopics = async (setId) => {
+    setLoading(true);
+    const res = await axios.get(`${BASE_URL}/api/practice-topic/${setId}`);
+    setPracticeTopics(res.data?.data || []);
+    setLoading(false);
   };
 
-  // 🟣 Fetch Topics inside a selected Practice Topic (like Probability, Number Series)
+  /* ---------------- FETCH TOPICS ---------------- */
+
   const fetchTopics = async (practiceTopicId) => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${BASE_URL}/api/questions/practice-topic/${practiceTopicId}/topics`);
-      const topicNames = res.data?.data || [];
-      setTopics(topicNames);
-      setExpandedSubjects((prev) => ({ ...prev, [practiceTopicId]: topicNames }));
-    } catch (err) {
-      console.error("❌ Error fetching topics:", err);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    const res = await axios.get(
+      `${BASE_URL}/api/questions/practice-topic/${practiceTopicId}/topics`
+    );
+    const data = res.data?.data || [];
+    setTopics(data);
+    setExpandedSubjects((p) => ({ ...p, [practiceTopicId]: data }));
+    setLoading(false);
   };
 
-  // 🧠 Fetch Questions for a selected Topic
-  const fetchQuestions = async (practiceTopicId, topicName) => {
-    try {
-      setLoading(true);
-      const res = await axios.get(
-        `${BASE_URL}/api/questions/practice-topic/${practiceTopicId}/topics/${encodeURIComponent(topicName)}`
-      );
-      const data = res.data?.data || [];
-      setQuestions(data);
-      setSelectedTopic({ name: topicName });
-      setCurrentPage(1);
-      setSelectedOptions({});
-    } catch (err) {
-      console.error("❌ Error fetching questions:", err);
-    } finally {
-      setLoading(false);
-    }
+  /* ---------------- FETCH QUESTIONS ---------------- */
+
+  const fetchQuestions = async (practiceTopicId, topic) => {
+    setLoading(true);
+    const res = await axios.get(
+      `${BASE_URL}/api/questions/practice-topic/${practiceTopicId}/topics/${encodeURIComponent(
+        topic
+      )}`
+    );
+    setQuestions(res.data?.data || []);
+    setSelectedTopic({ name: topic });
+    setSelectedOptions({});
+    setCurrentPage(pageFromUrl);
+    setLoading(false);
   };
 
-  const handleOptionClick = (id, option, correctAnswer, solutionText, solutionImage, solutionVideo) => {
-    setSelectedOptions((prev) => ({ ...prev, [id]: option }));
-    setShowSolution((prev) => ({
-      ...prev,
+  /* ---------------- URL → STATE SYNC ---------------- */
+
+  useEffect(() => {
+    if (!practiceSets.length || !setId) return;
+    const set = practiceSets.find((s) => s._id === setId);
+    if (!set) return;
+    setSelectedPracticeSet(set);
+    fetchPracticeTopics(set._id);
+  }, [practiceSets, setId]);
+
+  useEffect(() => {
+    if (!practiceTopics.length || !categoryId) return;
+    const topic = practiceTopics.find((t) => t._id === categoryId);
+    if (!topic) return;
+    setSelectedPracticeTopic(topic);
+    fetchTopics(topic._id);
+  }, [practiceTopics, categoryId]);
+
+  useEffect(() => {
+    if (!selectedPracticeTopic || !topicName) return;
+    fetchQuestions(selectedPracticeTopic._id, topicName);
+    setShowTopics(false);
+  }, [selectedPracticeTopic, topicName]);
+
+  /* ---------------- OPTION HANDLERS ---------------- */
+
+  const handleOptionClick = (
+    id,
+    option,
+    correctAnswer,
+    solutionText,
+    solutionImage,
+    solutionVideo
+  ) => {
+    setSelectedOptions((p) => ({ ...p, [id]: option }));
+    setShowSolution((p) => ({
+      ...p,
       [id]: { show: true, correctAnswer, solutionText, solutionImage, solutionVideo },
     }));
   };
@@ -115,22 +133,36 @@ const PracticeSets = () => {
     return "";
   };
 
-  const expandedQuestions = [];
-  questions.forEach((q) => {
-    expandedQuestions.push({ ...q, isSub: false });
-    if (q.subQuestions?.length) {
-      q.subQuestions.forEach((sub) =>
-        expandedQuestions.push({ ...sub, isSub: true, parentId: q._id })
+  /* ---------------- EXPAND QUESTIONS ---------------- */
+
+  const expandedQuestions = useMemo(() => {
+    const list = [];
+    questions.forEach((q) => {
+      list.push({ ...q, isSub: false });
+      q.subQuestions?.forEach((sub) =>
+        list.push({ ...sub, isSub: true, parentId: q._id })
       );
-    }
-  });
+    });
+    return list;
+  }, [questions]);
+
+  /* ---------------- PAGINATION ---------------- */
 
   const totalPages = Math.ceil(expandedQuestions.length / QUESTIONS_PER_PAGE);
+
   const paginatedExpanded = expandedQuestions.slice(
     (currentPage - 1) * QUESTIONS_PER_PAGE,
     currentPage * QUESTIONS_PER_PAGE
   );
 
+  useEffect(() => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.set("page", currentPage);
+      if (tagFromUrl) params.set("tag", tagFromUrl);
+      return params;
+    });
+  }, [currentPage]);
   return (
     <>
       <SEO
@@ -197,10 +229,24 @@ const PracticeSets = () => {
               <select
                 value={selectedPracticeSet?._id || ""}
                 onChange={(e) => {
-                  const set = practiceSets.find((s) => s._id === e.target.value);
-                  setSelectedPracticeSet(set);
-                  fetchPracticeTopics(set._id);
-                }}
+  const set = practiceSets.find((s) => s._id === e.target.value);
+  if (!set) return;
+
+  setSelectedPracticeSet(set);
+
+  // reset lower levels
+  setSelectedPracticeTopic(null);
+  setSelectedTopic(null);
+  setTopics([]);
+  setQuestions([]);
+  setShowTopics(true);
+
+  fetchPracticeTopics(set._id);
+
+  navigate(`/acme-practice-sets/${set._id}`);
+}}
+
+
                 className="w-full appearance-none bg-white text-gray-800 px-5 py-3 rounded-lg shadow-md 
                            focus:ring-4 focus:ring-blue-300 font-medium cursor-pointer 
                            border border-gray-200 sm:text-base text-sm transition-all duration-200"
@@ -228,10 +274,20 @@ const PracticeSets = () => {
               <select
                 value={selectedPracticeTopic?._id || ""}
                 onChange={(e) => {
-                  const topic = practiceTopics.find((t) => t._id === e.target.value);
-                  setSelectedPracticeTopic(topic);
-                  fetchTopics(topic._id);
-                }}
+  const topic = practiceTopics.find((t) => t._id === e.target.value);
+  if (!topic || !selectedPracticeSet) return;
+
+  setSelectedPracticeTopic(topic);
+  setSelectedTopic(null);
+  setQuestions([]);
+  setShowTopics(true);
+
+  fetchTopics(topic._id);
+
+  // ONLY category route (no topic yet)
+  navigate(`/acme-practice-sets/${selectedPracticeSet._id}/${topic._id}`);
+}}
+
                 disabled={!selectedPracticeSet}
                 className="w-full appearance-none bg-white text-gray-800 px-5 py-3 rounded-lg shadow-md 
                            focus:ring-4 focus:ring-indigo-300 font-medium cursor-pointer 
@@ -294,43 +350,46 @@ const PracticeSets = () => {
             </h2>
 
             <button
-              onClick={() => setShowTopics((prev) => !prev)}
+              onClick={() => setShowTopics((prev) => !prev)
+  
+}
+
               className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-pink-500 text-white rounded-full shadow-md hover:shadow-lg transition-all text-sm font-medium"
             >
               {showTopics ? "Hide Topics" : "Show Topics"}
             </button>
           </div>
 
-          {showTopics && (
-            <>
-              {expandedSubjects[selectedPracticeTopic?._id] ? (
-                <div className="flex flex-wrap justify-center gap-3">
-                  {expandedSubjects[selectedPracticeTopic._id].map((topic) => (
-                    <motion.button
-                      key={topic}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => {
-                        fetchQuestions(selectedPracticeTopic._id, topic);
-                        setShowTopics(false);
-                      }}
-                      className={`px-5 py-2 rounded-full text-sm font-medium border transition-all ${
-                        selectedTopic?.name === topic
-                          ? "bg-gradient-to-r from-indigo-500 to-pink-500 text-white shadow-md border-transparent"
-                          : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                      }`}
-                    >
-                      {topic}
-                    </motion.button>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic text-center">
-                  Select a category to view topics
-                </p>
-              )}
-            </>
-          )}
+          {showTopics && selectedPracticeTopic && expandedSubjects[selectedPracticeTopic._id] && (
+  <div className="flex flex-wrap justify-center gap-3">
+    {expandedSubjects[selectedPracticeTopic._id].map((topic) => (
+      <motion.button
+        key={topic}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.97 }}
+        onClick={() => {
+          fetchQuestions(selectedPracticeTopic._id, topic);
+          setShowTopics(false);
+          setCurrentPage(1);
+
+          navigate(
+            `/acme-practice-sets/${selectedPracticeSet._id}/${selectedPracticeTopic._id}/${encodeURIComponent(
+              topic
+            )}?page=1`
+          );
+        }}
+        className={`px-5 py-2 rounded-full text-sm font-medium border transition-all ${
+          selectedTopic?.name === topic
+            ? "bg-gradient-to-r from-indigo-500 to-pink-500 text-white shadow-md border-transparent"
+            : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+        }`}
+      >
+        {topic}
+      </motion.button>
+    ))}
+  </div>
+)}
+
         </motion.div>
       </AnimatePresence>
 

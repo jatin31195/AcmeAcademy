@@ -8,13 +8,9 @@ import "katex/dist/katex.min.css";
 
 const MainContent = ({
   loading,
-  paginatedExpanded = [],
   expandedQuestions = [],
   selectedSubject,
   selectedTopic,
-  currentPage,
-  totalPages,
-  setCurrentPage,
   handleOptionClick,
   getOptionStyle,
   showSolution,
@@ -22,7 +18,7 @@ const MainContent = ({
 }) => {
   const navigate = useNavigate();
 
-  /* ---------------- TAG LOGIC ---------------- */
+  /* ---------------- TAG DETECTION ---------------- */
 
   const allTags = useMemo(() => {
     return Array.from(
@@ -30,14 +26,78 @@ const MainContent = ({
     );
   }, [expandedQuestions]);
 
-  const [selectedTag, setSelectedTag] = useState(null);
+  const hasTags = allTags.length > 0;
 
-  // auto-select first tag when data loads
+  const [selectedTag, setSelectedTag] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  /* ---------------- AUTO SELECT FIRST TAG ---------------- */
+
   useEffect(() => {
-    if (!selectedTag && allTags.length > 0) {
+    if (hasTags && !selectedTag) {
       setSelectedTag(allTags[0]);
+      setCurrentPage(1);
     }
-  }, [allTags, selectedTag]);
+  }, [hasTags, allTags, selectedTag]);
+
+  /* ---------------- EFFECTIVE QUESTION LIST ---------------- */
+
+  const effectiveQuestions = useMemo(() => {
+    // 🔹 NO TAGS → show all questions
+    if (!hasTags) return expandedQuestions;
+
+    // 🔹 TAGS PRESENT → filter by selected tag
+    if (!selectedTag) return [];
+    return expandedQuestions.filter((q) => q.tag === selectedTag);
+  }, [expandedQuestions, selectedTag, hasTags]);
+
+  /* ---------------- PAGINATION ---------------- */
+
+  const totalPages = Math.ceil(
+    effectiveQuestions.length / QUESTIONS_PER_PAGE
+  );
+
+  const paginatedQuestions = useMemo(() => {
+    const start = (currentPage - 1) * QUESTIONS_PER_PAGE;
+    const end = start + QUESTIONS_PER_PAGE;
+    return effectiveQuestions.slice(start, end);
+  }, [effectiveQuestions, currentPage, QUESTIONS_PER_PAGE]);
+
+  /* ---------------- PAGINATION HANDLERS ---------------- */
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((p) => p + 1);
+    } else if (hasTags) {
+      // move to next tag
+      const currentTagIndex = allTags.indexOf(selectedTag);
+      if (currentTagIndex < allTags.length - 1) {
+        setSelectedTag(allTags[currentTagIndex + 1]);
+        setCurrentPage(1);
+      }
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage((p) => p - 1);
+    } else if (hasTags) {
+      // move to previous tag
+      const currentTagIndex = allTags.indexOf(selectedTag);
+      if (currentTagIndex > 0) {
+        const prevTag = allTags[currentTagIndex - 1];
+        const prevTagQuestions = expandedQuestions.filter(
+          (q) => q.tag === prevTag
+        );
+        const prevTotalPages = Math.ceil(
+          prevTagQuestions.length / QUESTIONS_PER_PAGE
+        );
+
+        setSelectedTag(prevTag);
+        setCurrentPage(prevTotalPages);
+      }
+    }
+  };
 
   /* ---------------- RENDER ---------------- */
 
@@ -59,48 +119,40 @@ const MainContent = ({
         </Button>
 
         {/* 📘 Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-10"
-        >
+        <div className="text-center mb-10">
           <h1 className="text-5xl font-extrabold mb-3 bg-gradient-to-r from-indigo-500 via-blue-500 to-pink-500 text-transparent bg-clip-text">
             Practice Sets
           </h1>
 
           {selectedSubject && selectedTopic && (
-            <div className="flex flex-wrap justify-center gap-2 mt-2">
-              <span className="px-4 py-1 text-sm font-semibold bg-blue-100 text-blue-700 rounded-full">
+            <div className="flex justify-center gap-2 mt-2">
+              <span className="px-4 py-1 text-sm bg-blue-100 text-blue-700 rounded-full">
                 Set: {selectedSubject.title}
               </span>
-              <span className="px-4 py-1 text-sm font-semibold bg-purple-100 text-purple-700 rounded-full">
-                Category: {selectedTopic.name}
+              <span className="px-4 py-1 text-sm bg-purple-100 text-purple-700 rounded-full">
+                Topic: {selectedTopic.name}
               </span>
             </div>
           )}
 
-          {selectedTag && (
+          {hasTags && selectedTag && (
             <p className="mt-3 text-sm font-medium text-indigo-600">
               Tag: {selectedTag}
             </p>
           )}
+        </div>
 
-          <p className="text-gray-600 text-sm mt-2 italic">
-            Sharpen your skills one topic at a time — consistency builds mastery.
-          </p>
-
-          <div className="mx-auto mt-4 h-[3px] w-32 bg-gradient-to-r from-indigo-400 via-blue-500 to-pink-500 rounded-full" />
-        </motion.div>
-
-        {/* 🏷️ TAG SELECTOR */}
-        {allTags.length > 0 && (
+        {/* 🏷️ TAG SELECTOR (ONLY IF TAGS EXIST) */}
+        {hasTags && (
           <div className="flex justify-center gap-2 mb-8 flex-wrap">
             {allTags.map((tag) => (
               <button
                 key={tag}
-                onClick={() => setSelectedTag(tag)}
-                className={`px-4 py-1 rounded-full text-sm font-semibold border transition ${
+                onClick={() => {
+                  setSelectedTag(tag);
+                  setCurrentPage(1);
+                }}
+                className={`px-4 py-1 rounded-full text-sm font-semibold border ${
                   selectedTag === tag
                     ? "bg-indigo-600 text-white border-indigo-600"
                     : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
@@ -114,54 +166,44 @@ const MainContent = ({
 
         {/* 📚 QUESTIONS */}
         {loading ? (
-          <p className="text-center text-gray-500 mt-10">Loading...</p>
+          <p className="text-center text-gray-500">Loading...</p>
+        ) : paginatedQuestions.length === 0 ? (
+          <p className="text-center text-gray-500">
+            No questions available.
+          </p>
         ) : (
-          <motion.div
-            key={currentPage}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="space-y-6"
-          >
-            {paginatedExpanded
-              .filter((q) => !selectedTag || q.tag === selectedTag)
-              .map((item, idx) => {
-                const mainQuestionNumber =
-                  (currentPage - 1) * QUESTIONS_PER_PAGE + idx + 1;
+          <div className="space-y-6">
+            {paginatedQuestions.map((item, idx) => {
+              const questionNumber =
+                (currentPage - 1) * QUESTIONS_PER_PAGE + idx + 1;
 
-                return (
-                  <QuestionDetails
-                    key={item._id || idx}
-                    item={item}
-                    idx={idx}
-                    handleOptionClick={handleOptionClick}
-                    getOptionStyle={getOptionStyle}
-                    showSolution={showSolution}
-                    mainQuestionNumber={mainQuestionNumber}
-                  />
-                );
-              })}
-          </motion.div>
+              return (
+                <QuestionDetails
+                  key={item._id || idx}
+                  item={item}
+                  idx={idx}
+                  handleOptionClick={handleOptionClick}
+                  getOptionStyle={getOptionStyle}
+                  showSolution={showSolution}
+                  mainQuestionNumber={questionNumber}
+                />
+              );
+            })}
+          </div>
         )}
 
         {/* 📄 Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center gap-2 mt-8">
-            <Button
-              variant="outline"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-            >
+          <div className="flex justify-center gap-3 mt-8">
+            <Button variant="outline" onClick={handlePrevious}>
               Previous
             </Button>
+
             <span className="px-3 py-1 bg-muted rounded text-sm">
               {currentPage} / {totalPages}
             </span>
-            <Button
-              variant="outline"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
-            >
+
+            <Button variant="outline" onClick={handleNext}>
               Next
             </Button>
           </div>
