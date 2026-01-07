@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate, Link } from "react-router-dom";
 import MainContent from "@/components/PracticeSets/MainContent";
 import SEO from "../components/SEO";
 import { BASE_URL } from "../config";
 import "katex/dist/katex.min.css";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const QUESTIONS_PER_PAGE = 5;
 
@@ -214,6 +216,14 @@ const PracticeSets = () => {
       {/* HERO SECTION */}
       <section className="relative py-28 bg-gradient-to-r from-blue-500 to-indigo-600 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="absolute left-8 top-8 sm:left-56 sm:top-18">
+    <Link to="/acme-academy-open-library">
+      <Button variant="ghost" className="flex items-center gap-2">
+        <ArrowLeft className="h-4 w-4" />
+        Back to Library
+      </Button>
+    </Link>
+  </div>
           <h1 className="text-5xl font-extrabold mb-4 text-gray-100">
             Practice Sets
           </h1>
