@@ -23,6 +23,8 @@ const Test = () => {
   const [questionStartTime, setQuestionStartTime] = useState(null);
   const [questionTimeTaken, setQuestionTimeTaken] = useState({});
   const [testStartTime, setTestStartTime] = useState(null);
+  const [sectionIndex, setSectionIndex] = useState(0);
+const [sectionTimeLeft, setSectionTimeLeft] = useState(0);
 
   useEffect(() => {
   if (!user) {
@@ -30,19 +32,62 @@ const Test = () => {
   }
 }, [user, navigate]);
 
-  useEffect(() => {
-    const fetchTest = async () => {
-      try {
-        const res = await axios.get(`${BASE_URL}/api/tests/${testId}`, { withCredentials: true });
-        setTestData(res.data);
-        setCurrentSection(res.data.sections?.[0]?.title || "");
-        setTimeLeft(res.data.totalDurationMinutes * 60);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchTest();
-  }, [testId]);
+ useEffect(() => {
+  const fetchTest = async () => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/api/tests/${testId}`,
+        { withCredentials: true }
+      );
+
+      const data = res.data;
+      setTestData(data);
+
+      // section init
+      setSectionIndex(0);
+      setCurrentSection(data.sections[0].title);
+
+      // total test time
+      setTimeLeft(data.totalDurationMinutes * 60);
+
+      // section time
+      setSectionTimeLeft(data.sections[0].durationMinutes * 60);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  fetchTest();
+}, [testId]);
+
+useEffect(() => {
+  if (!testStarted || sectionTimeLeft <= 0) return;
+
+  const timer = setInterval(() => {
+    setSectionTimeLeft((t) => t - 1);
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, [testStarted, sectionTimeLeft]);
+useEffect(() => {
+  if (!testStarted) return;
+  if (sectionTimeLeft > 0) return;
+
+  // move to next section
+  const nextIndex = sectionIndex + 1;
+
+  if (nextIndex < testData.sections.length) {
+    const nextSection = testData.sections[nextIndex];
+
+    setSectionIndex(nextIndex);
+    setCurrentSection(nextSection.title);
+
+    // reset question index for new section
+    setCurrentQuestion(0);
+
+    // set section timer
+    setSectionTimeLeft(nextSection.durationMinutes * 60);
+  }
+}, [sectionTimeLeft, testStarted]);
 
   useEffect(() => {
     if (testStarted && timeLeft > 0) {
@@ -110,11 +155,16 @@ const Test = () => {
   };
 
   const handleSaveAndNext = () => {
-    recordTimeForCurrentQuestion();
-    if (currentQuestion < testData.questions.length - 1) {
-      setCurrentQuestion(q => q + 1);
-    }
-  };
+  recordTimeForCurrentQuestion();
+
+  const currentSectionObj = testData.sections[sectionIndex];
+  const maxQ = currentSectionObj.numQuestions - 1;
+
+  if (currentQuestion < maxQ) {
+    setCurrentQuestion((q) => q + 1);
+  }
+};
+
 
   const handleSubmit = async () => {
   try {
@@ -240,22 +290,24 @@ const jsonLd = testData
     />
   ) : (
     <TestView
-      user={user}
-      testData={testData}
-      currentQuestion={currentQuestion}
-      setCurrentQuestion={setCurrentQuestion}
-      answers={answers}
-      handleAnswer={handleAnswer}
-      handleMarkForReviewAndNext={handleMarkForReviewAndNext}
-      handleSaveAndNext={handleSaveAndNext}
-      handleSubmit={handleSubmit}
-      timeLeft={timeLeft}
-      questionStatus={questionStatus}
-      statusCounts={statusCounts}
-      getQuestionStatusColor={getQuestionStatusColor}
-      formatTime={formatTime}
-      currentSection={currentSection}
-    />
+  user={user}
+  testData={testData}
+  currentQuestion={currentQuestion}
+  setCurrentQuestion={setCurrentQuestion}
+  answers={answers}
+  handleAnswer={handleAnswer}
+  handleMarkForReviewAndNext={handleMarkForReviewAndNext}
+  handleSaveAndNext={handleSaveAndNext}
+  handleSubmit={handleSubmit}
+  timeLeft={timeLeft}
+  sectionTimeLeft={sectionTimeLeft}   // ✅ ADD THIS
+  questionStatus={questionStatus}
+  statusCounts={statusCounts}
+  getQuestionStatusColor={getQuestionStatusColor}
+  formatTime={formatTime}
+  currentSection={currentSection}
+/>
+
   )}
 </>
 
