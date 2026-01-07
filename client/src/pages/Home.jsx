@@ -62,24 +62,24 @@ const jsonLd = {
 
 
 function Home() {
-  useEffect(() => {
-  const jsConfetti = new JSConfetti();
+//   useEffect(() => {
+//   const jsConfetti = new JSConfetti();
 
-  setTimeout(() => {
-    jsConfetti.addConfetti({
-      confettiColors: [
-        '#ff6b6b',
-        '#f06595',
-        '#fcc419',
-        '#40c057',
-        '#4dabf7',
-        '#9775fa',
-      ],
-      confettiRadius: 6,
-      confettiNumber: 250,
-    });
-  }, 800); // Delay to avoid navbar shift
-}, []);
+//   setTimeout(() => {
+//     jsConfetti.addConfetti({
+//       confettiColors: [
+//         '#ff6b6b',
+//         '#f06595',
+//         '#fcc419',
+//         '#40c057',
+//         '#4dabf7',
+//         '#9775fa',
+//       ],
+//       confettiRadius: 6,
+//       confettiNumber: 250,
+//     });
+//   }, 800); // Delay to avoid navbar shift
+// }, []);
 
   return (
     <>
