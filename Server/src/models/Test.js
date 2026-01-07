@@ -1,12 +1,20 @@
 import mongoose from "mongoose";
 
 const sectionSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  marksPerQuestion: { type: Number, required: true },
-  negativeMarks: { type: Number, default: 0 },       
-  numQuestions: { type: Number, required: true },    
-  durationMinutes: { type: Number, required: true }, 
+  title: String,
+  marksPerQuestion: Number,
+  negativeMarks: Number,
+  numQuestions: Number,
+  durationMinutes: { type: Number, default: 0 }, // 0 for shared
+  durationGroup: { type: String }, // "CE_GROUP"
 });
+sharedDurationGroups: [
+  {
+    name: String,          // "CE_GROUP"
+    durationMinutes: Number // 20
+  }
+]
+
 
 const solutionSchema = new mongoose.Schema({
   text: { type: String },           
@@ -40,18 +48,25 @@ const testSchema = new mongoose.Schema(
 
 
 testSchema.pre("save", function (next) {
-  if (this.sections && this.sections.length > 0) {
-    this.totalQuestions = this.sections.reduce((acc, s) => acc + s.numQuestions, 0);
-    this.totalMarks = this.sections.reduce(
-      (acc, s) => acc + s.numQuestions * s.marksPerQuestion,
-      0
-    );
-    this.totalDurationMinutes = this.sections.reduce(
-      (acc, s) => acc + s.durationMinutes,
-      0
-    );
-  }
+  const sectionTime = this.sections.reduce(
+    (a, s) => a + (s.durationMinutes || 0),
+    0
+  );
+
+  const sharedTime = this.sharedDurationGroups?.reduce(
+    (a, g) => a + g.durationMinutes,
+    0
+  ) || 0;
+
+  this.totalDurationMinutes = sectionTime + sharedTime;
+  this.totalQuestions = this.sections.reduce((a, s) => a + s.numQuestions, 0);
+  this.totalMarks = this.sections.reduce(
+    (a, s) => a + s.numQuestions * s.marksPerQuestion,
+    0
+  );
+
   next();
 });
+
 
 export default mongoose.model("Test", testSchema);
