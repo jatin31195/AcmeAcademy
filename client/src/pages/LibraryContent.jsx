@@ -254,36 +254,14 @@ export default function LibraryContent() {
                       : "border-slate-200"
                   }`}
                 >
-                  <CardHeader
-                  className="rounded-t-xl px-4 py-2 cursor-pointer hover:bg-muted/40 transition"
-                  onClick={() => toggleGroupExpanded(groupKey)}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <CardTitle className="gradient-text font-medium text-base leading-tight">
-                        <span className="gradient-hero mr-1">{gIdx + 1}.</span>Unit
-                      </CardTitle>
-                      <Badge variant="outline" className="bg-white/70 backdrop-blur">
-                        {groupCompleted}/{group.topics.length} done
-                      </Badge>
-                    </div>
-                    <Button
-                      variant={expandedGroup[groupKey] ? "default" : "outline"}
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleGroupExpanded(groupKey);
-                      }}
-                      className="no-underline"
-                    >
-                      {expandedGroup[groupKey] ? "Hide Topics" : "Show Topics"}
-                    </Button>
-                  </div>
+                  <CardHeader className="rounded-t-xl px-4 py-2 bg-muted/30">
+
+                 
                 </CardHeader>
 
 
-                  {expandedGroup[groupKey] && (
-                    <CardContent className="space-y-3 mt-2 px-4 py-3">
+                  <CardContent className="space-y-3 mt-2 px-4 py-3">
+
                       {group.topics.map((topic, idx) => (
                         <motion.div
                           key={topic._id}
@@ -302,7 +280,7 @@ export default function LibraryContent() {
                                 className="h-5 w-5 mt-1"
                               />
                               <div>
-                                <div className="text-xs text-muted-foreground">Topic {idx + 1}</div>
+                              
                                 <div
                                   className={`text-base ${
                                     topic.completed ? "line-through text-muted-foreground" : "font-medium text-gray-800"
@@ -434,7 +412,7 @@ export default function LibraryContent() {
                         </motion.div>
                       ))}
                     </CardContent>
-                  )}
+                  
                 </Card>
               </motion.div>
             );
