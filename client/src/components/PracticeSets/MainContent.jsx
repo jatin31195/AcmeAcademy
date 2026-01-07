@@ -108,15 +108,7 @@ const MainContent = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        {/* 🔙 Back */}
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/acme-academy-open-library")}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Library
-        </Button>
+        
 
         {/* 📘 Header */}
         <div className="text-center mb-10">
