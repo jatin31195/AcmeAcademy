@@ -48,7 +48,8 @@ app.use(
       "https://www.acmeacademy.in", // for Vite dev
       "https://admin.acmeacademy.in",
       "https://acmeacademy.onrender.com", // optional tunnel
-      "https://acme-academy-rd7v.vercel.app"
+      "https://acme-academy-rd7v.vercel.app",
+      "http://localhost:5173"
     ],
     methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
     credentials: true,

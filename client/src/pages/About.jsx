@@ -67,7 +67,7 @@ const milestones = [
   },
   {
     year: "2018",
-    title: "Chhattisgarh’s No.1 Academy",
+    title: "Chhattisgarh's No.1 Academy",
     highlight: "Regional Excellence Achieved",
     description:
       "ACME became the most trusted MCA Entrance Academy in Chhattisgarh with record selections and exceptional teaching standards.",
@@ -84,7 +84,7 @@ const milestones = [
     title: "Nationwide Recognition",
     highlight: "Trusted by Students Across India",
     description:
-      "Learners from every corner of India joined ACME’s programs, making it a leading national name in MCA preparation.",
+      "Learners from every corner of India joined ACME's programs, making it a leading national name in MCA preparation.",
   },
   {
     year: "2023",
@@ -111,10 +111,10 @@ const milestones = [
 
   const faculty = [
     {
-      name: "Mr. Kartikey Pandey",
+      name: "Dr. Kartikey Pandey",
       designation: "Director & Mathematics Mentor",
-      qualification: "MCA (NIT Raipur), Ph.D. Scholar",
-      experience: "10+ Years",
+      qualification: "PhD (Mathematics), NIT Raipur | MCA (NIT Raipur)",
+      experience: "15+ Years",
       specialization: "Mathematics & Reasoning",
       image: KP,
     },
@@ -191,12 +191,12 @@ const milestones = [
       "foundingDate": "2015",
       "founder": {
         "@type": "Person",
-        "name": "Mr. Kartikey Pandey",
+        "name": "Dr. Kartikey Pandey",
         "jobTitle": "Director & Mathematics Mentor",
         "alumniOf": "NIT Raipur",
         "sameAs": "https://www.linkedin.com/in/kartikey-pandey"
       },
-      "description": "ACME Academy offers India’s best online and offline MCA coaching with 10+ years of experience and 2000+ selections in NITs, DU, JNU, BHU, JMI, and HCU.",
+      "description": "ACME Academy offers India's best online and offline MCA coaching with 10+ years of experience and 2000+ selections in NITs, DU, JNU, BHU, JMI, and HCU.",
       "slogan": "Transforming Aspirations into Achievements",
       "sameAs": [
         "https://www.instagram.com/acmeacademy.in",
@@ -278,7 +278,7 @@ const milestones = [
             <span className="text-white">Acme Academy</span>
           </motion.h1>
           <p className="font-semibold text-lg sm:text-xl text-white/90 mb-8">
-            India’s Most Trusted MCA Entrance Academy 
+            India's Most Trusted MCA Entrance Academy 
             <br/>
             empowering aspirants with
             quality education and proven results.
@@ -315,7 +315,7 @@ const milestones = [
         <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-700"></div>
         <img
           src={KP}
-          alt="Kartikey Pandey"
+          alt="Dr. Kartikey Pandey"
           className="relative w-72 sm:w-80 md:w-96 rounded-2xl shadow-2xl object-cover border-4 border-white"
         />
       </div>
@@ -335,19 +335,19 @@ const milestones = [
 
       <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-4">
         <strong>ACME Academy</strong>, established in <strong>2015</strong> under the adept guidance of{" "}
-        <strong>Kartikey Pandey</strong> — a dedicated Ph.D. scholar and <strong>NIT Raipur</strong> alumnus —
+        <strong>Dr. Kartikey Pandey</strong> — a PhD (Mathematics) from <strong>NIT Raipur</strong> —
         has been at the forefront of <strong>MCA Entrance Exam</strong> preparation in India.
       </p>
 
       <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-4">
-        Known for his vision, discipline, and mentoring excellence, he’s not just the <strong>Director</strong> of the
+        Known for his vision, discipline, and mentoring excellence, he's not just the <strong>Director</strong> of the
         institution but the <strong>soul</strong> of ACME Academy. His leadership inspires innovation,
-        hard work, and success — creating a legacy of over <strong>1000+ selections</strong> in premier institutions like
+        hard work, and success — creating a legacy of over <strong>2000+ selections</strong> in premier institutions like
         <strong> NITs, DU, JNU, BHU, JMI, HCU</strong> and more.
       </p>
 
       <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-6">
-        His philosophy, <em>“We deliver what we promise,”</em> drives every aspect of ACME’s journey.
+        His philosophy, <em>"We deliver what we promise,"</em> drives every aspect of ACME's journey.
         Through up-to-date study materials, rigorous guidance, and personalized mentorship,
         he ensures every student achieves their highest potential.
       </p>
@@ -404,7 +404,7 @@ const milestones = [
           technology-driven world.
         </p>
         <p className="text-gray-700 leading-relaxed text-base md:text-lg mt-3 font-[Inter] tracking-wide">
-          We believe <strong>“Success is not just an outcome, but a journey of consistent growth.”</strong>
+          We believe <strong>"Success is not just an outcome, but a journey of consistent growth."</strong>
         </p>
       </motion.div>
 
@@ -426,7 +426,7 @@ const milestones = [
           student into an achiever.
         </p>
         <p className="text-gray-700 leading-relaxed text-base md:text-lg mt-3 font-[Inter] tracking-wide">
-          Guided by the principle <em>“Practice and Patience Make a Man Perfect,”</em> we
+          Guided by the principle <em>"Practice and Patience Make a Man Perfect,"</em> we
           cultivate excellence through structured learning and continuous improvement.
         </p>
       </motion.div>
@@ -658,7 +658,7 @@ const milestones = [
         Join Our Success Story
       </h3>
       <p className="text-gray-600 mb-8 text-sm sm:text-base leading-relaxed">
-        Become a part of <span className="font-semibold text-purple-600">ACME Academy’s</span> legacy of excellence and achieve your MCA dreams with
+        Become a part of <span className="font-semibold text-purple-600">ACME Academy's</span> legacy of excellence and achieve your MCA dreams with
         expert mentors guiding every step.
       </p>
       <div className="flex flex-col sm:flex-row gap-4 justify-center">

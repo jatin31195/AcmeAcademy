@@ -26,6 +26,8 @@ import "katex/dist/katex.min.css";
 import FreeCourses from "./pages/FreeCourses";
 import PracticeSets from "./pages/PracticeSets";
 import QuestionSEOPage from "./pages/QuestionSEOPage";
+import ScoreCheckerPage from "./pages/ScoreCheckerPage";  
+import ScoreCheckerFloat from "./components/ScoreCheckerFloat/scorecheckerfloat";
 
 function App() {
   const location = useLocation();
@@ -36,15 +38,21 @@ function App() {
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
     location.pathname === "/acme-courses" ||
+  
     location.pathname.startsWith("/acme-player") ||
     location.pathname.startsWith("/acme-test") ||
     location.pathname.startsWith("/acme-test-result");
 
-  const hideFooter = hideNavbar || location.pathname === "/acme-practice-sets";
+  const hideFooter = hideNavbar || location.pathname === "/acme-practice-sets"||  location.pathname === "/score-checker";
+  // Hide the float on the checker page itself + test/player pages
+  const hideFloat =
+    location.pathname === "/score-checker" ||
+    location.pathname.startsWith("/acme-player") ||
+    location.pathname.startsWith("/acme-test");
 
   return (
     <>
-     <ToastContainer
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}
@@ -59,7 +67,7 @@ function App() {
 
       <Routes>
         {/* Public routes */}
-        <Route >
+        <Route>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
         </Route>
@@ -73,36 +81,34 @@ function App() {
         <Route path="/contact-acme-academy" element={<Contact />} />
         <Route path="/acme-academy-results" element={<Results />} />
         <Route path="/acme-academy-results/:exam/:year" element={<Results />} />
-        <Route path="/acme-academy-results/:year" element={<Results />} /> 
+        <Route path="/acme-academy-results/:year" element={<Results />} />
         <Route path="/acme-academy-open-library" element={<OpenLibrary />} />
         <Route path="/acme-academy-open-library/:id" element={<LibraryContent />} />
         <Route path="/acme-player" element={<AcmePlayer />} />
         <Route path="/acme-free-courses" element={<FreeCourses />} />
         <Route path="/acme-practice-sets" element={<PracticeSets />} />
-<Route path="/acme-practice-sets/:setId" element={<PracticeSets />} />
-<Route path="/acme-practice-sets/:setId/:categoryId" element={<PracticeSets />} />
-<Route
-  path="/acme-practice-sets/:setId/:categoryId/:topicName"
-  element={<PracticeSets />}
-/>
-
+        <Route path="/acme-practice-sets/:setId" element={<PracticeSets />} />
+        <Route path="/acme-practice-sets/:setId/:categoryId" element={<PracticeSets />} />
+        <Route
+          path="/acme-practice-sets/:setId/:categoryId/:topicName"
+          element={<PracticeSets />}
+        />
         <Route path="/questions/:slug" element={<QuestionSEOPage />} />
-         <Route path="/home" element={<Home />} />
-         <Route path="/about" element={<About />} />
-        {/* Protected routes */}
-          <Route path="/dashboard" element={<Dashboard />} />
-        <Route element={<ProtectedRoute />}>
-         
-          
-          <Route path="/acme-test/:testId" element={<Test />} />
-          <Route path="/acme-test-result/:testId/:attemptNumber?" element={<TestResult />} 
+        <Route path="/home" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/score-checker" element={<ScoreCheckerPage />} /> {/* ← ADD */}
 
-      />
+        {/* Protected routes */}
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/acme-test/:testId" element={<Test />} />
+          <Route path="/acme-test-result/:testId/:attemptNumber?" element={<TestResult />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
 
+      {!hideFloat && <ScoreCheckerFloat />}   {/* ← ADD — floats on all pages */}
       {!hideFooter && <Footer />}
     </>
   );
