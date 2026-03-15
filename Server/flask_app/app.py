@@ -88,18 +88,19 @@ def get_sheet():
 def ensure_header(sheet):
     if not sheet.get_all_values():
         sheet.append_row(
-            ["Test Date", "Application No", "Roll No", "Candidate Name",
-             "Score", "Correct", "Incorrect", "Unattempted"],
+            ["Test Date", "Name", "Phone", "Application No", "Roll No",
+             "Candidate Name", "Score", "Correct", "Incorrect", "Unattempted"],
             value_input_option="RAW",
         )
 
 
-def save_to_sheet(app_no, roll_no, name, score, correct, incorrect, unattempted):
+def save_to_sheet(user_name, user_phone, app_no, roll_no, name, score, correct, incorrect, unattempted):
     sheet = get_sheet()
     ensure_header(sheet)
     sheet.append_row(
         [
             datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            user_name, user_phone,
             app_no, roll_no, name,
             score, correct, incorrect, unattempted,
         ],
@@ -281,12 +282,15 @@ def check():
                 incorrect += 1
             results.append({"qid": qid, "yours": user_code, "correct": correct_code, "status": status})
 
-        score     = correct * 4 - incorrect
-        candidate = extract_candidate_details(response_text)
+        score      = correct * 4 - incorrect
+        candidate  = extract_candidate_details(response_text)
+        user_name  = request.form.get("user_name", "").strip()
+        user_phone = request.form.get("user_phone", "").strip()
 
         sheet_error = None
         try:
             save_to_sheet(
+                user_name, user_phone,
                 candidate["app_no"], candidate["roll_no"], candidate["name"],
                 score, correct, incorrect, unattempted,
             )
