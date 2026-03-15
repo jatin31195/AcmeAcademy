@@ -2,8 +2,8 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
-
-const FLASK_URL = "http://localhost:5001";
+import { Flask_URL } from "@/config";
+const FLASK_URL = Flask_URL;
 
 const EXAMS = [
   {
