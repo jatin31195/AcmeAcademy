@@ -291,11 +291,7 @@ const ScoreCheckerPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
             >
-              {/* Badge with logo — same as Navbar Acme Library */}
-              <div className="inline-flex items-center gap-2 bg-purple-500/15 border border-purple-400/30 text-purple-200 text-xs font-bold px-4 py-1.5 rounded-full mb-5 tracking-widest uppercase">
-                <img src="/logo.png" alt="ACME" className="h-4 w-auto object-contain" />
-                ACME Academy
-              </div>
+           
 
               <h1 className="text-[clamp(2.2rem,5vw,3.8rem)] font-extrabold text-white drop-shadow-2xl mb-4">
                 <span className="bg-gradient-to-r from-pink-400 via-purple-300 to-indigo-300 text-transparent bg-clip-text">
