@@ -1,4 +1,6 @@
 flask
-pymupdf
 flask-cors
-gunicorn
+pymupdf
+gspread
+google-auth
+python-dotenv

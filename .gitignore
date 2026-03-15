@@ -15,7 +15,8 @@ Admin/node_modules/
 client/.env
 Server/.env
 Admin/.env
-
+Server/flask_app/.env
+Server/flask_app/service_account.json
 # Build outputs
 client/dist/
 client/build/
