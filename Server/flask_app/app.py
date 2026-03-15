@@ -4,7 +4,11 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS                          # ← ADD 1
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", "https://www.acmeacademy.in"])  # ← ADD 2
+CORS(app, origins=[
+    "http://localhost:5173",
+    "https://www.acmeacademy.in",
+    "https://acmeacademy.in"
+]) # ← ADD 2
 
 # ── Parsers ──────────────────────────────────────────────────────────────────
 
