@@ -25,6 +25,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const isProduction = process.env.NODE_ENV === "production";
 const shouldEnforceHttps = isProduction || process.env.FORCE_HTTPS === "true";
+const allowedOrigins = [
+  "https://www.acmeacademy.in",
+  "https://acmeacademy.in",
+  "https://admin.acmeacademy.in",
+  "https://api.acmeacademy.in",
+  "https://acmeacademy.onrender.com",
+  "https://acme-academy-rd7v.vercel.app",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+];
 
 const isHttpsRequest = (req) => {
   const forwardedProto = req.headers["x-forwarded-proto"];
@@ -54,30 +64,27 @@ app.set("trust proxy", 1);
 //  next();
 //});
 app.use(
-  prerender
-    .set("prerenderToken", "yd8IUbtERM5oQKILMuBo")
-    .set("protocol", "https")
+  cors({
+    origin(origin, callback) {
+      // Allow requests without Origin header (curl, health checks, server-to-server).
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    credentials: true,
+    optionsSuccessStatus: 204,
+  })
 );
 
 app.use(
-  cors({
-    origin: isProduction
-      ? [
-          "https://www.acmeacademy.in",
-          "https://admin.acmeacademy.in",
-          "https://acmeacademy.onrender.com",
-          "https://acme-academy-rd7v.vercel.app",
-        ]
-      : [
-          "https://www.acmeacademy.in",
-          "https://admin.acmeacademy.in",
-          "https://acmeacademy.onrender.com",
-          "https://acme-academy-rd7v.vercel.app",
-          "http://localhost:5173",
-        ],
-    methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
-    credentials: true,
-  })
+  prerender
+    .set("prerenderToken", "yd8IUbtERM5oQKILMuBo")
+    .set("protocol", "https")
 );
 
 // Enforce HTTPS and send strict transport security headers in production.
