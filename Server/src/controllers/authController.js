@@ -2,12 +2,56 @@ import * as userService from "../services/authService.js";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import UserTestAttempt from "../models/UserTestAttempt.js";
+import { uploadToCloudinary } from "../utils/multerCloudinary.js";
 import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import dotenv from "dotenv";
 dotenv.config();
 import crypto from "crypto";
 const otpStore = new Map();
 const verifiedEmails = new Set();
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const DEFAULT_RESEND_FROM = "Acme Academy <noreply@acmeacademy.in>";
+
+const toNumberOrNull = (value) => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+};
+
+const normalizeMobile = (value) => {
+  const digits = String(value || "").replace(/\D/g, "");
+  return digits.length ? digits : "";
+};
+
+const buildVerificationSummary = (userDoc) => {
+  const p = userDoc.verificationProfile || {};
+  const acceptedBy = userDoc.fullname || userDoc.username || "Student";
+  return {
+    name: userDoc.fullname || "",
+    username: userDoc.username || "",
+    mobile: userDoc.phone || p.mobile || userDoc.whatsapp || "",
+    email: userDoc.email || "",
+    address: p.address || "",
+    targetExam: userDoc.targetExam || p.targetExam || "",
+    targetYear: userDoc.targetYear || p.targetYear || "",
+    courseEnrolled: p.courseEnrolled || "",
+    termsAccepted: !!p.termsAccepted,
+    acceptedBy,
+    acceptedDeclaration: `I, ${acceptedBy}, confirm that I have accepted the Terms and Conditions for the above data.`,
+    submittedAt: userDoc.verificationSubmittedAt || null,
+    signatureDataUrl: p.signatureDataUrl || "",
+    downloadProfileCardDataUrl: p.downloadProfileCardDataUrl || "",
+  };
+};
+
+const sanitizeUserForStudent = (userDoc) => {
+  const safeUser = userDoc.toObject();
+  delete safeUser.password;
+  delete safeUser.__v;
+  delete safeUser.verificationProfile;
+  safeUser.verificationSummary = buildVerificationSummary(userDoc);
+  return safeUser;
+};
 export const sendEmailOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -18,19 +62,22 @@ export const sendEmailOtp = async (req, res) => {
       return res.status(400).json({ message: "Email already registered" });
 
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
-    otpStore.set(email, { otp, createdAt: Date.now() });
 
-    const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
+    if (!resend) {
+      return res
+        .status(500)
+        .json({ message: "Resend is not configured. Add RESEND_API_KEY in server env." });
+    }
+
+    const resendFrom = process.env.RESEND_FROM_EMAIL || DEFAULT_RESEND_FROM;
+    if (!resendFrom.includes("@acmeacademy.in")) {
+  return res.status(500).json({
+    message: "Invalid sender email. Must use your verified domain.",
   });
+}
 
-
-    const mailOptions = {
-      from: `"ACME Academy" <acmeacademy15@gmail.com>`,
+    const resendResponse = await resend.emails.send({
+      from: resendFrom,
       to: email,
       subject: "Your ACME Academy OTP Verification Code",
       html: `
@@ -40,12 +87,71 @@ export const sendEmailOtp = async (req, res) => {
           <p>Your OTP for ACME Academy registration is:</p>
           <h1 style="color:#E11D48;letter-spacing:5px;">${otp}</h1>
           <p>This code will expire in <b>5 minutes</b>.</p>
-          <p style="font-size:13px;color:#777;">If you didn’t request this, ignore this email.</p>
+          <p style="font-size:13px;color:#777;">If you didn't request this, ignore this email.</p>
         </div>`,
+    });
+
+    const sendOtpFallbackWithNodemailer = async () => {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: `"ACME Academy" <${process.env.EMAIL_USER || "acmeacademy15@gmail.com"}>`,
+        to: email,
+        subject: "Your ACME Academy OTP Verification Code",
+        html: `
+          <div style="font-family:Arial;padding:20px;background:#f9f9f9;border-radius:10px;">
+            <h2 style="color:#4F46E5;">🔐 Email Verification</h2>
+            <p>Dear Student,</p>
+            <p>Your OTP for ACME Academy registration is:</p>
+            <h1 style="color:#E11D48;letter-spacing:5px;">${otp}</h1>
+            <p>This code will expire in <b>5 minutes</b>.</p>
+            <p style="font-size:13px;color:#777;">If you didn't request this, ignore this email.</p>
+          </div>`,
+      });
     };
 
-    await transporter.sendMail(mailOptions);
-    res.status(200).json({ message: "OTP sent successfully" });
+    if (resendResponse?.error) {
+      console.error("Resend OTP error:", resendResponse.error);
+
+      const isResendSandboxError =
+        resendResponse.error?.statusCode === 403 &&
+        resendResponse.error?.name === "validation_error";
+
+      if (isResendSandboxError && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        await sendOtpFallbackWithNodemailer();
+        otpStore.set(email, { otp, createdAt: Date.now() });
+        return res.status(200).json({
+          message:
+            "OTP sent successfully via fallback mail service. Configure verified Resend domain for primary delivery.",
+          deliveryMode: "nodemailer-fallback",
+        });
+      }
+
+      return res.status(502).json({
+        message: "OTP email could not be delivered by mail provider.",
+        providerError: resendResponse.error?.message || "Unknown provider error",
+      });
+    }
+
+    if (!resendResponse?.data?.id) {
+      console.error("Resend OTP rejected (no message id):", resendResponse);
+      return res.status(502).json({
+        message: "OTP email was not accepted by provider. Please verify sender domain and recipient.",
+      });
+    }
+
+    otpStore.set(email, { otp, createdAt: Date.now() });
+
+    res.status(200).json({
+      message: "OTP sent successfully",
+      deliveryId: resendResponse.data.id,
+    });
   } catch (err) {
     console.error("Send OTP error:", err);
     res.status(500).json({ message: "Failed to send OTP" });
@@ -229,7 +335,7 @@ export const getMe = async (req, res) => {
     const user = await User.findById(decoded.userId).select("-password");
 
     if (!user) return res.status(404).json({ message: "User not found" });
-    res.status(200).json({ user });
+    res.status(200).json({ user: sanitizeUserForStudent(user) });
   } catch (err) {
     console.error("Get user error:", err.message);
     res.status(401).json({ message: "Invalid or expired token" });
@@ -260,7 +366,7 @@ export const refreshToken = async (req, res) => {
       maxAge: 15 * 60 * 1000,
     });
 
-    res.status(200).json({ success: true, user });
+    res.status(200).json({ success: true, user: sanitizeUserForStudent(user) });
   } catch (err) {
     console.error("Refresh token error:", err.message);
     res.status(401).json({ message: "Refresh token invalid or expired" });
@@ -294,6 +400,14 @@ export const updateProfile = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
+    if (user.verificationProfileLocked) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Profile is locked after verification submission. Please contact admin for changes.",
+      });
+    }
+
     const fields = [
       "fullname",
       "dob",
@@ -319,17 +433,242 @@ export const updateProfile = async (req, res) => {
 
     await user.save();
 
-    const safeUser = user.toObject();
-    delete safeUser.password;
-
     res.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      user: safeUser,
+      user: sanitizeUserForStudent(user),
     });
   } catch (err) {
     console.error("Profile update error:", err);
     res.status(500).json({ message: "Failed to update profile" });
+  }
+};
+
+export const submitVerificationProfile = async (req, res) => {
+  try {
+    const userId = req.user?._id || req.userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (user.verificationProfileLocked || user.verificationProfileSubmitted) {
+      return res.status(409).json({
+        success: false,
+        message:
+          "Verification profile already submitted. Only admin can edit it now.",
+      });
+    }
+
+    const {
+      mobile,
+      address,
+      targetExam,
+      targetExams,
+      targetYear,
+      courseEnrolled,
+      batchesEnrolled,
+      fatherName,
+      motherName,
+      parentsContact,
+      city,
+      state,
+      idType,
+      livePhotoDataUrl,
+      signatureDataUrl,
+      profileCardImageDataUrl,
+      profileCardAcceptedAt,
+      termsAccepted,
+    } = req.body;
+
+    const acceptedAt = profileCardAcceptedAt ? new Date(profileCardAcceptedAt) : new Date();
+    const acceptedAtSafe = Number.isNaN(acceptedAt.getTime()) ? new Date() : acceptedAt;
+
+    const normalizedMobile = normalizeMobile(mobile);
+
+    if (!normalizedMobile || !address || !targetExam || !targetYear || !courseEnrolled) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Missing required fields: mobile, address, targetExam, targetYear, courseEnrolled.",
+      });
+    }
+
+    const mobileHolder = await User.findOne({
+      _id: { $ne: user._id },
+      $or: [{ phone: normalizedMobile }, { "verificationProfile.mobile": normalizedMobile }],
+    }).select("_id");
+
+    if (mobileHolder) {
+      return res.status(409).json({
+        success: false,
+        message: "This mobile number is already linked to another verified profile.",
+      });
+    }
+
+    if (termsAccepted !== "true") {
+      return res.status(400).json({
+        success: false,
+        message: "Please accept terms before submission.",
+      });
+    }
+
+    const filesArray = Array.isArray(req.files) ? req.files : [];
+    const allowedFixedFileFields = new Set([
+      "idFront",
+      "idBack",
+      "marksheet",
+      "latestPhoto",
+      "photo",
+      "passportPhoto",
+    ]);
+
+    for (const f of filesArray) {
+      const isDynamicApplication = /^applicationForm_/i.test(f.fieldname || "");
+      if (!allowedFixedFileFields.has(f.fieldname) && !isDynamicApplication) {
+        return res.status(400).json({
+          success: false,
+          message: `Unexpected upload field: ${f.fieldname}`,
+        });
+      }
+    }
+
+    const getOne = (key) => filesArray.find((f) => f.fieldname === key) || null;
+
+    const idFrontFile = getOne("idFront");
+    const idBackFile = getOne("idBack");
+
+    if (!idFrontFile || !idBackFile) {
+      return res.status(400).json({
+        success: false,
+        message: "ID front and ID back files are required.",
+      });
+    }
+
+    const cloudFolder = `users/${user._id}/verification`;
+
+    const [
+      idFrontUrl,
+      idBackUrl,
+      marksheetUrl,
+      latestPhotoUrl,
+      passportPhotoUrl,
+    ] = await Promise.all([
+      uploadToCloudinary(idFrontFile.path, cloudFolder, "auto"),
+      uploadToCloudinary(idBackFile.path, cloudFolder, "auto"),
+      getOne("marksheet")
+        ? uploadToCloudinary(getOne("marksheet").path, cloudFolder, "auto")
+        : Promise.resolve(""),
+      getOne("latestPhoto") || getOne("photo")
+        ? uploadToCloudinary(
+            (getOne("latestPhoto") || getOne("photo")).path,
+            cloudFolder,
+            "auto"
+          )
+        : Promise.resolve(""),
+      getOne("passportPhoto")
+        ? uploadToCloudinary(getOne("passportPhoto").path, cloudFolder, "auto")
+        : Promise.resolve(""),
+    ]);
+
+    let parsedTargetExams = [];
+    if (targetExams) {
+      try {
+        const maybeArray = JSON.parse(targetExams);
+        if (Array.isArray(maybeArray)) {
+          parsedTargetExams = maybeArray.map((v) => String(v).trim()).filter(Boolean);
+        }
+      } catch {
+        parsedTargetExams = String(targetExams)
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean);
+      }
+    }
+
+    if (!parsedTargetExams.length && targetExam) {
+      parsedTargetExams = [String(targetExam).trim()];
+    }
+
+    const applicationFormFiles = filesArray.filter((f) =>
+      /^applicationForm_/i.test(f.fieldname || "")
+    );
+
+    const applicationForms = await Promise.all(
+      applicationFormFiles.map(async (f) => {
+        const exam = String(f.fieldname).replace(/^applicationForm_/i, "").trim();
+        const fileUrl = await uploadToCloudinary(f.path, cloudFolder, "auto");
+        return { exam, fileUrl };
+      })
+    );
+
+    const parsedTargetYear = toNumberOrNull(targetYear);
+    if (!parsedTargetYear) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid targetYear" });
+    }
+
+    user.verificationProfile = {
+      mobile: normalizedMobile,
+      address: String(address).trim(),
+      targetExam: String(targetExam || parsedTargetExams[0] || "").trim(),
+      targetExams: parsedTargetExams,
+      targetYear: parsedTargetYear,
+      courseEnrolled: String(courseEnrolled || batchesEnrolled || "").trim(),
+      batchesEnrolled: String(batchesEnrolled || courseEnrolled || "").trim(),
+      fatherName: fatherName ? String(fatherName).trim() : "",
+      motherName: motherName ? String(motherName).trim() : "",
+      parentsContact: parentsContact ? String(parentsContact).trim() : "",
+      city: city ? String(city).trim() : "",
+      state: state ? String(state).trim() : "",
+      idType: idType ? String(idType).trim() : "",
+      idFrontUrl,
+      idBackUrl,
+      marksheetUrl,
+      latestPhotoUrl,
+      passportPhotoUrl,
+      applicationForms,
+      livePhotoDataUrl: livePhotoDataUrl || "",
+      signatureDataUrl: signatureDataUrl || "",
+      termsAccepted: true,
+      termsAcceptedAt: acceptedAtSafe,
+      downloadProfileCardDataUrl: profileCardImageDataUrl || "",
+    };
+
+    user.phone = normalizedMobile;
+    user.targetExam = String(targetExam || parsedTargetExams[0] || "").trim();
+    user.targetYear = parsedTargetYear;
+    user.verificationProfileSubmitted = true;
+    user.verificationProfileLocked = true;
+    user.verificationSubmittedAt = new Date();
+    user.verificationStatus = "pending";
+    user.activityLogs = Array.isArray(user.activityLogs) ? user.activityLogs : [];
+    user.activityLogs.push({
+      action: "VERIFICATION_TERMS_ACCEPTED",
+      message: "Student accepted terms and submitted verification profile.",
+      meta: {
+        acceptedBy: user.fullname || user.username || "Student",
+        mobile: normalizedMobile,
+        acceptedAt: acceptedAtSafe,
+      },
+      at: acceptedAtSafe,
+    });
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Verification profile submitted successfully. It is now locked for student edits.",
+      user: sanitizeUserForStudent(user),
+    });
+  } catch (err) {
+    console.error("Verification profile submit error:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to submit verification profile" });
   }
 };
 
@@ -346,12 +685,87 @@ export const getProfile = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        user,
+        user: sanitizeUserForStudent(user),
       },
     });
   } catch (err) {
     console.error("Get profile error:", err);
     res.status(500).json({ message: "Error fetching profile" });
+  }
+};
+
+export const adminUpdateVerificationProfile = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const body = req.body || {};
+    const current = user.verificationProfile || {};
+
+    const nextTargetYear =
+      body.targetYear !== undefined ? toNumberOrNull(body.targetYear) : current.targetYear;
+
+    const nextMobile =
+      body.mobile !== undefined
+        ? normalizeMobile(body.mobile)
+        : normalizeMobile(current.mobile || user.phone || "");
+
+    if (nextMobile) {
+      const mobileHolder = await User.findOne({
+        _id: { $ne: user._id },
+        $or: [{ phone: nextMobile }, { "verificationProfile.mobile": nextMobile }],
+      }).select("_id");
+
+      if (mobileHolder) {
+        return res.status(409).json({
+          success: false,
+          message: "This mobile number is already linked to another user.",
+        });
+      }
+    }
+
+    user.verificationProfile = {
+      ...current,
+      mobile: nextMobile,
+      address: body.address ?? current.address,
+      targetExam: body.targetExam ?? current.targetExam,
+      targetYear: nextTargetYear,
+      courseEnrolled: body.courseEnrolled ?? current.courseEnrolled,
+      fatherName: body.fatherName ?? current.fatherName,
+      motherName: body.motherName ?? current.motherName,
+      parentsContact: body.parentsContact ?? current.parentsContact,
+      city: body.city ?? current.city,
+      state: body.state ?? current.state,
+      idType: body.idType ?? current.idType,
+      termsAccepted:
+        body.termsAccepted !== undefined ? !!body.termsAccepted : current.termsAccepted,
+    };
+
+    if (body.mobile !== undefined) user.phone = nextMobile;
+    if (body.targetExam !== undefined) user.targetExam = String(body.targetExam);
+    if (body.targetYear !== undefined && nextTargetYear) user.targetYear = nextTargetYear;
+    if (body.verificationStatus) user.verificationStatus = body.verificationStatus;
+
+    user.verificationProfileSubmitted = true;
+    user.verificationProfileLocked = true;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Verification profile updated by admin",
+      user: sanitizeUserForStudent(user),
+    });
+  } catch (err) {
+    console.error("Admin verification update error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update verification profile",
+    });
   }
 };
 export const getUserTestAttempts = async (req, res) => {

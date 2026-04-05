@@ -23,6 +23,23 @@ import { fileURLToPath } from "url";
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const isProduction = process.env.NODE_ENV === "production";
+const shouldEnforceHttps = isProduction || process.env.FORCE_HTTPS === "true";
+
+const isHttpsRequest = (req) => {
+  const forwardedProto = req.headers["x-forwarded-proto"];
+  if (Array.isArray(forwardedProto)) {
+    return forwardedProto.some((v) => String(v).includes("https"));
+  }
+  if (typeof forwardedProto === "string") {
+    return forwardedProto.split(",").map((v) => v.trim()).includes("https");
+  }
+  return req.secure;
+};
+
+// Required when running behind reverse proxies (Render/Vercel/Nginx/Cloudflare)
+// so Express can correctly detect HTTPS via X-Forwarded-* headers.
+app.set("trust proxy", 1);
 /* ------------------------- 🔹 Middlewares ------------------------- */
 //app.use(forceHttps);
 //app.use((req, res, next) => {
@@ -44,17 +61,60 @@ app.use(
 
 app.use(
   cors({
-    origin: [
-      "https://www.acmeacademy.in", // for Vite dev
-      "https://admin.acmeacademy.in",
-      "https://acmeacademy.onrender.com", // optional tunnel
-      "https://acme-academy-rd7v.vercel.app",
-      "http://localhost:5173"
-    ],
+    origin: isProduction
+      ? [
+          "https://www.acmeacademy.in",
+          "https://admin.acmeacademy.in",
+          "https://acmeacademy.onrender.com",
+          "https://acme-academy-rd7v.vercel.app",
+        ]
+      : [
+          "https://www.acmeacademy.in",
+          "https://admin.acmeacademy.in",
+          "https://acmeacademy.onrender.com",
+          "https://acme-academy-rd7v.vercel.app",
+          "http://localhost:5173",
+        ],
     methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
     credentials: true,
   })
 );
+
+// Enforce HTTPS and send strict transport security headers in production.
+app.use((req, res, next) => {
+  if (shouldEnforceHttps) {
+    const isHttps = isHttpsRequest(req);
+
+    if (!isHttps) {
+      if (req.path.startsWith("/api/")) {
+        return res.status(426).json({
+          success: false,
+          message: "HTTPS is required for API access.",
+        });
+      }
+
+      const host = req.headers.host;
+      return res.redirect(301, `https://${host}${req.originalUrl}`);
+    }
+
+    // Force browsers to always use HTTPS for this domain.
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  }
+
+  // Basic hardening headers for all environments.
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
+
+// Sensitive student endpoints should never be cached by browsers/proxies.
+app.use(["/api/users", "/api/results", "/api/tests"], (req, res, next) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
 
 app.use(cookieParser());
 app.use(express.json());

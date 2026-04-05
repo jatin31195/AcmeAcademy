@@ -5,12 +5,23 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "@/config";
 
-const TestRankingTable = () => {
+const TestRankingTable = ({ attempts: initialAttempts, loading: externalLoading }) => {
   const navigate = useNavigate();
-  const [attempts, setAttempts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const hasExternalData = Array.isArray(initialAttempts);
+  const [attempts, setAttempts] = useState(hasExternalData ? initialAttempts : []);
+  const [loading, setLoading] = useState(
+    typeof externalLoading === "boolean" ? externalLoading : !hasExternalData
+  );
 
   useEffect(() => {
+    if (hasExternalData) {
+      setAttempts(initialAttempts || []);
+      if (typeof externalLoading === "boolean") {
+        setLoading(externalLoading);
+      }
+      return;
+    }
+
     const fetchAttempts = async () => {
       try {
         const res = await axios.get(`${BASE_URL}/api/users/user/all-test`, {
@@ -26,7 +37,7 @@ const TestRankingTable = () => {
       }
     };
     fetchAttempts();
-  }, []);
+  }, [hasExternalData, initialAttempts, externalLoading]);
 
   // 🏅 Badge style logic
   const getRankingBadge = (rank) => {

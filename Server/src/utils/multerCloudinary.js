@@ -19,12 +19,16 @@ const storage = multer.diskStorage({
 export const upload = multer({ storage });
 
 // ✅ Helper: Upload to Cloudinary and delete local copy
-export const uploadToCloudinary = async (localFilePath, folder = "results") => {
+export const uploadToCloudinary = async (
+  localFilePath,
+  folder = "results",
+  resourceType = "auto"
+) => {
   if (!localFilePath) return null;
   try {
     const res = await cloudinary.uploader.upload(localFilePath, {
       folder,
-      resource_type: "image",
+      resource_type: resourceType,
     });
 
     // Delete local file

@@ -26,7 +26,7 @@ const StatBox = ({ icon: Icon, count, label, iconBg, iconColor }) => (
 const StatisticsCard = () => {
   const { user, loading } = useUser();
 
-  if (loading) {
+  if (loading && !user) {
     return (
       <div className="text-center py-12 text-gray-500 animate-pulse">
         Loading your stats...

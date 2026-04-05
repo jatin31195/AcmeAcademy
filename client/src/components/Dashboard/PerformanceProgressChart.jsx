@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import {
@@ -37,16 +37,47 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-const PerformanceProgressChart = () => {
-  const [attempts, setAttempts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalAttempts: 0,
-    highestScore: 0,
-    averageScore: 0,
-  });
+const PerformanceProgressChart = ({ attempts: initialAttempts, loading: externalLoading }) => {
+  const hasExternalData = Array.isArray(initialAttempts);
+  const [attempts, setAttempts] = useState(hasExternalData ? initialAttempts : []);
+  const [loading, setLoading] = useState(
+    typeof externalLoading === "boolean" ? externalLoading : !hasExternalData
+  );
+
+  const stats = useMemo(() => {
+    if (!attempts.length) {
+      return {
+        totalAttempts: 0,
+        highestScore: 0,
+        averageScore: 0,
+      };
+    }
+
+    const scores = attempts.map((a) => a.score || 0);
+    const highest = Math.max(...scores);
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+
+    return {
+      totalAttempts: attempts.length,
+      highestScore: highest,
+      averageScore: avg.toFixed(2),
+    };
+  }, [attempts]);
 
   useEffect(() => {
+    if (hasExternalData) {
+      const mapped = (initialAttempts || []).map((attempt, idx) => ({
+        ...attempt,
+        index: idx + 1,
+      }));
+
+      setAttempts(mapped);
+      if (typeof externalLoading === "boolean") {
+        setLoading(externalLoading);
+      }
+      return;
+    }
+
     const fetchUserTests = async () => {
       try {
         const res = await axios.get(`${BASE_URL}/api/users/user/all-test`, {
@@ -58,16 +89,6 @@ const PerformanceProgressChart = () => {
             ...attempt,
             index: idx + 1,
           }));
-
-          const scores = data.map((a) => a.score || 0);
-          const highest = Math.max(...scores);
-          const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-
-          setStats({
-            totalAttempts: data.length,
-            highestScore: highest,
-            averageScore: avg.toFixed(2),
-          });
           setAttempts(data);
         }
       } catch (error) {
@@ -78,7 +99,7 @@ const PerformanceProgressChart = () => {
     };
 
     fetchUserTests();
-  }, []);
+  }, [hasExternalData, initialAttempts, externalLoading]);
 
   if (loading) {
     return (

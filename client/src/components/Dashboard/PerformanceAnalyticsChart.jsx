@@ -22,12 +22,23 @@ const DEFAULT_COLORS = [
   "#6366f1", // indigo
 ];
 
-const PerformanceAnalyticsChart = () => {
-  const [analytics, setAnalytics] = useState([]);
-  const [loading, setLoading] = useState(true);
+const PerformanceAnalyticsChart = ({ analytics: initialAnalytics, loading: externalLoading }) => {
+  const hasExternalData = Array.isArray(initialAnalytics);
+  const [analytics, setAnalytics] = useState(hasExternalData ? initialAnalytics : []);
+  const [loading, setLoading] = useState(
+    typeof externalLoading === "boolean" ? externalLoading : !hasExternalData
+  );
 
   // ✅ Fetch analytics from backend
   useEffect(() => {
+    if (hasExternalData) {
+      setAnalytics(initialAnalytics || []);
+      if (typeof externalLoading === "boolean") {
+        setLoading(externalLoading);
+      }
+      return;
+    }
+
     const fetchData = async () => {
       try {
         const res = await axios.get(
@@ -44,7 +55,7 @@ const PerformanceAnalyticsChart = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [hasExternalData, initialAnalytics, externalLoading]);
 
   if (loading) {
     return (

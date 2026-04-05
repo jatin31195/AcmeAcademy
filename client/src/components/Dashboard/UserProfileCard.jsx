@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -11,19 +11,43 @@ import {
   Target,
   BookOpen,
   Hash,
+  Download,
+  ShieldCheck,
+  CheckCircle2,
 } from "lucide-react";
 import { BASE_URL } from "../../config";
 import { useUser } from "../../UserContext"; 
+import { useNavigate } from "react-router-dom";
 
 const API_BASE = `${BASE_URL}/api/users`;
 
 const UserProfileCard = () => {
+  const navigate = useNavigate();
   const { user, loading: userLoading, fetchUser } = useUser(); 
 
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({});
   const [avatarFile, setAvatarFile] = useState(null);
   const [status, setStatus] = useState("");
+
+  const isVerificationLocked =
+    !!user?.verificationProfileLocked || !!user?.verificationProfileSubmitted;
+  const isVerified = user?.verificationStatus === "verified";
+
+  const verificationSummary = useMemo(
+    () =>
+      user?.verificationSummary || {
+        name: user?.fullname || "",
+        username: user?.username || "",
+        mobile: user?.phone || user?.whatsapp || "",
+        email: user?.email || "",
+        address: "",
+        targetExam: user?.targetExam || "",
+        targetYear: user?.targetYear || "",
+        courseEnrolled: "",
+      },
+    [user]
+  );
 
   // 🔹 Initialize edit data when user context loads
   useEffect(() => {
@@ -57,6 +81,11 @@ const UserProfileCard = () => {
   };
 
   const handleSave = async () => {
+    if (isVerificationLocked) {
+      setStatus("❌ Profile is locked. Contact admin for changes.");
+      return;
+    }
+
     try {
       const formData = new FormData();
       Object.keys(editData).forEach((key) => {
@@ -80,7 +109,201 @@ const UserProfileCard = () => {
     }
   };
 
-  if (userLoading)
+  const handleDownloadProfile = () => {
+    if (verificationSummary.downloadProfileCardDataUrl) {
+      const link = document.createElement("a");
+      link.download = `${verificationSummary.username || "user"}-verification-profile.jpg`;
+      link.href = verificationSummary.downloadProfileCardDataUrl;
+      link.click();
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 1000;
+    canvas.height = 760;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const bg = ctx.createLinearGradient(0, 0, 1000, 760);
+    bg.addColorStop(0, "#f8f7ff");
+    bg.addColorStop(0.55, "#f3f0ff");
+    bg.addColorStop(1, "#fdf2f8");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, 1000, 760);
+
+    const topBar = ctx.createLinearGradient(0, 0, 1000, 0);
+    topBar.addColorStop(0, "#9333ea");
+    topBar.addColorStop(0.5, "#7c3aed");
+    topBar.addColorStop(1, "#ec4899");
+    ctx.fillStyle = topBar;
+    ctx.fillRect(0, 0, 1000, 8);
+
+    ctx.fillStyle = "rgba(124,58,237,0.06)";
+    for (let x = 50; x < 1000; x += 40) {
+      for (let y = 50; y < 760; y += 40) {
+        ctx.beginPath();
+        ctx.arc(x, y, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    const drawLabelValue = (label, value, x, y, w = 420) => {
+      ctx.fillStyle = "rgba(124,58,237,0.05)";
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, 72, 12);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(124,58,237,0.12)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, 72, 12);
+      ctx.stroke();
+
+      ctx.font = "600 10px Georgia, serif";
+      ctx.fillStyle = "#9ca3af";
+      ctx.fillText(label.toUpperCase(), x + 16, y + 22);
+
+      ctx.font = "bold 18px Georgia, serif";
+      ctx.fillStyle = "#1e1b4b";
+      const safeValue = String(value || "-");
+      ctx.fillText(safeValue.length > 34 ? `${safeValue.slice(0, 31)}...` : safeValue, x + 16, y + 50);
+    };
+
+    const rows = [
+      ["Student Name", verificationSummary.name || "-"],
+      ["Username", verificationSummary.username || "-"],
+      ["Mobile", verificationSummary.mobile || "-"],
+      ["Email", verificationSummary.email || "-"],
+      ["Target Exam", verificationSummary.targetExam || "-"],
+      ["Target Year", verificationSummary.targetYear || "-"],
+      ["Course Enrolled", verificationSummary.courseEnrolled || "-"],
+      ["Address", verificationSummary.address || "-"],
+    ];
+
+    const finish = (logoImg) => {
+      ctx.fillStyle = "rgba(124,58,237,0.1)";
+      ctx.beginPath();
+      ctx.arc(72, 62, 30, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (logoImg) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(72, 62, 27, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(logoImg, 45, 35, 54, 54);
+        ctx.restore();
+      }
+
+      ctx.font = "bold 22px Georgia, serif";
+      ctx.fillStyle = "#1e1b4b";
+      ctx.fillText("ACME", 115, 56);
+      ctx.font = "600 11px Georgia, serif";
+      ctx.fillStyle = "#7c3aed";
+      ctx.fillText("ACADEMY", 115, 74);
+      ctx.font = "500 10px Georgia, serif";
+      ctx.fillStyle = "#9ca3af";
+      ctx.fillText("acmeacademy.in", 115, 90);
+
+      ctx.strokeStyle = "rgba(124,58,237,0.12)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(52, 110);
+      ctx.lineTo(948, 110);
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(124,58,237,0.1)";
+      ctx.beginPath();
+      ctx.roundRect(52, 124, 220, 28, 6);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(124,58,237,0.25)";
+      ctx.beginPath();
+      ctx.roundRect(52, 124, 220, 28, 6);
+      ctx.stroke();
+      ctx.font = "bold 11px Georgia, serif";
+      ctx.fillStyle = "#7c3aed";
+      ctx.fillText("USER VERIFICATION PROFILE", 66, 143);
+
+      drawLabelValue(rows[0][0], rows[0][1], 52, 172, 430);
+      drawLabelValue(rows[1][0], rows[1][1], 514, 172, 434);
+      drawLabelValue(rows[2][0], rows[2][1], 52, 260, 430);
+      drawLabelValue(rows[3][0], rows[3][1], 514, 260, 434);
+      drawLabelValue(rows[4][0], rows[4][1], 52, 348, 280);
+      drawLabelValue(rows[5][0], rows[5][1], 350, 348, 180);
+      drawLabelValue(rows[6][0], rows[6][1], 548, 348, 400);
+      drawLabelValue(rows[7][0], rows[7][1], 52, 436, 896);
+
+      ctx.fillStyle = "rgba(16,185,129,0.08)";
+      ctx.beginPath();
+      ctx.roundRect(52, 532, 896, 56, 12);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(16,185,129,0.24)";
+      ctx.beginPath();
+      ctx.roundRect(52, 532, 896, 56, 12);
+      ctx.stroke();
+
+      const acceptedBy = verificationSummary.name || verificationSummary.username || "Student";
+      ctx.font = "600 12px Georgia, serif";
+      ctx.fillStyle = "#065f46";
+      ctx.fillText(
+        `I, ${acceptedBy}, confirm that I have accepted the Terms and Conditions for the above data.`,
+        72,
+        566
+      );
+
+      ctx.fillStyle = "rgba(124,58,237,0.05)";
+      ctx.beginPath();
+      ctx.roundRect(52, 602, 420, 90, 12);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(124,58,237,0.2)";
+      ctx.beginPath();
+      ctx.roundRect(52, 602, 420, 90, 12);
+      ctx.stroke();
+      ctx.font = "600 10px Georgia, serif";
+      ctx.fillStyle = "#9ca3af";
+      ctx.fillText("STUDENT SIGNATURE", 70, 625);
+
+      if (verificationSummary.signatureDataUrl) {
+        const signImg = new Image();
+        signImg.onload = () => {
+          ctx.drawImage(signImg, 70, 632, 180, 42);
+          ctx.font = "bold 12px Georgia, serif";
+          ctx.fillStyle = "#1e1b4b";
+          ctx.fillText(acceptedBy, 70, 686);
+          const link = document.createElement("a");
+          link.download = `${verificationSummary.username || "user"}-verification-profile.jpg`;
+          link.href = canvas.toDataURL("image/jpeg", 0.92);
+          link.click();
+        };
+        signImg.onerror = () => {
+          ctx.font = "bold 12px Georgia, serif";
+          ctx.fillStyle = "#1e1b4b";
+          ctx.fillText(acceptedBy, 70, 686);
+          const link = document.createElement("a");
+          link.download = `${verificationSummary.username || "user"}-verification-profile.jpg`;
+          link.href = canvas.toDataURL("image/jpeg", 0.92);
+          link.click();
+        };
+        signImg.src = verificationSummary.signatureDataUrl;
+        return;
+      }
+
+      ctx.font = "bold 12px Georgia, serif";
+      ctx.fillStyle = "#1e1b4b";
+      ctx.fillText(acceptedBy, 70, 686);
+
+      const link = document.createElement("a");
+      link.download = `${verificationSummary.username || "user"}-verification-profile.jpg`;
+      link.href = canvas.toDataURL("image/jpeg", 0.92);
+      link.click();
+    };
+
+    const logo = new Image();
+    logo.onload = () => finish(logo);
+    logo.onerror = () => finish(null);
+    logo.src = "/logo.png";
+  };
+
+  if (userLoading && !user)
     return (
       <div className="text-center py-20 text-gray-600">Loading profile...</div>
     );
@@ -158,41 +381,92 @@ const UserProfileCard = () => {
 
           {/* Info */}
           <div className="flex-1 text-center md:text-left">
-            <h2 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-700 to-indigo-600">
-              {editData.fullname}
-            </h2>
+            <div className="flex items-center justify-center md:justify-start gap-2">
+              <h2 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-700 to-indigo-600">
+                {editData.fullname}
+              </h2>
+              {isVerified && (
+                <CheckCircle2
+                  className="h-6 w-6 text-blue-500"
+                  aria-label="Verified user"
+                  title="Verified"
+                />
+              )}
+            </div>
             <p className="mt-2 flex items-center justify-center md:justify-start text-gray-600">
               <Mail className="h-4 w-4 mr-2 opacity-70" />
               {editData.email}
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-              <InfoItem icon={Calendar} label="Born" value={editData.dob} />
-              <InfoItem icon={User} label="Gender" value={editData.gender} />
-              <InfoItem icon={Target} label="Exam" value={editData.targetExam} />
-              <InfoItem icon={BookOpen} label="Year" value={editData.targetYear} />
-              <InfoItem icon={User} label="Father" value={editData.fatherName} />
-              <InfoItem
-                icon={GraduationCap}
-                label="College"
-                value={editData.collegeName}
-              />
-              <InfoItem
-                icon={Hash}
-                label="App ID"
-                value={editData.nimcetApplicationId}
-              />
+            <div className="mt-2 flex items-center justify-center md:justify-start gap-2 text-sm">
+              <ShieldCheck className="h-4 w-4 text-indigo-600" />
+              {isVerificationLocked ? (
+                <span className="text-indigo-700 font-medium">
+                  Verification submitted. Student edits are locked.
+                </span>
+              ) : (
+                <span className="text-amber-700 font-medium">
+                  Verification pending. Complete profile verification once.
+                </span>
+              )}
             </div>
+
+            {isVerificationLocked ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                <InfoItem icon={User} label="Username" value={verificationSummary.username} />
+                <InfoItem icon={User} label="Mobile" value={verificationSummary.mobile} />
+                <InfoItem icon={Target} label="Exam" value={verificationSummary.targetExam} />
+                <InfoItem icon={BookOpen} label="Year" value={verificationSummary.targetYear} />
+                <InfoItem icon={GraduationCap} label="Course" value={verificationSummary.courseEnrolled} />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                <InfoItem icon={Calendar} label="Born" value={editData.dob} />
+                <InfoItem icon={User} label="Gender" value={editData.gender} />
+                <InfoItem icon={Target} label="Exam" value={editData.targetExam} />
+                <InfoItem icon={BookOpen} label="Year" value={editData.targetYear} />
+                <InfoItem icon={User} label="Father" value={editData.fatherName} />
+                <InfoItem
+                  icon={GraduationCap}
+                  label="College"
+                  value={editData.collegeName}
+                />
+                <InfoItem
+                  icon={Hash}
+                  label="App ID"
+                  value={editData.nimcetApplicationId}
+                />
+              </div>
+            )}
           </div>
 
-          <div className="mt-6 md:mt-0">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-700 transition flex items-center gap-2"
-            >
-              <Edit2 className="h-4 w-4" />
-              Edit Profile
-            </button>
+          <div className="mt-6 md:mt-0 flex flex-col gap-2">
+            {!isVerificationLocked && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-700 transition flex items-center gap-2"
+              >
+                <Edit2 className="h-4 w-4" />
+                Edit Profile
+              </button>
+            )}
+
+            {!isVerificationLocked ? (
+              <button
+                onClick={() => navigate("/profile")}
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg shadow hover:bg-indigo-700 transition"
+              >
+                Complete Verification
+              </button>
+            ) : (
+              <button
+                onClick={handleDownloadProfile}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download User Profile
+              </button>
+            )}
           </div>
         </div>
       </motion.div>
@@ -209,7 +483,7 @@ const UserProfileCard = () => {
 
       {/* ✨ Edit Modal */}
       <AnimatePresence>
-        {isEditing && (
+        {isEditing && !isVerificationLocked && (
           <motion.div
             className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50 px-2"
             initial={{ opacity: 0 }}

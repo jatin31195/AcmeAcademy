@@ -84,7 +84,7 @@ export const sendCounsellingMail = async (req, res) => {
     `;
 
     const mailOptions = {
-      from: `"ACME Academy" <acmeacademy15@gmail.com>`,
+      from: `"ACME Academy" <contact@acmeacademy.in>`,
       to: "acmenimcet@gmail.com",
       subject: `📩 New Counselling Enquiry: ${subject}`,
       html: mailHTML,

@@ -28,6 +28,10 @@ import PracticeSets from "./pages/PracticeSets";
 import QuestionSEOPage from "./pages/QuestionSEOPage";
 import ScoreCheckerPage from "./pages/ScoreCheckerPage";  
 import ScoreCheckerFloat from "./components/ScoreCheckerFloat/scorecheckerfloat";
+import StudentProfilePage from "./pages/profile";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import RefundPolicy from "./pages/RefundPolicy";
 
 function App() {
   const location = useLocation();
@@ -96,6 +100,9 @@ function App() {
         <Route path="/questions/:slug" element={<QuestionSEOPage />} />
         <Route path="/home" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/refund" element={<RefundPolicy />} />
         <Route path="/score-checker" element={<ScoreCheckerPage />} /> {/* ← ADD */}
 
         {/* Protected routes */}
@@ -103,8 +110,8 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/acme-test/:testId" element={<Test />} />
           <Route path="/acme-test-result/:testId/:attemptNumber?" element={<TestResult />} />
+        <Route path="/profile" element={<StudentProfilePage />} />
         </Route>
-
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
 
