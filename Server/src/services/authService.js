@@ -32,6 +32,19 @@ export const createUser = async ({
   return await user.save();
 };
 
+const issueAuthTokens = (userId) => {
+  const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: "15m",
+  });
+  const refreshToken = jwt.sign(
+    { userId },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: "30d" }
+  );
+
+  return { accessToken, refreshToken };
+};
+
 export const loginUser = async ({ email, password }) => {
   const user = await User.findOne({ email });
   if (!user) throw new Error("User not found");
@@ -39,14 +52,16 @@ export const loginUser = async ({ email, password }) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Invalid credentials");
 
-  const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "15m",
-  });
-  const refreshToken = jwt.sign(
-    { userId: user._id },
-    process.env.JWT_REFRESH_SECRET,
-    { expiresIn: "30d" }
-  );
+  const { accessToken, refreshToken } = issueAuthTokens(user._id);
+
+  return { user, accessToken, refreshToken };
+};
+
+export const loginUserByPhone = async (phone) => {
+  const user = await User.findOne({ phone });
+  if (!user) throw new Error("User not found");
+
+  const { accessToken, refreshToken } = issueAuthTokens(user._id);
 
   return { user, accessToken, refreshToken };
 };

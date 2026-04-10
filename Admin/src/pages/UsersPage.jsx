@@ -1,19 +1,58 @@
-import { useEffect, useState } from "react";
-import { Plus, Search, MoreHorizontal, Filter } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Search,
+  Filter,
+  Eye,
+  Pencil,
+  ShieldCheck,
+  Phone,
+  Mail,
+  User,
+} from "lucide-react";
 
 import PageHeader from "@/components/PageHeader";
 import DataTable from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BASE_URL } from "@/config";
 
 const API = `${BASE_URL}/api/admin/users`;
+
+const formatDate = (value) => {
+  if (!value) return "-";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "-";
+  return parsed.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const statusBadgeClass = {
+  verified: "bg-emerald-500/15 border-emerald-400 text-emerald-300",
+  pending: "bg-amber-500/15 border-amber-400 text-amber-300",
+  rejected: "bg-rose-500/15 border-rose-400 text-rose-300",
+};
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [activeUser, setActiveUser] = useState(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editForm, setEditForm] = useState({});
+  const [filter, setFilter] = useState("all");
 
   /* ---------------- FETCH USERS ---------------- */
   const fetchUsers = async () => {
@@ -38,22 +77,116 @@ const UsersPage = () => {
     fetchUsers();
   }, []);
 
-  const filteredUsers = users.filter(
-    (u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredUsers = useMemo(() => {
+    return users.filter((u) => {
+      const matchesSearch =
+        (u.name || "").toLowerCase().includes(search.toLowerCase()) ||
+        (u.email || "").toLowerCase().includes(search.toLowerCase()) ||
+        (u.phone || "").toLowerCase().includes(search.toLowerCase());
+
+      const matchesFilter = filter === "all" ? true : u.verificationStatus === filter;
+      return matchesSearch && matchesFilter;
+    });
+  }, [users, search, filter]);
+
+  const openDetails = async (userId) => {
+    try {
+      const res = await fetch(`${API}/${userId}`, { credentials: "include" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load user details");
+
+      setActiveUser(data.user);
+      setDetailsOpen(true);
+    } catch (err) {
+      alert(err.message || "Unable to fetch user details");
+    }
+  };
+
+  const openEdit = async (userId) => {
+    try {
+      const res = await fetch(`${API}/${userId}`, { credentials: "include" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load user details");
+
+      const user = data.user;
+      const vp = user.verificationProfile || {};
+
+      setActiveUser(user);
+      setEditForm({
+        fullname: user.fullname || "",
+        username: user.username || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        dob: user.dob ? String(user.dob).slice(0, 10) : "",
+        whatsapp: user.whatsapp || "",
+        gender: user.gender || "",
+        fatherName: user.fatherName || "",
+        collegeName: user.collegeName || "",
+        nimcetApplicationId: user.nimcetApplicationId || "",
+        targetExam: user.targetExam || "",
+        targetYear: user.targetYear || "",
+        verificationStatus: user.verificationStatus || "pending",
+        verificationProfileLocked: user.verificationProfileLocked,
+        verificationProfileSubmitted: user.verificationProfileSubmitted,
+        verificationMobile: vp.mobile || "",
+        address: vp.address || "",
+        verificationTargetExam: vp.targetExam || "",
+        verificationTargetYear: vp.targetYear || "",
+        courseEnrolled: vp.courseEnrolled || "",
+        batchesEnrolled: vp.batchesEnrolled || "",
+        vpFatherName: vp.fatherName || "",
+        vpMotherName: vp.motherName || "",
+        parentsContact: vp.parentsContact || "",
+        city: vp.city || "",
+        state: vp.state || "",
+        idType: vp.idType || "",
+        termsAccepted: vp.termsAccepted,
+      });
+      setEditOpen(true);
+    } catch (err) {
+      alert(err.message || "Unable to load user for edit");
+    }
+  };
+
+  const onChange = (field, value) => {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const saveEdit = async () => {
+    if (!activeUser?._id) return;
+    try {
+      setSaving(true);
+      const res = await fetch(`${API}/${activeUser._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(editForm),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update user");
+
+      await fetchUsers();
+      setActiveUser(data.user);
+      setEditOpen(false);
+      setDetailsOpen(true);
+    } catch (err) {
+      alert(err.message || "Unable to save user");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="animate-fade-in">
       <PageHeader
-        title="Users"
-        description="Manage all registered users on the platform."
+        title="User Control Center"
+        description="Admin-only visibility and updates for complete student records."
       >
-        <Button className="gradient-primary text-primary-foreground">
-          <Plus className="h-4 w-4 mr-2" />
-          Add User
-        </Button>
+        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-emerald-200">
+          <ShieldCheck className="h-4 w-4" />
+          Admin Exclusive Edits
+        </div>
       </PageHeader>
 
       {/* Filters */}
@@ -68,50 +201,273 @@ const UsersPage = () => {
           />
         </div>
 
-        <Button variant="outline" className="border-border">
-          <Filter className="h-4 w-4 mr-2" />
-          Filters
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={filter === "all" ? "default" : "outline"}
+            className="border-border"
+            onClick={() => setFilter("all")}
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            All
+          </Button>
+          <Button
+            variant={filter === "verified" ? "default" : "outline"}
+            className="border-border"
+            onClick={() => setFilter("verified")}
+          >
+            Verified
+          </Button>
+          <Button
+            variant={filter === "pending" ? "default" : "outline"}
+            className="border-border"
+            onClick={() => setFilter("pending")}
+          >
+            Pending
+          </Button>
+          <Button
+            variant={filter === "rejected" ? "default" : "outline"}
+            className="border-border"
+            onClick={() => setFilter("rejected")}
+          >
+            Rejected
+          </Button>
+        </div>
       </div>
 
       {/* Users Table */}
       <DataTable
-        loading={loading}
         columns={[
           { key: "name", header: "Name" },
           { key: "email", header: "Email" },
           {
-            key: "role",
-            header: "Role",
-            render: (user) => (
-              <Badge variant="secondary">{user.role}</Badge>
-            ),
+            key: "phone",
+            header: "Phone",
+            render: (user) => user.phone || "-",
           },
           {
-            key: "status",
-            header: "Status",
+            key: "verificationStatus",
+            header: "Verification",
             render: (user) => (
               <Badge
                 variant="outline"
-                className="border-success text-success"
+                className={statusBadgeClass[user.verificationStatus] || ""}
               >
-                {user.status}
+                {user.verificationStatus || "pending"}
+              </Badge>
+            ),
+          },
+          {
+            key: "lock",
+            header: "Edit Lock",
+            render: (user) => (
+              <Badge variant={user.verificationProfileLocked ? "default" : "secondary"}>
+                {user.verificationProfileLocked ? "Locked" : "Unlocked"}
               </Badge>
             ),
           },
           { key: "joined", header: "Joined" },
           {
             key: "actions",
-            header: "",
-            render: () => (
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
+            header: "Actions",
+            render: (user) => (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-border"
+                  onClick={() => openDetails(user.id)}
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  View
+                </Button>
+                <Button
+                  size="sm"
+                  className="gradient-primary text-primary-foreground"
+                  onClick={() => openEdit(user.id)}
+                >
+                  <Pencil className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+              </div>
             ),
           },
         ]}
         data={filteredUsers}
       />
+
+      {loading && <p className="mt-4 text-muted-foreground">Loading users...</p>}
+
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto border-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">
+              {activeUser?.fullname || activeUser?.username || "User"}
+            </DialogTitle>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
+              <span className="inline-flex items-center gap-1"><Mail className="h-4 w-4" /> {activeUser?.email || "-"}</span>
+              <span className="inline-flex items-center gap-1"><Phone className="h-4 w-4" /> {activeUser?.phone || "-"}</span>
+              <span className="inline-flex items-center gap-1"><User className="h-4 w-4" /> {activeUser?.username || "-"}</span>
+              <Badge variant="outline" className={statusBadgeClass[activeUser?.verificationStatus] || ""}>
+                {activeUser?.verificationStatus || "pending"}
+              </Badge>
+            </div>
+          </DialogHeader>
+
+          <Tabs defaultValue="overview" className="mt-2">
+            <TabsList className="bg-slate-800/80">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="verification">Verification</TabsTrigger>
+              <TabsTrigger value="logs">Activity</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  ["Full Name", activeUser?.fullname],
+                  ["Username", activeUser?.username],
+                  ["Email", activeUser?.email],
+                  ["Phone", activeUser?.phone],
+                  ["WhatsApp", activeUser?.whatsapp],
+                  ["DOB", formatDate(activeUser?.dob)],
+                  ["Gender", activeUser?.gender],
+                  ["Father Name", activeUser?.fatherName],
+                  ["College", activeUser?.collegeName],
+                  ["Application ID", activeUser?.nimcetApplicationId],
+                  ["Target Exam", activeUser?.targetExam],
+                  ["Target Year", activeUser?.targetYear],
+                  ["Joined", formatDate(activeUser?.createdAt)],
+                  ["Last Updated", formatDate(activeUser?.updatedAt)],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
+                    <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
+                    <p className="mt-1 font-medium text-slate-100">{value || "-"}</p>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="verification" className="mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  ["Locked", activeUser?.verificationProfileLocked ? "Yes" : "No"],
+                  ["Submitted", activeUser?.verificationProfileSubmitted ? "Yes" : "No"],
+                  ["Submitted At", formatDate(activeUser?.verificationSubmittedAt)],
+                  ["Mobile", activeUser?.verificationProfile?.mobile],
+                  ["Address", activeUser?.verificationProfile?.address],
+                  ["Course", activeUser?.verificationProfile?.courseEnrolled],
+                  ["Batches", activeUser?.verificationProfile?.batchesEnrolled],
+                  ["City", activeUser?.verificationProfile?.city],
+                  ["State", activeUser?.verificationProfile?.state],
+                  ["ID Type", activeUser?.verificationProfile?.idType],
+                  ["Terms Accepted", activeUser?.verificationProfile?.termsAccepted ? "Yes" : "No"],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
+                    <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
+                    <p className="mt-1 font-medium text-slate-100">{value || "-"}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                {[
+                  ["ID Front", activeUser?.verificationProfile?.idFrontUrl],
+                  ["ID Back", activeUser?.verificationProfile?.idBackUrl],
+                  ["Marksheet", activeUser?.verificationProfile?.marksheetUrl],
+                  ["Latest Photo", activeUser?.verificationProfile?.latestPhotoUrl],
+                  ["Passport Photo", activeUser?.verificationProfile?.passportPhotoUrl],
+                ].map(([label, url]) => (
+                  <a
+                    key={label}
+                    href={url || "#"}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`rounded-lg border px-4 py-3 ${url ? "border-cyan-400/60 bg-cyan-500/10 hover:bg-cyan-500/20" : "border-slate-700 bg-slate-900/50 pointer-events-none"}`}
+                  >
+                    <p className="text-xs text-slate-300">{label}</p>
+                    <p className="text-sm font-semibold truncate">{url ? "Open File" : "Not Uploaded"}</p>
+                  </a>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="logs" className="mt-4">
+              <div className="space-y-3">
+                {(activeUser?.activityLogs || []).slice(-20).reverse().map((log, index) => (
+                  <div key={`${log.action}-${index}`} className="rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-semibold text-slate-100">{log.action}</p>
+                      <p className="text-xs text-slate-400">{formatDate(log.at)}</p>
+                    </div>
+                    <p className="mt-1 text-sm text-slate-300">{log.message || "-"}</p>
+                  </div>
+                ))}
+                {!activeUser?.activityLogs?.length && (
+                  <p className="text-slate-400">No activity logs available.</p>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit User Details (Admin Only)</DialogTitle>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              ["fullname", "Full Name"],
+              ["username", "Username"],
+              ["email", "Email"],
+              ["phone", "Phone"],
+              ["dob", "DOB (yyyy-mm-dd)"],
+              ["whatsapp", "WhatsApp"],
+              ["gender", "Gender"],
+              ["fatherName", "Father Name"],
+              ["collegeName", "College Name"],
+              ["nimcetApplicationId", "Application ID"],
+              ["targetExam", "Target Exam"],
+              ["targetYear", "Target Year"],
+              ["verificationStatus", "Verification Status"],
+              ["verificationMobile", "Verification Mobile"],
+              ["address", "Address"],
+              ["verificationTargetExam", "Verification Target Exam"],
+              ["verificationTargetYear", "Verification Target Year"],
+              ["courseEnrolled", "Course Enrolled"],
+              ["batchesEnrolled", "Batches Enrolled"],
+              ["vpFatherName", "VP Father Name"],
+              ["vpMotherName", "VP Mother Name"],
+              ["parentsContact", "Parents Contact"],
+              ["city", "City"],
+              ["state", "State"],
+              ["idType", "ID Type"],
+              ["verificationProfileLocked", "Verification Locked (true/false)"],
+              ["verificationProfileSubmitted", "Verification Submitted (true/false)"],
+              ["termsAccepted", "Terms Accepted (true/false)"],
+            ].map(([key, label]) => (
+              <div key={key}>
+                <p className="text-xs text-muted-foreground mb-1">{label}</p>
+                <Input
+                  value={String(editForm[key] ?? "")}
+                  onChange={(e) => onChange(key, e.target.value)}
+                  className="bg-secondary border-border"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 flex items-center justify-end gap-2">
+            <Button variant="outline" onClick={() => setEditOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveEdit} disabled={saving} className="gradient-primary text-primary-foreground">
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

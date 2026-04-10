@@ -13,13 +13,14 @@ const Signup = () => {
     username: "",
     fullname: "",
     email: "",
-    password: "",
-    confirmPassword: "",
     dob: "",
+    phone: "",
     whatsapp: "",
   });
 
   const [otp, setOtp] = useState("");
+  const [otpSessionId, setOtpSessionId] = useState("");
+  const [otpToken, setOtpToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
   const [accountCreated, setAccountCreated] = useState(false);
@@ -31,14 +32,10 @@ const Signup = () => {
 
 
   const sendOtp = async () => {
-    const { username, fullname, email, password, confirmPassword, dob } = userDetails;
+    const { username, fullname, email, dob, phone } = userDetails;
 
-    if (!username || !fullname || !email || !password || !confirmPassword || !dob) {
+    if (!username || !fullname || !email || !dob || !phone) {
       toast.error("Please fill all required fields");
-      return;
-    }
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
       return;
     }
 
@@ -47,13 +44,14 @@ const Signup = () => {
       const res = await fetch(`${BASE_URL}/api/users/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ phone, purpose: "signup" }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
+      setOtpSessionId(data.sessionId);
       setShowOTP(true);
-      toast.success("OTP sent to your email!");
+      toast.success("OTP sent to your phone!");
     } catch (err) {
       console.error(err);
       toast.error(err.message || "Failed to send OTP");
@@ -64,22 +62,24 @@ const Signup = () => {
 
   // ✅ Verify OTP & Auto Register
   const verifyOtp = async () => {
+    if (!otpSessionId) return toast.error("OTP session not found. Please resend OTP.");
     if (!otp) return toast.error("Enter the OTP");
     setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/api/users/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: userDetails.email, otp }),
+        body: JSON.stringify({ sessionId: otpSessionId, otp, phone: userDetails.phone }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
+      setOtpToken(data.verificationToken);
       toast.success("OTP Verified!");
 
       
-      await onRegister();
+      await onRegister(data.verificationToken);
     } catch (err) {
       toast.error(err.message || "Invalid OTP");
     } finally {
@@ -88,13 +88,16 @@ const Signup = () => {
   };
 
 
-  const onRegister = async () => {
+  const onRegister = async (verifiedToken = otpToken) => {
     setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/api/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userDetails),
+        body: JSON.stringify({
+          ...userDetails,
+          otpToken: verifiedToken,
+        }),
       });
 
       const data = await res.json();
@@ -175,18 +178,10 @@ const Signup = () => {
                   className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
                 <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={userDetails.password}
-                  onChange={handleChange}
-                  className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                />
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  placeholder="Confirm Password"
-                  value={userDetails.confirmPassword}
+                  type="tel"
+                  name="phone"
+                  placeholder="Phone (10 digits)"
+                  value={userDetails.phone}
                   onChange={handleChange}
                   className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
@@ -238,7 +233,7 @@ const Signup = () => {
                <OtpInput
   value={otp}
   onChange={setOtp}
-  OTPLength={4}
+  OTPLength={6}
   otpType="number"
   autoFocus
   className="flex justify-center gap-3"

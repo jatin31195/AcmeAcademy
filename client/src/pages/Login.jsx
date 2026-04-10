@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Phone, ArrowRight } from "lucide-react";
+import OtpInput from "otp-input-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,21 +19,60 @@ const Login = () => {
 
   const { login, fetchUser } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSessionId, setOtpSessionId] = useState("");
+  const [showOtpInput, setShowOtpInput] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (!email || !password) return toast.error("Please fill both email and password");
+    if (!phone) return toast.error("Please enter phone number");
 
     setLoading(true);
     try {
+      const res = await fetch(`${BASE_URL}/api/users/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, purpose: "login" }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Login failed");
+
+      setOtpSessionId(data.sessionId);
+      setShowOtpInput(true);
+      toast.success("OTP sent successfully");
+    } catch (err) {
+      toast.error(err.message || "Server error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyAndLogin = async (e) => {
+    e.preventDefault();
+    if (!otpSessionId) return toast.error("OTP session missing. Request OTP again.");
+    if (!otp) return toast.error("Please enter OTP");
+
+    setLoading(true);
+    try {
+      const verifyRes = await fetch(`${BASE_URL}/api/users/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: otpSessionId, otp, phone }),
+      });
+
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok) throw new Error(verifyData.message || "OTP verification failed");
+
       const res = await fetch(`${BASE_URL}/api/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          phone,
+          otpToken: verifyData.verificationToken,
+        }),
         credentials: "include",
       });
 
@@ -43,7 +83,7 @@ const Login = () => {
 
       
       await Promise.all([
-        login(data.user || { email }),
+        login(data.user || { phone }),
         fetchUser()
       ]);
 
@@ -82,52 +122,48 @@ const Login = () => {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form
+              onSubmit={showOtpInput ? handleVerifyAndLogin : handleSendOtp}
+              className="space-y-4"
+            >
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-200">
-                  Email Address
+                <Label htmlFor="phone" className="text-gray-200">
+                  Phone Number
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
+                    id="phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Enter your 10-digit phone"
                     className="pl-10 bg-gray-800 text-white focus:border-blue-500"
                     required
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-200">
-                  Password
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="pl-10 pr-10 bg-gray-800 text-white focus:border-blue-500"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+              {showOtpInput && (
+                <div className="space-y-2">
+                  <Label className="text-gray-200">OTP</Label>
+                  <div className="flex justify-center">
+                    <OtpInput
+                      value={otp}
+                      onChange={setOtp}
+                      OTPLength={6}
+                      otpType="number"
+                      autoFocus
+                      className="flex justify-center gap-2"
+                      inputClassName="w-10 h-10 rounded-md text-white border-2 border-blue-400 focus:border-blue-300 focus:ring-2 focus:ring-blue-400 outline-none text-center text-base"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <Button
-                type="submit"
+                type="button"
+                onClick={showOtpInput ? handleVerifyAndLogin : handleSendOtp}
                 disabled={loading}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white"
               >
@@ -138,10 +174,22 @@ const Login = () => {
                   />
                 ) : (
                   <>
-                    Login <ArrowRight className="h-4 w-4 ml-1" />
+                    {showOtpInput ? "Verify OTP & Login" : "Send OTP"} <ArrowRight className="h-4 w-4 ml-1" />
                   </>
                 )}
               </Button>
+
+              {showOtpInput && (
+                <Button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={loading}
+                  variant="outline"
+                  className="w-full border-gray-600 text-gray-200 hover:bg-gray-800"
+                >
+                  Resend OTP
+                </Button>
+              )}
             </form>
 
             <p className="text-center text-sm text-gray-300">

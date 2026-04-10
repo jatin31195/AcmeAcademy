@@ -4,14 +4,15 @@ import User from "../models/User.js";
 import UserTestAttempt from "../models/UserTestAttempt.js";
 import { uploadToCloudinary } from "../utils/multerCloudinary.js";
 import nodemailer from "nodemailer";
-import { Resend } from "resend";
+import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
 import crypto from "crypto";
-const otpStore = new Map();
-const verifiedEmails = new Set();
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const DEFAULT_RESEND_FROM = "Acme Academy <noreply@acmeacademy.in>";
+const otpSessionStore = new Map();
+const verifiedOtpTokenStore = new Map();
+const OTP_TTL_MS = 5 * 60 * 1000;
+const VERIFIED_TOKEN_TTL_MS = 15 * 60 * 1000;
+const TWO_FACTOR_TEMPLATE = process.env.TWO_FACTOR_TEMPLATE || "LoginSignup";
 
 const toNumberOrNull = (value) => {
   const num = Number(value);
@@ -21,6 +22,31 @@ const toNumberOrNull = (value) => {
 const normalizeMobile = (value) => {
   const digits = String(value || "").replace(/\D/g, "");
   return digits.length ? digits : "";
+};
+
+const getPhoneFromIndianInput = (value) => {
+  const digits = normalizeMobile(value);
+  if (!digits) return "";
+
+  const tenDigits = digits.slice(-10);
+  if (tenDigits.length !== 10) return "";
+  return tenDigits;
+};
+
+const cleanupExpiredOtpState = () => {
+  const now = Date.now();
+
+  for (const [sessionId, item] of otpSessionStore.entries()) {
+    if (now - item.createdAt > OTP_TTL_MS) {
+      otpSessionStore.delete(sessionId);
+    }
+  }
+
+  for (const [token, item] of verifiedOtpTokenStore.entries()) {
+    if (now - item.createdAt > VERIFIED_TOKEN_TTL_MS) {
+      verifiedOtpTokenStore.delete(token);
+    }
+  }
 };
 
 const buildVerificationSummary = (userDoc) => {
@@ -54,160 +80,172 @@ const sanitizeUserForStudent = (userDoc) => {
 };
 export const sendEmailOtp = async (req, res) => {
   try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ message: "Email required" });
+    cleanupExpiredOtpState();
+    const { phone, purpose = "signup" } = req.body;
 
-    const existingUser = await userService.getUserByEmail(email);
-    if (existingUser)
-      return res.status(400).json({ message: "Email already registered" });
-
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
-
-    if (!resend) {
-      return res
-        .status(500)
-        .json({ message: "Resend is not configured. Add RESEND_API_KEY in server env." });
+    const normalizedPurpose = String(purpose || "signup").toLowerCase();
+    if (!["signup", "login"].includes(normalizedPurpose)) {
+      return res.status(400).json({ message: "Invalid purpose. Use signup or login." });
     }
 
-    const resendFrom = process.env.RESEND_FROM_EMAIL || DEFAULT_RESEND_FROM;
-    if (!resendFrom.includes("@acmeacademy.in")) {
-  return res.status(500).json({
-    message: "Invalid sender email. Must use your verified domain.",
-  });
-}
+    const normalizedPhone = getPhoneFromIndianInput(phone);
+    if (!normalizedPhone) {
+      return res.status(400).json({ message: "Valid 10-digit phone is required" });
+    }
 
-    const resendResponse = await resend.emails.send({
-      from: resendFrom,
-      to: email,
-      subject: "Your ACME Academy OTP Verification Code",
-      html: `
-        <div style="font-family:Arial;padding:20px;background:#f9f9f9;border-radius:10px;">
-          <h2 style="color:#4F46E5;">🔐 Email Verification</h2>
-          <p>Dear Student,</p>
-          <p>Your OTP for ACME Academy registration is:</p>
-          <h1 style="color:#E11D48;letter-spacing:5px;">${otp}</h1>
-          <p>This code will expire in <b>5 minutes</b>.</p>
-          <p style="font-size:13px;color:#777;">If you didn't request this, ignore this email.</p>
-        </div>`,
+    const existingByPhone = await userService.getUserByPhone(normalizedPhone);
+    if (normalizedPurpose === "signup" && existingByPhone) {
+      return res.status(400).json({ message: "Phone already registered" });
+    }
+    if (normalizedPurpose === "login" && !existingByPhone) {
+      return res.status(404).json({ message: "User not found with this phone" });
+    }
+
+    if (!process.env.TWO_FACTOR_API_KEY) {
+      return res.status(500).json({ message: "2Factor is not configured" });
+    }
+
+    const response = await axios.get(
+      `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/91${normalizedPhone}/AUTOGEN/${encodeURIComponent(
+        TWO_FACTOR_TEMPLATE
+      )}`
+    );
+
+    const detailsText = String(response?.data?.Details || "");
+    const isVoiceFallback = /voice|call/i.test(detailsText);
+
+    if (response?.data?.Status !== "Success" || !response?.data?.Details || isVoiceFallback) {
+      return res.status(502).json({
+        message: isVoiceFallback
+          ? "Provider triggered voice fallback instead of SMS. Check 2Factor SMS template/DLT mapping and disable call fallback in account settings."
+          : response?.data?.Details || "Failed to initiate OTP session",
+      });
+    }
+
+    const sessionId = String(response.data.Details);
+    otpSessionStore.set(sessionId, {
+      phone: normalizedPhone,
+      purpose: normalizedPurpose,
+      createdAt: Date.now(),
     });
 
-    const sendOtpFallbackWithNodemailer = async () => {
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
-      await transporter.sendMail({
-        from: `"ACME Academy" <${process.env.EMAIL_USER || "acmeacademy15@gmail.com"}>`,
-        to: email,
-        subject: "Your ACME Academy OTP Verification Code",
-        html: `
-          <div style="font-family:Arial;padding:20px;background:#f9f9f9;border-radius:10px;">
-            <h2 style="color:#4F46E5;">🔐 Email Verification</h2>
-            <p>Dear Student,</p>
-            <p>Your OTP for ACME Academy registration is:</p>
-            <h1 style="color:#E11D48;letter-spacing:5px;">${otp}</h1>
-            <p>This code will expire in <b>5 minutes</b>.</p>
-            <p style="font-size:13px;color:#777;">If you didn't request this, ignore this email.</p>
-          </div>`,
-      });
-    };
-
-    if (resendResponse?.error) {
-      console.error("Resend OTP error:", resendResponse.error);
-
-      const isResendSandboxError =
-        resendResponse.error?.statusCode === 403 &&
-        resendResponse.error?.name === "validation_error";
-
-      if (isResendSandboxError && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-        await sendOtpFallbackWithNodemailer();
-        otpStore.set(email, { otp, createdAt: Date.now() });
-        return res.status(200).json({
-          message:
-            "OTP sent successfully via fallback mail service. Configure verified Resend domain for primary delivery.",
-          deliveryMode: "nodemailer-fallback",
-        });
-      }
-
-      return res.status(502).json({
-        message: "OTP email could not be delivered by mail provider.",
-        providerError: resendResponse.error?.message || "Unknown provider error",
-      });
-    }
-
-    if (!resendResponse?.data?.id) {
-      console.error("Resend OTP rejected (no message id):", resendResponse);
-      return res.status(502).json({
-        message: "OTP email was not accepted by provider. Please verify sender domain and recipient.",
-      });
-    }
-
-    otpStore.set(email, { otp, createdAt: Date.now() });
-
-    res.status(200).json({
+    return res.status(200).json({
       message: "OTP sent successfully",
-      deliveryId: resendResponse.data.id,
+      sessionId,
+      phone: normalizedPhone,
+      purpose: normalizedPurpose,
     });
   } catch (err) {
-    console.error("Send OTP error:", err);
-    res.status(500).json({ message: "Failed to send OTP" });
+    console.error("Send OTP error:", err?.response?.data || err.message || err);
+    return res.status(500).json({ message: "Failed to send OTP" });
   }
 };
 
-export const verifyEmailOtp = (req, res) => {
+export const verifyEmailOtp = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    cleanupExpiredOtpState();
+    const { sessionId, otp, phone } = req.body;
 
-    const stored = otpStore.get(email);
-    if (!stored) return res.status(400).json({ message: "No OTP found" });
+    if (!sessionId || !otp || !phone) {
+      return res.status(400).json({ message: "sessionId, otp and phone are required" });
+    }
 
-    const isExpired = Date.now() - stored.createdAt > 5 * 60 * 1000;
-    if (isExpired) {
-      otpStore.delete(email);
+    const normalizedPhone = getPhoneFromIndianInput(phone);
+    if (!normalizedPhone) {
+      return res.status(400).json({ message: "Valid 10-digit phone is required" });
+    }
+
+    const storedSession = otpSessionStore.get(String(sessionId));
+    if (!storedSession) {
+      return res.status(400).json({ message: "OTP session not found or expired" });
+    }
+
+    if (storedSession.phone !== normalizedPhone) {
+      return res.status(400).json({ message: "Phone does not match OTP session" });
+    }
+
+    if (Date.now() - storedSession.createdAt > OTP_TTL_MS) {
+      otpSessionStore.delete(String(sessionId));
       return res.status(400).json({ message: "OTP expired" });
     }
 
-    if (stored.otp !== otp)
-      return res.status(400).json({ message: "Invalid OTP" });
+    if (!process.env.TWO_FACTOR_API_KEY) {
+      return res.status(500).json({ message: "2Factor is not configured" });
+    }
 
-    // ✅ Mark email as verified
-    verifiedEmails.add(email);
-    otpStore.delete(email);
+    const response = await axios.get(
+      `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/VERIFY/${sessionId}/${String(
+        otp
+      ).trim()}`
+    );
 
-    res.status(200).json({ verified: true, message: "OTP verified successfully" });
+    const otpMatched =
+      response?.data?.Details === "OTP Matched" || response?.data?.Status === "Success";
+
+    if (!otpMatched) {
+      return res.status(400).json({ message: response?.data?.Details || "Invalid OTP" });
+    }
+
+    const verificationToken = crypto.randomBytes(24).toString("hex");
+    verifiedOtpTokenStore.set(verificationToken, {
+      phone: storedSession.phone,
+      purpose: storedSession.purpose,
+      createdAt: Date.now(),
+    });
+
+    otpSessionStore.delete(String(sessionId));
+
+    return res.status(200).json({
+      verified: true,
+      message: "OTP verified successfully",
+      verificationToken,
+      phone: storedSession.phone,
+      purpose: storedSession.purpose,
+    });
   } catch (err) {
-    console.error("Verify OTP error:", err);
-    res.status(500).json({ message: "Server error verifying OTP" });
+    console.error("Verify OTP error:", err?.response?.data || err.message || err);
+    return res.status(500).json({ message: "Server error verifying OTP" });
   }
 };
 
 export const registerUser = async (req, res) => {
   try {
-    const { username, fullname, email, password, dob, whatsapp } = req.body;
+    cleanupExpiredOtpState();
+    const { username, fullname, email, password, dob, whatsapp, phone, otpToken } = req.body;
 
-    if (!verifiedEmails.has(email)) {
-      return res.status(403).json({
-        message: "Please verify your email before registration",
-      });
+    const normalizedPhone = getPhoneFromIndianInput(phone);
+    if (!normalizedPhone) {
+      return res.status(400).json({ message: "Valid 10-digit phone is required" });
     }
 
-    verifiedEmails.delete(email);
+    const verifiedOtpEntry = verifiedOtpTokenStore.get(otpToken);
+    if (!verifiedOtpEntry || verifiedOtpEntry.purpose !== "signup") {
+      return res.status(403).json({ message: "Please verify signup OTP before registration" });
+    }
+    if (verifiedOtpEntry.phone !== normalizedPhone) {
+      return res.status(403).json({ message: "OTP does not belong to this phone" });
+    }
+
+    verifiedOtpTokenStore.delete(otpToken);
 
     const existingEmail = await userService.getUserByEmail(email);
     if (existingEmail)
       return res.status(400).json({ message: "Email already registered" });
+
+    const existingPhone = await userService.getUserByPhone(normalizedPhone);
+    if (existingPhone)
+      return res.status(400).json({ message: "Phone already registered" });
+
+    const effectivePassword = password || crypto.randomBytes(16).toString("hex");
 
     // ✅ Create user
     const user = await userService.createUser({
       username,
       fullname,
       email,
-      password,
+      password: effectivePassword,
       dob,
+      phone: normalizedPhone,
       whatsapp,
     });
 
@@ -292,11 +330,43 @@ export const registerUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const { user, accessToken, refreshToken } = await userService.loginUser({
-      email,
-      password,
-    });
+    cleanupExpiredOtpState();
+
+    const { email, password, phone, otpToken } = req.body;
+    let user;
+    let accessToken;
+    let refreshToken;
+
+    if (phone && otpToken) {
+      const normalizedPhone = getPhoneFromIndianInput(phone);
+      if (!normalizedPhone) {
+        return res.status(400).json({ message: "Valid 10-digit phone is required" });
+      }
+
+      const verifiedOtpEntry = verifiedOtpTokenStore.get(otpToken);
+      if (!verifiedOtpEntry || verifiedOtpEntry.purpose !== "login") {
+        return res.status(403).json({ message: "Please verify login OTP before continuing" });
+      }
+
+      if (verifiedOtpEntry.phone !== normalizedPhone) {
+        return res.status(403).json({ message: "OTP does not belong to this phone" });
+      }
+
+      verifiedOtpTokenStore.delete(otpToken);
+
+      const authResult = await userService.loginUserByPhone(normalizedPhone);
+      user = authResult.user;
+      accessToken = authResult.accessToken;
+      refreshToken = authResult.refreshToken;
+    } else {
+      const authResult = await userService.loginUser({
+        email,
+        password,
+      });
+      user = authResult.user;
+      accessToken = authResult.accessToken;
+      refreshToken = authResult.refreshToken;
+    }
 
     const cookieOptions = {
       httpOnly: true,
@@ -400,43 +470,10 @@ export const updateProfile = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (user.verificationProfileLocked) {
-      return res.status(403).json({
-        success: false,
-        message:
-          "Profile is locked after verification submission. Please contact admin for changes.",
-      });
-    }
-
-    const fields = [
-      "fullname",
-      "dob",
-      "gender",
-      "fatherName",
-      "collegeName",
-      "nimcetApplicationId",
-      "targetExam",
-      "targetYear",
-      "whatsapp",
-      "phone",
-    ];
-
-    if (req.file) {
-      user.profilePic = `/uploads/${req.file.filename}`;
-    }
-
-  
-    for (const field of fields) {
-      if (req.body[field] !== undefined && req.body[field] !== "")
-        user[field] = req.body[field];
-    }
-
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Profile updated successfully",
-      user: sanitizeUserForStudent(user),
+    return res.status(403).json({
+      success: false,
+      message:
+        "Profile edits are restricted. Only admin can update user details now.",
     });
   } catch (err) {
     console.error("Profile update error:", err);
