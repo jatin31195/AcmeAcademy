@@ -254,6 +254,11 @@ export const registerUser = async (req, res) => {
     if (existingEmail)
       return res.status(400).json({ message: "Email already registered" });
 
+    const existingUsername = await userService.getUserByUsername(username);
+    if (existingUsername) {
+      return res.status(400).json({ message: "Username already registered" });
+    }
+
     const existingPhone = await userService.getUserByPhone(normalizedPhone);
     if (existingPhone)
       return res.status(400).json({ message: "Phone already registered" });
@@ -350,7 +355,25 @@ export const registerUser = async (req, res) => {
     });
   } catch (err) {
     console.error("Register error:", err);
-    res.status(500).json({ message: "Server Error" });
+
+    if (err?.code === 11000) {
+      const duplicateField = Object.keys(err?.keyValue || {})[0];
+      const duplicateValue = duplicateField ? err.keyValue[duplicateField] : "";
+      const fieldLabel =
+        duplicateField === "username"
+          ? "Username"
+          : duplicateField === "email"
+            ? "Email"
+            : duplicateField === "phone"
+              ? "Phone"
+              : "Field";
+
+      return res.status(400).json({
+        message: `${fieldLabel} already registered${duplicateValue ? `: ${duplicateValue}` : ""}`,
+      });
+    }
+
+    res.status(500).json({ message: err?.message || "Server Error" });
   }
 };
 

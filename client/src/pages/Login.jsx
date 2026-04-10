@@ -11,6 +11,15 @@ import logo from "/logo.png";
 import { BASE_URL } from "../config";
 import SEO from "../components/SEO";
 
+const readErrorMessage = async (response, fallbackMessage) => {
+  try {
+    const data = await response.json();
+    return data?.message || fallbackMessage;
+  } catch {
+    return fallbackMessage;
+  }
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,8 +44,8 @@ const Login = () => {
         credentials: "include",
       });
 
+      if (!res.ok) throw new Error(await readErrorMessage(res, "Login failed"));
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Login failed");
 
       toast.success("Welcome back!");
 

@@ -10,6 +10,10 @@ export const getUserByPhone = async (phone) => {
   return await User.findOne({ phone });
 };
 
+export const getUserByUsername = async (username) => {
+  return await User.findOne({ username });
+};
+
 export const createUser = async ({
   username,
   fullname,

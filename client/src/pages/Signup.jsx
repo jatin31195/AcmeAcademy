@@ -6,6 +6,15 @@ import { useNavigate } from "react-router-dom";
 import logo from "/logo.png";
 import { BASE_URL } from "../config";
 
+const readErrorMessage = async (response, fallbackMessage) => {
+  try {
+    const data = await response.json();
+    return data?.message || fallbackMessage;
+  } catch {
+    return fallbackMessage;
+  }
+};
+
 const Signup = () => {
   const navigate = useNavigate();
 
@@ -48,8 +57,8 @@ const Signup = () => {
         body: JSON.stringify({ phone, purpose: "signup" }),
       });
 
+      if (!res.ok) throw new Error(await readErrorMessage(res, "Failed to send OTP"));
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
       setOtpSessionId(data.sessionId);
       setShowOTP(true);
       toast.success("OTP sent to your phone!");
@@ -73,8 +82,8 @@ const Signup = () => {
         body: JSON.stringify({ sessionId: otpSessionId, otp, phone: userDetails.phone }),
       });
 
+      if (!res.ok) throw new Error(await readErrorMessage(res, "Invalid OTP"));
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
 
       setOtpToken(data.verificationToken);
       toast.success("OTP Verified!");
@@ -101,8 +110,8 @@ const Signup = () => {
         }),
       });
 
+      if (!res.ok) throw new Error(await readErrorMessage(res, "Failed to create account"));
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
 
       toast.success("Account created successfully!");
       setAccountCreated(true);
