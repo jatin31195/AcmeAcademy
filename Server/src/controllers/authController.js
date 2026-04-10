@@ -67,6 +67,24 @@ const buildVerificationSummary = (userDoc) => {
     submittedAt: userDoc.verificationSubmittedAt || null,
     signatureDataUrl: p.signatureDataUrl || "",
     downloadProfileCardDataUrl: p.downloadProfileCardDataUrl || "",
+    verificationMedia: {
+      profilePic: userDoc.profilePic || "",
+      idFrontUrl: p.idFrontUrl || "",
+      idBackUrl: p.idBackUrl || "",
+      marksheetUrl: p.marksheetUrl || "",
+      latestPhotoUrl: p.latestPhotoUrl || "",
+      passportPhotoUrl: p.passportPhotoUrl || "",
+      livePhotoDataUrl: p.livePhotoDataUrl || "",
+      signatureDataUrl: p.signatureDataUrl || "",
+      downloadProfileCardDataUrl: p.downloadProfileCardDataUrl || "",
+      applicationForms: Array.isArray(p.applicationForms)
+        ? p.applicationForms.map((form, index) => ({
+            exam: form?.exam || "",
+            fileUrl: form?.fileUrl || "",
+            id: form?._id || index,
+          }))
+        : [],
+    },
   };
 };
 

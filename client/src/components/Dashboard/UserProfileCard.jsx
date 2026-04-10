@@ -14,12 +14,58 @@ import {
   Download,
   ShieldCheck,
   CheckCircle2,
+  ExternalLink,
 } from "lucide-react";
 import { BASE_URL } from "../../config";
 import { useUser } from "../../UserContext"; 
 import { useNavigate } from "react-router-dom";
 
 const API_BASE = `${BASE_URL}/api/users`;
+
+const isImageSource = (value) => {
+  const normalized = String(value || "").toLowerCase();
+  return (
+    normalized.startsWith("data:image/") ||
+    /\.(png|jpe?g|webp|gif|svg)(\?|$)/i.test(normalized)
+  );
+};
+
+const MediaCard = ({ title, url }) => {
+  const hasUrl = Boolean(url);
+  const image = hasUrl && isImageSource(url);
+
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{title}</p>
+
+      {hasUrl ? (
+        <>
+          {image ? (
+            <div className="mt-3 h-36 overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+              <img src={url} alt={title} className="h-full w-full object-cover" loading="lazy" />
+            </div>
+          ) : (
+            <div className="mt-3 grid h-36 place-items-center rounded-xl border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
+              File preview unavailable
+            </div>
+          )}
+
+          <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700"
+          >
+            <ExternalLink className="h-4 w-4" />
+            {image ? "Open image" : "Open file"}
+          </a>
+        </>
+      ) : (
+        <p className="mt-3 text-sm text-gray-500">Not uploaded</p>
+      )}
+    </div>
+  );
+};
 
 const UserProfileCard = () => {
   const navigate = useNavigate();
@@ -45,9 +91,37 @@ const UserProfileCard = () => {
         targetExam: user?.targetExam || "",
         targetYear: user?.targetYear || "",
         courseEnrolled: "",
+        verificationMedia: {},
       },
     [user]
   );
+
+  const verificationAssets = useMemo(() => {
+    const media = verificationSummary.verificationMedia || {};
+    const applicationForms = Array.isArray(media.applicationForms)
+      ? media.applicationForms
+      : [];
+
+    return [
+      { title: "Profile Photo", url: media.profilePic || user?.profilePic || "" },
+      { title: "ID Front", url: media.idFrontUrl || "" },
+      { title: "ID Back", url: media.idBackUrl || "" },
+      { title: "Marksheet", url: media.marksheetUrl || "" },
+      { title: "Passport Photo", url: media.passportPhotoUrl || "" },
+      { title: "Latest Photo", url: media.latestPhotoUrl || "" },
+      { title: "Live Photo", url: media.livePhotoDataUrl || "" },
+      { title: "Signature", url: media.signatureDataUrl || "" },
+      {
+        title: "Profile Card Preview",
+        url: media.downloadProfileCardDataUrl || verificationSummary.downloadProfileCardDataUrl || "",
+      },
+      ...applicationForms.map((form, index) => ({
+        title: `Application Form${form?.exam ? ` (${form.exam})` : ""}`,
+        url: form?.fileUrl || "",
+        key: `application-${form?.id || index}`,
+      })),
+    ];
+  }, [user?.profilePic, verificationSummary]);
 
   // 🔹 Initialize edit data when user context loads
   useEffect(() => {
@@ -412,13 +486,35 @@ const UserProfileCard = () => {
             </div>
 
             {isVerificationLocked ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                <InfoItem icon={User} label="Username" value={verificationSummary.username} />
-                <InfoItem icon={User} label="Mobile" value={verificationSummary.mobile} />
-                <InfoItem icon={Target} label="Exam" value={verificationSummary.targetExam} />
-                <InfoItem icon={BookOpen} label="Year" value={verificationSummary.targetYear} />
-                <InfoItem icon={GraduationCap} label="Course" value={verificationSummary.courseEnrolled} />
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                  <InfoItem icon={User} label="Username" value={verificationSummary.username} />
+                  <InfoItem icon={User} label="Mobile" value={verificationSummary.mobile} />
+                  <InfoItem icon={Target} label="Exam" value={verificationSummary.targetExam} />
+                  <InfoItem icon={BookOpen} label="Year" value={verificationSummary.targetYear} />
+                  <InfoItem icon={GraduationCap} label="Course" value={verificationSummary.courseEnrolled} />
+                </div>
+
+                <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">Verification Assets</p>
+                      <p className="text-xs text-gray-500">
+                        Uploaded documents and captures attached to this locked profile.
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                      {verificationAssets.filter((item) => item.url).length} files available
+                    </span>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {verificationAssets.map((item) => (
+                      <MediaCard key={`${item.title}-${item.url}`} title={item.title} url={item.url} />
+                    ))}
+                  </div>
+                </div>
+              </>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
                 <InfoItem icon={Calendar} label="Born" value={editData.dob} />
