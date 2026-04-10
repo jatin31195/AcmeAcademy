@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -35,7 +35,7 @@ function App() {
  
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
 
           {/* Protected Admin Routes */}
@@ -96,7 +96,7 @@ function App() {
           </Route>
 
           {/* Fallback */}
-          <Route path="*" element={<div>Page Not Found</div>} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
    
     </>

@@ -62,14 +62,6 @@ const Login = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Checking session...</p>
-      </div>
-    );
-  }
-
   return (
     
     <div className="min-h-screen flex items-center justify-center p-4">

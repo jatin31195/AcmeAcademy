@@ -2,19 +2,8 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const location = useLocation();
-
-  // ⏳ Wait until auth check completes
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <p className="text-muted-foreground text-sm">
-          Checking session...
-        </p>
-      </div>
-    );
-  }
 
   // 🔐 Not authenticated → redirect to login
   if (!isAuthenticated) {
