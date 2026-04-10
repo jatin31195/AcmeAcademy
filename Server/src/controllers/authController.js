@@ -267,17 +267,18 @@ export const registerUser = async (req, res) => {
       whatsapp,
     });
 
-   
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    let welcomeEmailSent = false;
 
-    
-    const mailHTML = `
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      const mailHTML = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fc; padding: 30px; border-radius: 12px; max-width: 600px; margin: 20px auto; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #e0e0e0;">
         
         <div style="text-align:center; margin-bottom: 20px;">
@@ -322,21 +323,27 @@ export const registerUser = async (req, res) => {
           <span style="font-size:12px;">This is an automated welcome email. Please do not reply.</span>
         </p>
       </div>
-    `;
+      `;
 
-    
-    const mailOptions = {
-      from: `"ACME Academy" <acmeacademy15@gmail.com>`,
-      to: email,
-      subject: "🎉 Welcome to ACME Academy — Let’s Begin Your MCA Journey!",
-      html: mailHTML,
-    };
+      const mailOptions = {
+        from: `"ACME Academy" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: "🎉 Welcome to ACME Academy — Let’s Begin Your MCA Journey!",
+        html: mailHTML,
+      };
 
-   
-    await transporter.sendMail(mailOptions);
+      try {
+        await transporter.sendMail(mailOptions);
+        welcomeEmailSent = true;
+      } catch (mailErr) {
+        console.error("Welcome email send failed:", mailErr);
+      }
+    }
 
     res.status(201).json({
-      message: "User created successfully and welcome email sent!",
+      message: welcomeEmailSent
+        ? "User created successfully and welcome email sent!"
+        : "User created successfully",
       userId: user._id,
     });
   } catch (err) {
