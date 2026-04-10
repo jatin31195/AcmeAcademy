@@ -43,6 +43,7 @@ const Login = () => {
           title: 'Welcome back!',
           description: 'You have successfully logged in.',
         });
+        navigate('/admin', { replace: true });
        
       } else {
         toast({

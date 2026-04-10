@@ -8,6 +8,12 @@ import {
   Phone,
   Mail,
   User,
+  CheckCircle2,
+  XCircle,
+  Clock3,
+  Lock,
+  Unlock,
+  ExternalLink,
 } from "lucide-react";
 
 import PageHeader from "@/components/PageHeader";
@@ -43,6 +49,85 @@ const statusBadgeClass = {
   rejected: "bg-rose-500/15 border-rose-400 text-rose-300",
 };
 
+const truthy = (value) => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") return value.toLowerCase() === "true";
+  return Boolean(value);
+};
+
+const getDocumentItems = (user) => {
+  const vp = user?.verificationProfile || {};
+  const forms = Array.isArray(vp.applicationForms)
+    ? vp.applicationForms.map((form, index) => ({
+        label: `Application Form${form?.exam ? ` (${form.exam})` : ""}`,
+        url: form?.fileUrl || "",
+        key: `application-${form?._id || index}`,
+      }))
+    : [];
+
+  return [
+    { key: "profile", label: "Profile Photo", url: user?.profilePic || "" },
+    { key: "id-front", label: "ID Front", url: vp.idFrontUrl || "" },
+    { key: "id-back", label: "ID Back", url: vp.idBackUrl || "" },
+    { key: "marksheet", label: "Marksheet", url: vp.marksheetUrl || "" },
+    { key: "passport", label: "Passport Photo", url: vp.passportPhotoUrl || "" },
+    { key: "latest", label: "Latest Photo", url: vp.latestPhotoUrl || "" },
+    { key: "live-photo", label: "Live Photo Capture", url: vp.livePhotoDataUrl || "" },
+    { key: "signature", label: "Signature", url: vp.signatureDataUrl || "" },
+    {
+      key: "profile-card",
+      label: "Profile Card Preview",
+      url: vp.downloadProfileCardDataUrl || "",
+    },
+    ...forms,
+  ];
+};
+
+const DocumentCard = ({ label, url }) => {
+  const hasUrl = Boolean(url);
+  const normalized = String(url || "").toLowerCase();
+  const isImage =
+    hasUrl &&
+    (normalized.startsWith("data:image/") ||
+      /\.(png|jpg|jpeg|webp|gif|svg)(\?|$)/i.test(normalized));
+
+  return (
+    <div className="rounded-xl border border-slate-700 bg-slate-900 p-3">
+      <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
+
+      {hasUrl ? (
+        <>
+          {isImage ? (
+            <div className="mt-2 h-36 overflow-hidden rounded-lg border border-slate-700 bg-slate-950">
+              <img
+                src={url}
+                alt={label}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          ) : (
+            <div className="mt-2 h-36 rounded-lg border border-slate-700 bg-slate-950 grid place-items-center text-slate-400 text-sm">
+              File preview unavailable
+            </div>
+          )}
+          <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-2 inline-flex items-center gap-2 text-sm text-cyan-300 hover:text-cyan-200"
+          >
+            <ExternalLink className="h-4 w-4" />
+            {isImage ? "Open Image" : "Open File"}
+          </a>
+        </>
+      ) : (
+        <p className="mt-3 text-sm text-slate-500">Not uploaded</p>
+      )}
+    </div>
+  );
+};
+
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
@@ -51,6 +136,7 @@ const UsersPage = () => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [verificationSaving, setVerificationSaving] = useState(false);
   const [editForm, setEditForm] = useState({});
   const [filter, setFilter] = useState("all");
 
@@ -177,6 +263,30 @@ const UsersPage = () => {
     }
   };
 
+  const updateVerification = async (payload, successMessage) => {
+    if (!activeUser?._id) return;
+    try {
+      setVerificationSaving(true);
+      const res = await fetch(`${API}/${activeUser._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update verification");
+
+      setActiveUser(data.user);
+      await fetchUsers();
+      if (successMessage) alert(successMessage);
+    } catch (err) {
+      alert(err.message || "Unable to update verification");
+    } finally {
+      setVerificationSaving(false);
+    }
+  };
+
   return (
     <div className="animate-fade-in">
       <PageHeader
@@ -298,7 +408,7 @@ const UsersPage = () => {
       {loading && <p className="mt-4 text-muted-foreground">Loading users...</p>}
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto border-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100">
+        <DialogContent className="max-w-6xl max-h-[92vh] overflow-y-auto border border-slate-700 bg-slate-950 text-slate-100 shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-2xl">
               {activeUser?.fullname || activeUser?.username || "User"}
@@ -347,6 +457,109 @@ const UsersPage = () => {
             </TabsContent>
 
             <TabsContent value="verification" className="mt-4">
+              <div className="rounded-xl border border-slate-700 bg-slate-900 p-4 mb-4">
+                <p className="text-xs uppercase tracking-wide text-slate-400 mb-3">
+                  Verification Decision Panel
+                </p>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-slate-400 mb-2">Verification Status</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        disabled={verificationSaving}
+                        variant={activeUser?.verificationStatus === "verified" ? "default" : "outline"}
+                        className={activeUser?.verificationStatus === "verified" ? "bg-emerald-600 hover:bg-emerald-500" : "border-slate-600"}
+                        onClick={() =>
+                          updateVerification(
+                            {
+                              verificationStatus: "verified",
+                              verificationProfileLocked: true,
+                            },
+                            "User verification approved"
+                          )
+                        }
+                      >
+                        <CheckCircle2 className="h-4 w-4 mr-1" />
+                        Approve
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        disabled={verificationSaving}
+                        variant={activeUser?.verificationStatus === "rejected" ? "default" : "outline"}
+                        className={activeUser?.verificationStatus === "rejected" ? "bg-rose-600 hover:bg-rose-500" : "border-slate-600"}
+                        onClick={() =>
+                          updateVerification(
+                            {
+                              verificationStatus: "rejected",
+                              verificationProfileLocked: false,
+                            },
+                            "User verification rejected"
+                          )
+                        }
+                      >
+                        <XCircle className="h-4 w-4 mr-1" />
+                        Reject
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        disabled={verificationSaving}
+                        variant={activeUser?.verificationStatus === "pending" ? "default" : "outline"}
+                        className={activeUser?.verificationStatus === "pending" ? "bg-amber-600 hover:bg-amber-500" : "border-slate-600"}
+                        onClick={() =>
+                          updateVerification(
+                            { verificationStatus: "pending" },
+                            "Verification marked pending"
+                          )
+                        }
+                      >
+                        <Clock3 className="h-4 w-4 mr-1" />
+                        Pending
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-slate-400 mb-2">Profile Edit Lock</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        disabled={verificationSaving}
+                        variant={activeUser?.verificationProfileLocked ? "default" : "outline"}
+                        className={activeUser?.verificationProfileLocked ? "bg-violet-600 hover:bg-violet-500" : "border-slate-600"}
+                        onClick={() =>
+                          updateVerification(
+                            { verificationProfileLocked: true },
+                            "Verification profile locked"
+                          )
+                        }
+                      >
+                        <Lock className="h-4 w-4 mr-1" />
+                        Lock
+                      </Button>
+                      <Button
+                        size="sm"
+                        disabled={verificationSaving}
+                        variant={!activeUser?.verificationProfileLocked ? "default" : "outline"}
+                        className={!activeUser?.verificationProfileLocked ? "bg-slate-600 hover:bg-slate-500" : "border-slate-600"}
+                        onClick={() =>
+                          updateVerification(
+                            { verificationProfileLocked: false },
+                            "Verification profile unlocked"
+                          )
+                        }
+                      >
+                        <Unlock className="h-4 w-4 mr-1" />
+                        Unlock
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
                   ["Locked", activeUser?.verificationProfileLocked ? "Yes" : "No"],
@@ -356,6 +569,9 @@ const UsersPage = () => {
                   ["Address", activeUser?.verificationProfile?.address],
                   ["Course", activeUser?.verificationProfile?.courseEnrolled],
                   ["Batches", activeUser?.verificationProfile?.batchesEnrolled],
+                  ["VP Father Name", activeUser?.verificationProfile?.fatherName],
+                  ["VP Mother Name", activeUser?.verificationProfile?.motherName],
+                  ["Parents Contact", activeUser?.verificationProfile?.parentsContact],
                   ["City", activeUser?.verificationProfile?.city],
                   ["State", activeUser?.verificationProfile?.state],
                   ["ID Type", activeUser?.verificationProfile?.idType],
@@ -368,25 +584,15 @@ const UsersPage = () => {
                 ))}
               </div>
 
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                {[
-                  ["ID Front", activeUser?.verificationProfile?.idFrontUrl],
-                  ["ID Back", activeUser?.verificationProfile?.idBackUrl],
-                  ["Marksheet", activeUser?.verificationProfile?.marksheetUrl],
-                  ["Latest Photo", activeUser?.verificationProfile?.latestPhotoUrl],
-                  ["Passport Photo", activeUser?.verificationProfile?.passportPhotoUrl],
-                ].map(([label, url]) => (
-                  <a
-                    key={label}
-                    href={url || "#"}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`rounded-lg border px-4 py-3 ${url ? "border-cyan-400/60 bg-cyan-500/10 hover:bg-cyan-500/20" : "border-slate-700 bg-slate-900/50 pointer-events-none"}`}
-                  >
-                    <p className="text-xs text-slate-300">{label}</p>
-                    <p className="text-sm font-semibold truncate">{url ? "Open File" : "Not Uploaded"}</p>
-                  </a>
-                ))}
+              <div className="mt-4">
+                <p className="text-xs uppercase tracking-wide text-slate-400 mb-3">
+                  Uploaded Photos And Documents
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                  {getDocumentItems(activeUser).map((doc) => (
+                    <DocumentCard key={doc.key} label={doc.label} url={doc.url} />
+                  ))}
+                </div>
               </div>
             </TabsContent>
 
@@ -411,7 +617,7 @@ const UsersPage = () => {
       </Dialog>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border border-slate-700 bg-slate-950 text-slate-100 shadow-2xl">
           <DialogHeader>
             <DialogTitle>Edit User Details (Admin Only)</DialogTitle>
           </DialogHeader>
@@ -446,16 +652,67 @@ const UsersPage = () => {
               ["verificationProfileLocked", "Verification Locked (true/false)"],
               ["verificationProfileSubmitted", "Verification Submitted (true/false)"],
               ["termsAccepted", "Terms Accepted (true/false)"],
-            ].map(([key, label]) => (
+            ].map(([key, label]) => {
+              const isBooleanField =
+                key === "verificationProfileLocked" ||
+                key === "verificationProfileSubmitted" ||
+                key === "termsAccepted";
+
+              const isVerificationStatusField = key === "verificationStatus";
+
+              return (
               <div key={key}>
                 <p className="text-xs text-muted-foreground mb-1">{label}</p>
-                <Input
-                  value={String(editForm[key] ?? "")}
-                  onChange={(e) => onChange(key, e.target.value)}
-                  className="bg-secondary border-border"
-                />
+                {isVerificationStatusField ? (
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      ["pending", "Pending"],
+                      ["verified", "Verified"],
+                      ["rejected", "Rejected"],
+                    ].map(([value, text]) => (
+                      <Button
+                        key={value}
+                        type="button"
+                        size="sm"
+                        variant={editForm[key] === value ? "default" : "outline"}
+                        className={editForm[key] === value ? "gradient-primary text-primary-foreground" : "border-border"}
+                        onClick={() => onChange(key, value)}
+                      >
+                        {text}
+                      </Button>
+                    ))}
+                  </div>
+                ) : isBooleanField ? (
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={truthy(editForm[key]) ? "default" : "outline"}
+                      className={truthy(editForm[key]) ? "bg-emerald-600 hover:bg-emerald-500 text-white" : "border-border"}
+                      onClick={() => onChange(key, true)}
+                    >
+                      True
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={!truthy(editForm[key]) ? "default" : "outline"}
+                      className={!truthy(editForm[key]) ? "bg-rose-600 hover:bg-rose-500 text-white" : "border-border"}
+                      onClick={() => onChange(key, false)}
+                    >
+                      False
+                    </Button>
+                  </div>
+                ) : (
+                  <Input
+                    value={String(editForm[key] ?? "")}
+                    onChange={(e) => onChange(key, e.target.value)}
+                    className="bg-secondary border-border"
+                  />
+                )}
               </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-6 flex items-center justify-end gap-2">
