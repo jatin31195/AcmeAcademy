@@ -13,6 +13,7 @@ const Signup = () => {
     username: "",
     fullname: "",
     email: "",
+    password: "",
     dob: "",
     phone: "",
     whatsapp: "",
@@ -32,9 +33,9 @@ const Signup = () => {
 
 
   const sendOtp = async () => {
-    const { username, fullname, email, dob, phone } = userDetails;
+    const { username, fullname, email, password, dob, phone } = userDetails;
 
-    if (!username || !fullname || !email || !dob || !phone) {
+    if (!username || !fullname || !email || !password || !dob || !phone) {
       toast.error("Please fill all required fields");
       return;
     }
@@ -174,6 +175,14 @@ const Signup = () => {
                   name="email"
                   placeholder="Email"
                   value={userDetails.email}
+                  onChange={handleChange}
+                  className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  value={userDetails.password}
                   onChange={handleChange}
                   className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />

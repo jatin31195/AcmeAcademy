@@ -231,6 +231,10 @@ export const registerUser = async (req, res) => {
     cleanupExpiredOtpState();
     const { username, fullname, email, password, dob, whatsapp, phone, otpToken } = req.body;
 
+    if (!password || !String(password).trim()) {
+      return res.status(400).json({ message: "Password is required for signup" });
+    }
+
     const normalizedPhone = getPhoneFromIndianInput(phone);
     if (!normalizedPhone) {
       return res.status(400).json({ message: "Valid 10-digit phone is required" });
@@ -254,14 +258,12 @@ export const registerUser = async (req, res) => {
     if (existingPhone)
       return res.status(400).json({ message: "Phone already registered" });
 
-    const effectivePassword = password || crypto.randomBytes(16).toString("hex");
-
     // ✅ Create user
     const user = await userService.createUser({
       username,
       fullname,
       email,
-      password: effectivePassword,
+      password: String(password).trim(),
       dob,
       phone: normalizedPhone,
       whatsapp,
