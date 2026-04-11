@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "@/config";
+import { useAuth } from "@/AuthContext";
 
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
 import UserProfileCard from "@/components/Dashboard/UserProfileCard";
@@ -51,6 +53,9 @@ const Dashboard = () => {
   const [attempts, setAttempts] = useState(cachedData?.attempts || []);
   const [analytics, setAnalytics] = useState(cachedData?.analytics || []);
   const [loading, setLoading] = useState(!cachedData);
+  
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (hasFetchedRef.current) return;
@@ -94,15 +99,43 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
-
-      <section className="relative py-8 hero-gradient overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 relative">
+      {/* Login Overlay */}
+      {!authLoading && !user && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Blurry Background */}
+          <div className="absolute inset-0 backdrop-blur-sm bg-black/20"></div>
+          
+          {/* Modal Content */}
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center cursor-pointer hover:shadow-3xl transition-shadow"
+            onClick={() => navigate("/login")}
+          >
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Login to Track Your Progress
+            </h2>
+            <p className="text-lg text-gray-600 mb-6">
+              Let Acme Academy Prepare You for the Best Result
+            </p>
+            <button
+              onClick={() => navigate("/login")}
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-lg transition-all transform hover:scale-105"
+            >
+              Go to Login
+            </button>
+          </div>
         </div>
-      </section>
+      )}
+      
+      {/* Dashboard Content - Blurred when not logged in */}
+      <div className={!authLoading && !user ? "blur-[0.5px] pointer-events-none" : ""}>
+        <section className="relative py-8 hero-gradient overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          </div>
+        </section>
 
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 pb-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 pb-10">
         <DashboardLayout />
 
         {/* Profile Card */}
@@ -147,6 +180,7 @@ const Dashboard = () => {
 
         
         <div className="h-10" />
+        </div>
       </div>
     </div>
   );
