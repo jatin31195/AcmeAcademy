@@ -888,6 +888,28 @@ export const submitVerificationProfile = async (req, res) => {
 
     await user.save();
 
+    // Save to Google Sheet
+    try {
+      const FLASK_URL = process.env.FLASK_SERVER_URL || "http://localhost:5001";
+      await axios.post(`${FLASK_URL}/save-verification`, {
+        fullname: user.fullname,
+        email: user.email,
+        phone: normalizedMobile,
+        address: user.verificationProfile.address,
+        targetExam: user.verificationProfile.targetExam,
+        targetYear: user.verificationProfile.targetYear,
+        courseEnrolled: user.verificationProfile.courseEnrolled,
+        fatherName: user.verificationProfile.fatherName,
+        motherName: user.verificationProfile.motherName,
+        state: user.verificationProfile.state,
+        city: user.verificationProfile.city,
+        idType: user.verificationProfile.idType,
+      });
+    } catch (sheetError) {
+      console.error("Error saving to Google Sheet:", sheetError.message);
+      // Don't fail the API if sheet save fails - it's a secondary operation
+    }
+
     return res.status(200).json({
       success: true,
       message:

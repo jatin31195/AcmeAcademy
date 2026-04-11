@@ -24,8 +24,10 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive",
 ]
 
-SHEET_ID       = os.environ.get("GOOGLE_SHEET_ID", "").strip()
-WORKSHEET_NAME = os.environ.get("GOOGLE_WORKSHEET_NAME", "Results").strip()
+SHEET_ID               = os.environ.get("GOOGLE_SHEET_ID", "").strip()
+WORKSHEET_NAME        = os.environ.get("GOOGLE_WORKSHEET_NAME", "Results").strip()
+VERIFICATION_SHEET_NAME = os.environ.get("GOOGLE_VERIFICATION_SHEET_NAME", "Sheet1").strip()
+
 
 
 def get_sheet():
@@ -106,6 +108,84 @@ def save_to_sheet(user_name, user_phone, app_no, roll_no, name, score, correct, 
         ],
         value_input_option="RAW",
     )
+
+
+def save_verification_to_sheet(fullname, email, phone, address, target_exam, target_year, course_enrolled, 
+                               father_name, mother_name, state, city, id_type, submission_date):
+    """Save verification profile data to verification sheet"""
+    try:
+        raw = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
+        if not raw:
+            raise RuntimeError("GOOGLE_SERVICE_ACCOUNT_JSON is empty or missing in .env file.")
+        if not SHEET_ID:
+            raise RuntimeError("GOOGLE_SHEET_ID is empty or missing in .env file.")
+        
+        # Load credentials
+        if raw.endswith(".json") and not raw.startswith("{"):
+            json_path = os.path.join(os.path.dirname(__file__), raw)
+            if not os.path.exists(json_path):
+                raise RuntimeError(f"Service account file not found: {json_path}")
+            with open(json_path, "r") as f:
+                info = json.load(f)
+        else:
+            info = json.loads(raw)
+        
+        creds = Credentials.from_service_account_info(info, scopes=SCOPES)
+        client = gspread.authorize(creds)
+        spreadsheet = client.open_by_key(SHEET_ID)
+        
+        # Try to get verification sheet, create if doesn't exist
+        try:
+            sheet = spreadsheet.worksheet(VERIFICATION_SHEET_NAME)
+        except gspread.exceptions.WorksheetNotFound:
+            # Create new sheet if it doesn't exist
+            sheet = spreadsheet.add_worksheet(VERIFICATION_SHEET_NAME, rows=1000, cols=12)
+            # Add headers
+            sheet.append_row(
+                [
+                    "Submission Date", "Full Name", "Email", "Phone", "Address", 
+                    "Target Exam", "Target Year", "Course", "Father Name", 
+                    "Mother Name", "State", "City", "ID Type"
+                ],
+                value_input_option="RAW",
+            )
+        
+        # Check if headers exist, if not add them
+        all_values = sheet.get_all_values()
+        if not all_values:
+            sheet.append_row(
+                [
+                    "Submission Date", "Full Name", "Email", "Phone", "Address", 
+                    "Target Exam", "Target Year", "Course", "Father Name", 
+                    "Mother Name", "State", "City", "ID Type"
+                ],
+                value_input_option="RAW",
+            )
+        
+        # Append verification data
+        sheet.append_row(
+            [
+                submission_date,
+                fullname,
+                email,
+                phone,
+                address,
+                target_exam,
+                target_year,
+                course_enrolled,
+                father_name,
+                mother_name,
+                state,
+                city,
+                id_type,
+            ],
+            value_input_option="RAW",
+        )
+        
+        return True
+    except Exception as e:
+        print(f"Error saving verification to sheet: {e}")
+        return False
 
 
 # ── Parsers ───────────────────────────────────────────────────────────────────
@@ -240,6 +320,47 @@ def test_sheets():
     except Exception as e:
         diagnostics["sheet_write"] = f"❌ {str(e)}"
         return jsonify({"status": "FAILED", "diagnostics": diagnostics}), 500
+
+
+@app.route("/save-verification", methods=["POST"])
+def save_verification():
+    """Save verification profile to Google Sheet"""
+    try:
+        data = request.json
+        
+        if not data:
+            return jsonify({"success": False, "error": "No data provided"}), 400
+        
+        # Extract required fields
+        fullname = data.get("fullname", "")
+        email = data.get("email", "")
+        phone = data.get("phone", "")
+        address = data.get("address", "")
+        target_exam = data.get("targetExam", "")
+        target_year = data.get("targetYear", "")
+        course = data.get("courseEnrolled", "")
+        father_name = data.get("fatherName", "")
+        mother_name = data.get("motherName", "")
+        state = data.get("state", "")
+        city = data.get("city", "")
+        id_type = data.get("idType", "")
+        
+        submission_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        success = save_verification_to_sheet(
+            fullname, email, phone, address, target_exam,
+            target_year, course, father_name, mother_name,
+            state, city, id_type, submission_date
+        )
+        
+        if success:
+            return jsonify({"success": True, "message": "Verification profile saved to sheet"})
+        else:
+            return jsonify({"success": False, "error": "Failed to save to sheet"}), 500
+    
+    except Exception as e:
+        print(f"Error in /save-verification: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @app.route("/check", methods=["POST"])
