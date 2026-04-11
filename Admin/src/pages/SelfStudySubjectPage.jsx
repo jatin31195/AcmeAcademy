@@ -156,7 +156,7 @@ const SelfStudySubjectPage = () => {
 
             {/* RIGHT ACTIONS */}
             <div className="w-full md:w-auto">
-              <div className="rounded-lg border bg-muted/30 p-3 min-w-[220px]">
+              <div className="w-full rounded-lg border bg-muted/30 p-3 md:min-w-[220px]">
                 {/* SHOW TOPICS */}
                 <button
                   onClick={() =>
@@ -183,7 +183,7 @@ const SelfStudySubjectPage = () => {
                 </button>
 
                 {/* EDIT / DELETE */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <button
                     onClick={() => openEdit(s)}
                     className="
@@ -258,16 +258,16 @@ const SelfStudySubjectPage = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-2 mt-6">
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button
               variant="outline"
-              className="cursor-pointer"
+              className="cursor-pointer w-full sm:w-auto"
               onClick={() => setOpen(false)}
             >
               Cancel
             </Button>
             <Button
-              className="bg-green-800 cursor-pointer"
+              className="bg-green-800 cursor-pointer w-full sm:w-auto"
               onClick={handleSubmit}
               disabled={loading}
             >

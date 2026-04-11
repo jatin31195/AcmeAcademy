@@ -165,12 +165,14 @@ const handleUpdate = async () => {
       <div className="rounded-xl border bg-card p-6 flex gap-4 flex-wrap">
         <select
   className="
+    w-full
+    sm:w-auto
     bg-white
     text-slate-900
     border border-slate-300
     rounded-lg
     px-4 py-2
-    min-w-[200px]
+    sm:min-w-[200px]
     focus:outline-none
     focus:ring-2
     focus:ring-primary
@@ -196,12 +198,14 @@ const handleUpdate = async () => {
 
         <select
   className="
+    w-full
+    sm:w-auto
     bg-white
     text-slate-900
     border border-slate-300
     rounded-lg
     px-4 py-2
-    min-w-[160px]
+    sm:min-w-[160px]
     focus:outline-none
     focus:ring-2
     focus:ring-primary
@@ -232,7 +236,7 @@ const handleUpdate = async () => {
             className="rounded-2xl border bg-card shadow-lg p-6 flex flex-col lg:flex-row gap-6"
           >
             {/* BIG PHOTO */}
-            <div className="w-full lg:w-60 h-72 rounded-xl overflow-hidden bg-secondary">
+            <div className="h-64 w-full overflow-hidden rounded-xl bg-secondary sm:h-72 lg:w-60">
               <img
                 src={r.photoUrl}
                 alt={r.name}
@@ -255,11 +259,12 @@ const handleUpdate = async () => {
                 <Badge variant="secondary">{r.year}</Badge>
               </div>
 
-              <div className="flex gap-3 pt-4">
-                <Button variant="outline" onClick={() => openEditModal(r)}>
+              <div className="flex flex-col gap-2 pt-4 sm:flex-row sm:gap-3">
+                <Button className="w-full sm:w-auto" variant="outline" onClick={() => openEditModal(r)}>
                   ✏️ Edit
                 </Button>
                 <Button
+                  className="w-full sm:w-auto"
                   variant="destructive"
                   onClick={() => handleDelete(r._id)}
                 >
@@ -298,14 +303,14 @@ const handleUpdate = async () => {
               onChange={(e) => setForm({ ...form, photo: e.target.files[0] })} />
           </div>
 
-          <div className="flex justify-end gap-2 mt-6">
-            <Button variant="outline" onClick={() => {
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button className="w-full sm:w-auto" variant="outline" onClick={() => {
               setOpenAdd(false);
               setOpenEdit(false);
             }}>
               Cancel
             </Button>
-            <Button onClick={openEdit ? handleUpdate : handleAdd}>
+            <Button className="w-full sm:w-auto" onClick={openEdit ? handleUpdate : handleAdd}>
               {openEdit ? "Update" : "Add"}
             </Button>
           </div>

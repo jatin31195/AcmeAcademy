@@ -11,13 +11,14 @@ import { cn } from "@/lib/utils";
 const DataTable = ({ columns, data, className }) => {
   return (
     <div
-      className={cn("rounded-xl shadow-card border", className)}
+      className={cn("rounded-xl border shadow-card", className)}
       style={{
         backgroundColor: "hsl(var(--card))",
         borderColor: "hsl(var(--border))",
       }}
     >
-      <Table>
+      <div className="w-full overflow-x-auto">
+      <Table className="min-w-[760px]">
         <TableHeader>
           <TableRow
             className="hover:bg-transparent"
@@ -26,7 +27,7 @@ const DataTable = ({ columns, data, className }) => {
             {columns.map((column) => (
               <TableHead
                 key={String(column.key)}
-                className="font-medium"
+                className="whitespace-nowrap font-medium"
                 style={{ color: "hsl(var(--muted-foreground))" }}
               >
                 {column.header}
@@ -53,6 +54,7 @@ const DataTable = ({ columns, data, className }) => {
               {columns.map((column) => (
                 <TableCell
                   key={`${item.id}-${String(column.key)}`}
+                  className="align-top"
                   style={{ color: "hsl(var(--foreground))" }}
                 >
                   {column.render
@@ -64,6 +66,7 @@ const DataTable = ({ columns, data, className }) => {
           ))}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 };

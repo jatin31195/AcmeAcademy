@@ -140,7 +140,7 @@ const SelfStudyTopicTestPage = () => {
             </div>
 
             {/* ACTIONS */}
-            <div className="flex flex-col gap-3 min-w-[220px]">
+            <div className="flex w-full flex-col gap-3 xl:min-w-[220px]">
               <button
                 onClick={() =>
                   navigate(
@@ -209,12 +209,12 @@ const SelfStudyTopicTestPage = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-2 mt-6">
-            <Button variant="outline" onClick={() => setOpen(false)}>
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button className="w-full sm:w-auto" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
             <Button
-              className="bg-[hsl(var(--success))]"
+              className="w-full bg-[hsl(var(--success))] sm:w-auto"
               onClick={handleCreate}
               disabled={loading}
             >

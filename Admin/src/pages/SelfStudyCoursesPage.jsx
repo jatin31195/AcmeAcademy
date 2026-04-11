@@ -123,7 +123,7 @@ const SelfStudyCoursesPage = () => {
 
       {/* ---------------- TABLE ---------------- */}
       <div className="rounded-xl border bg-card mt-6 overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[840px] text-sm">
           <thead className="bg-secondary">
             <tr>
               <th className="p-3 text-left">Title</th>
@@ -145,7 +145,7 @@ const SelfStudyCoursesPage = () => {
                   <Badge variant="secondary">Active</Badge>
                 </td>
                 <td className="p-3">
-  <div className="w-full max-w-[260px] mx-auto rounded-xl border bg-muted/30 p-4 shadow-sm">
+  <div className="mx-auto w-full min-w-[220px] max-w-[260px] rounded-xl border bg-muted/30 p-4 shadow-sm">
     
     {/* SHOW SUBJECTS */}
     <button
@@ -272,12 +272,12 @@ const SelfStudyCoursesPage = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-2 mt-6">
-            <Button variant="outline" onClick={() => setOpen(false)}>
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button className="w-full sm:w-auto" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
             <Button
-              className="bg-green-800"
+              className="w-full bg-green-800 sm:w-auto"
               onClick={handleSubmit}
               disabled={loading}
             >

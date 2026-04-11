@@ -134,7 +134,7 @@ const PYQsPage = () => {
       </PageHeader>
 
       <div className="rounded-xl border border-border bg-card mt-6 overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[760px] text-sm">
           <thead className="bg-secondary">
             <tr>
               <th className="p-3 text-left">Title</th>
@@ -155,17 +155,19 @@ const PYQsPage = () => {
                   <Badge variant="secondary">{p.difficulty}</Badge>
                 </td>
                 <td className="p-3">{p.questions}</td>
-                <td className="p-3 flex gap-2 justify-center">
-                  <Button size="sm" variant="outline" onClick={() => openEdit(p)}>
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDelete(p._id)}
-                  >
-                    Delete
-                  </Button>
+                <td className="p-3">
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <Button size="sm" variant="outline" onClick={() => openEdit(p)}>
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(p._id)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -230,11 +232,11 @@ const PYQsPage = () => {
             <Input type="file" accept="application/pdf" name="file" onChange={handleChange} />
           </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button variant="outline" onClick={() => setOpen(false)}>
+          <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
+            <Button className="w-full sm:w-auto" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button className="gradient-primary" onClick={handleSubmit} disabled={loading}>
+            <Button className="gradient-primary w-full sm:w-auto" onClick={handleSubmit} disabled={loading}>
               {loading ? "Saving..." : "Save"}
             </Button>
           </div>

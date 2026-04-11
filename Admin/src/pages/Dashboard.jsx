@@ -21,9 +21,9 @@ const UserModal = ({ user, onClose }) => {
   if (!user) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-3 backdrop-blur-sm">
       <div
-        className="w-[420px] rounded-xl border shadow-2xl"
+        className="w-full max-w-md rounded-xl border shadow-2xl"
         style={{
           backgroundColor: "hsl(var(--card))",
           borderColor: "hsl(var(--border))",
@@ -43,8 +43,8 @@ const UserModal = ({ user, onClose }) => {
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-3 text-sm">
-          <div className="flex justify-between">
+        <div className="space-y-3 px-4 py-5 text-sm sm:px-6">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <span style={{ color: "hsl(var(--muted-foreground))" }}>
               Name
             </span>
@@ -56,7 +56,7 @@ const UserModal = ({ user, onClose }) => {
             </span>
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <span style={{ color: "hsl(var(--muted-foreground))" }}>
               User ID
             </span>
@@ -71,12 +71,12 @@ const UserModal = ({ user, onClose }) => {
 
         {/* Footer */}
         <div
-          className="px-6 py-4 border-t flex justify-end"
+          className="flex border-t px-4 py-4 sm:px-6 sm:justify-end"
           style={{ borderColor: "hsl(var(--border))" }}
         >
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-md text-sm font-medium transition"
+            className="w-full rounded-md px-4 py-2 text-sm font-medium transition sm:w-auto"
             style={{
               backgroundColor: "hsl(var(--primary))",
               color: "hsl(var(--primary-foreground))",

@@ -32,13 +32,16 @@ const menuItems = [
   { icon: Mail, label: "Mails", path: "/admin/mails" },
 ];
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ mobileOpen = false, onClose }) => {
   const { logout, adminEmail } = useAuth();
   const location = useLocation();
 
   return (
     <aside
-      className="fixed left-0 top-0 z-40 h-screen w-64 border-r"
+      className={cn(
+        "fixed left-0 top-0 z-40 h-screen w-64 border-r transition-transform duration-300",
+        mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      )}
       style={{
         backgroundColor: "hsl(var(--sidebar-background))",
         borderColor: "hsl(var(--sidebar-border))",
@@ -73,6 +76,7 @@ const AdminSidebar = () => {
               <NavLink
                 key={item.path}
                 to={item.path}
+                onClick={() => onClose?.()}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                   isActive

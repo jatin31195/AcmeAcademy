@@ -185,7 +185,7 @@ const course = state?.course;
       </div>
 
       {/* ================= CENTER : LINKS ================= */}
-      <div className="flex flex-col gap-2 min-w-[220px]">
+      <div className="flex w-full flex-col gap-2 xl:min-w-[220px]">
         {t.links?.lecture && (
           <a
             href={t.links.lecture}
@@ -248,7 +248,7 @@ const course = state?.course;
       </div>
 
       {/* ================= RIGHT : ACTIONS ================= */}
-      <div className="flex flex-col gap-3 min-w-[180px]">
+      <div className="flex w-full flex-col gap-3 xl:min-w-[180px]">
         {/* PRIMARY ACTION */}
         <button
           onClick={() =>
@@ -344,23 +344,23 @@ const course = state?.course;
             <Input name="links.notes" placeholder="Notes link" value={form.links.notes} onChange={handleChange} />
             <Input name="links.assignment" placeholder="Assignment link" value={form.links.assignment} onChange={handleChange} />
 
-            <div className="flex gap-6">
-              <label className="flex gap-2 items-center">
+            <div className="flex flex-wrap gap-4 sm:gap-6">
+              <label className="flex items-center gap-2">
                 <input type="checkbox" name="locked.assignment" checked={form.locked.assignment} onChange={handleChange} />
                 Lock Assignment
               </label>
-              <label className="flex gap-2 items-center">
+              <label className="flex items-center gap-2">
                 <input type="checkbox" name="locked.test" checked={form.locked.test} onChange={handleChange} />
                 Lock Test
               </label>
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 mt-6">
-            <Button variant="outline" onClick={() => setOpen(false)}>
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button className="w-full sm:w-auto" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button className="gradient-primary" onClick={handleSubmit} disabled={loading}>
+            <Button className="gradient-primary w-full sm:w-auto" onClick={handleSubmit} disabled={loading}>
               {loading ? "Saving..." : "Save Topic"}
             </Button>
           </div>

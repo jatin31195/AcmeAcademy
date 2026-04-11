@@ -1,9 +1,9 @@
 const PageHeader = ({ title, description, children }) => {
   return (
-    <div className="mb-8 flex items-center justify-between">
+    <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
       <div>
         <h1
-          className="text-2xl font-bold"
+          className="text-xl font-bold sm:text-2xl"
           style={{ color: "hsl(var(--foreground))" }}
         >
           {title}
@@ -11,7 +11,7 @@ const PageHeader = ({ title, description, children }) => {
 
         {description && (
           <p
-            className="mt-1"
+            className="mt-1 text-sm sm:text-base"
             style={{ color: "hsl(var(--muted-foreground))" }}
           >
             {description}
@@ -20,7 +20,7 @@ const PageHeader = ({ title, description, children }) => {
       </div>
 
       {children && (
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end sm:gap-3">
           {children}
         </div>
       )}

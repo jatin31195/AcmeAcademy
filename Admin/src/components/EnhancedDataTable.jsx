@@ -66,7 +66,8 @@ const EnhancedDataTable = ({
           borderColor: "hsl(var(--border))",
         }}
       >
-        <Table>
+        <div className="w-full overflow-x-auto">
+        <Table className="min-w-[820px]">
           <TableHeader>
             <TableRow
               style={{
@@ -77,7 +78,7 @@ const EnhancedDataTable = ({
               {columns.map((column) => (
                 <TableHead
                   key={column.key}
-                  className={cn("font-semibold", column.className)}
+                  className={cn("whitespace-nowrap font-semibold", column.className)}
                   style={{ color: "hsl(var(--foreground))" }}
                 >
                   {column.header}
@@ -86,7 +87,7 @@ const EnhancedDataTable = ({
 
               {hasActions && (
                 <TableHead
-                  className="font-semibold w-32"
+                  className="w-32 whitespace-nowrap font-semibold"
                   style={{ color: "hsl(var(--foreground))" }}
                 >
                   Actions
@@ -126,7 +127,7 @@ const EnhancedDataTable = ({
                   {columns.map((column) => (
                     <TableCell
                       key={column.key}
-                      className={column.className}
+                      className={cn("align-top", column.className)}
                       style={{ color: "hsl(var(--foreground))" }}
                     >
                       {column.render
@@ -181,13 +182,14 @@ const EnhancedDataTable = ({
             )}
           </TableBody>
         </Table>
+        </div>
       </div>
 
       {/* PAGINATION */}
       {pagination && pagination.total > 0 && (
-        <div className="flex items-center justify-between px-2">
+        <div className="flex flex-col gap-3 px-2 sm:flex-row sm:items-center sm:justify-between">
           <p
-            className="text-sm"
+            className="text-xs sm:text-sm"
             style={{ color: "hsl(var(--muted-foreground))" }}
           >
             Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
@@ -198,7 +200,7 @@ const EnhancedDataTable = ({
             of {pagination.total} results
           </p>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 self-start sm:self-auto">
             <Button
               variant="outline"
               size="icon"

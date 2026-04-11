@@ -133,8 +133,53 @@ const HomeCoursesPage = () => {
       </PageHeader>
 
       {/* ---------------- TABLE ---------------- */}
-      <div className="rounded-xl border bg-card mt-6 overflow-x-auto">
-        <table className="w-full text-sm">
+      <div className="mt-6 space-y-4">
+        <div className="grid gap-3 md:hidden">
+          {courses.map((c) => (
+            <div key={c._id} className="rounded-xl border bg-card p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="text-base font-semibold leading-tight">{c.title}</h3>
+                <Badge variant="secondary">Active</Badge>
+              </div>
+
+              <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+                <p><span className="font-medium text-foreground">Type:</span> {c.courseType || "-"}</p>
+                <p><span className="font-medium text-foreground">Mode:</span> {c.mode || "-"}</p>
+                <p><span className="font-medium text-foreground">Exams:</span> {(c.exams || []).join(", ") || "-"}</p>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 flex-1"
+                  onClick={() => openEdit(c)}
+                >
+                  <Pencil className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="h-9 flex-1"
+                  onClick={() => handleDelete(c._id)}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Delete
+                </Button>
+              </div>
+            </div>
+          ))}
+
+          {courses.length === 0 && (
+            <div className="rounded-xl border bg-card p-6 text-center text-muted-foreground">
+              No courses found
+            </div>
+          )}
+        </div>
+
+        <div className="hidden rounded-xl border bg-card overflow-x-auto md:block">
+          <table className="w-full text-sm">
           <thead className="bg-secondary">
             <tr>
               <th className="p-3 text-left">Title</th>
@@ -182,7 +227,8 @@ const HomeCoursesPage = () => {
               </tr>
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
 
       {/* ---------------- MODAL ---------------- */}
@@ -208,12 +254,12 @@ const HomeCoursesPage = () => {
             <Input name="link" placeholder="Course Link" value={form.link} onChange={handleChange} />
           </div>
 
-          <div className="flex justify-end gap-2 mt-6">
-            <Button className="cursor-pointer" variant="outline" onClick={() => setOpen(false)}>
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button className="cursor-pointer w-full sm:w-auto" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
             <Button
-              className="bg-green-800 cursor-pointer"
+              className="bg-green-800 cursor-pointer w-full sm:w-auto"
               onClick={handleSubmit}
               disabled={loading}
             >

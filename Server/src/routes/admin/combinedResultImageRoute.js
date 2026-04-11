@@ -8,8 +8,8 @@ import { verifyAdmin } from "../../middlewares/adminAuthMiddleware.js";
 import { upload } from "../../utils/multerCloudinary.js";
 
 const router = express.Router();
-router.get("/get-image",getCombinedResultImages);
-router.post("/add-image",addCombinedResultImage);
-router.delete("/delete-image/:id",deleteCombinedResultImage);
+router.get("/get-image", getCombinedResultImages);
+router.post("/add-image", verifyAdmin, addCombinedResultImage);
+router.delete("/delete-image/:id", verifyAdmin, deleteCombinedResultImage);
 
 export default router;

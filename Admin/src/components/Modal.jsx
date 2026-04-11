@@ -23,10 +23,10 @@ const Modal = ({
   size = "md",
 }) => {
   const sizeClasses = {
-    sm: "max-w-sm",
-    md: "max-w-md",
-    lg: "max-w-2xl",
-    xl: "max-w-4xl",
+    sm: "sm:max-w-sm",
+    md: "sm:max-w-md",
+    lg: "sm:max-w-2xl",
+    xl: "sm:max-w-4xl",
   };
 
   const descriptionId = description ? "modal-description" : undefined;
@@ -36,9 +36,12 @@ const Modal = ({
       <DialogContent
         aria-describedby={descriptionId}
         className={`
+          w-[calc(100%-1rem)]
+          max-w-[calc(100%-1rem)]
           ${sizeClasses[size]}
           max-h-[90vh]
           flex flex-col
+          p-4 sm:w-full sm:p-6
         `}
         style={{
           backgroundColor: "hsl(var(--card))",
@@ -64,13 +67,13 @@ const Modal = ({
         </DialogHeader>
 
         {/* ---------------- BODY (scrollable) ---------------- */}
-        <div className="flex-1 overflow-y-auto py-4 pr-2">
+        <div className="flex-1 overflow-y-auto py-3 pr-1 sm:py-4 sm:pr-2">
           {children}
         </div>
 
         {/* ---------------- FOOTER (fixed) ---------------- */}
         {footer && (
-          <DialogFooter className="shrink-0 pt-4 border-t">
+          <DialogFooter className="shrink-0 gap-2 border-t pt-3 sm:pt-4">
             {footer}
           </DialogFooter>
         )}
@@ -100,7 +103,7 @@ export const ConfirmDialog = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
         aria-describedby={descriptionId}
-        className="max-w-md"
+        className="w-[calc(100%-1rem)] max-w-[calc(100%-1rem)] sm:max-w-md"
         style={{
           backgroundColor: "hsl(var(--card))",
           borderColor: "hsl(var(--border))",

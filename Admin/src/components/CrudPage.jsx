@@ -173,12 +173,12 @@ const CrudPage = ({
         size="lg"
         footer={
           crud.modalMode !== "view" && (
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={crud.closeModal}>
+            <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row">
+              <Button className="w-full sm:w-auto" variant="outline" onClick={crud.closeModal}>
                 Cancel
               </Button>
               <Button
-                className="gradient-primary"
+                className="gradient-primary w-full sm:w-auto"
                 onClick={handleSubmit}
                 disabled={crud.loading}
               >

@@ -10,11 +10,16 @@ const AuthContext = createContext(null);
 const api = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
+  timeout: 15000,
 });
+
+const INACTIVITY_MS = 30 * 60 * 1000;
+const REVALIDATE_MS = 5 * 60 * 1000;
 
 export const AuthProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
+  const inactivityTimerRef = useRef(null);
 
   // Prevent multiple refresh calls
   const isRefreshing = useRef(false);
@@ -75,6 +80,54 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  const clearInactivityTimer = () => {
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = null;
+    }
+  };
+
+  const startInactivityTimer = () => {
+    clearInactivityTimer();
+    inactivityTimerRef.current = setTimeout(async () => {
+      try {
+        await api.post("/api/admin/auth/logout");
+      } catch {
+        // ignore logout error on timeout
+      } finally {
+        setAdmin(null);
+      }
+    }, INACTIVITY_MS);
+  };
+
+  useEffect(() => {
+    if (!admin) {
+      clearInactivityTimer();
+      return;
+    }
+
+    const events = ["mousemove", "keydown", "click", "scroll", "touchstart"];
+    const onActivity = () => startInactivityTimer();
+
+    events.forEach((eventName) => window.addEventListener(eventName, onActivity, { passive: true }));
+    startInactivityTimer();
+
+    return () => {
+      events.forEach((eventName) => window.removeEventListener(eventName, onActivity));
+      clearInactivityTimer();
+    };
+  }, [admin]);
+
+  useEffect(() => {
+    if (!admin) return;
+
+    const intervalId = setInterval(() => {
+      checkAuth();
+    }, REVALIDATE_MS);
+
+    return () => clearInterval(intervalId);
+  }, [admin]);
+
   /* =======================
      AUTH METHODS
   ======================= */
@@ -87,7 +140,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (res.status === 200) {
-        setAdmin({ email });
+        setAdmin(res.data?.admin || { email });
         return true;
       }
       return false;
@@ -100,6 +153,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await api.post("/api/admin/auth/logout");
     } finally {
+      clearInactivityTimer();
       setAdmin(null);
     }
   };

@@ -1,25 +1,26 @@
+import { Suspense, lazy } from "react";
 import { Navigate, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
-import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminLayout from "@/components/AdminLayout";
-import Login from "@/pages/Login";
-import Dashboard from "./pages/Dashboard";
-import PYQsPage from "./pages/PYQsPage";
-import UsersPage from "./pages/UsersPage";
-import HomeCoursesPage from "./pages/HomeCoursesPage";
-import SelfStudyCoursesPage from "./pages/SelfStudyCoursesPage";
-import SelfStudySubjectPage from "./pages/SelfStudySubjectPage";
-import SelfStudySubjectTopicPage from "./pages/SelfStudySubjectTopicPage";
-import SelfStudyTopicTestPage from "./pages/SelfStudyTopicTestPage";
-import SelfStudyTestQuestionPage from "./pages/SelfStudyTestQuestionPage";
-import YearlyResultPage from "./pages/YearlyResultPage";
-import PracticeSetPage from "./pages/PracticeSetPage";
-import PracticeCategoryPage from "./pages/PracticeCategoryPage";
-import PracticeQuestionPage from "./pages/PracticeQuestionPage";
-import HomeResultImagesPage from "./pages/HomeResultImagesPage";
-import HomeNoticePage from "./pages/HomeNoticePage";
-import AdminSendMailPage from "./pages/AdminSendMailPage";
+
+const Login = lazy(() => import("@/pages/Login"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const PYQsPage = lazy(() => import("./pages/PYQsPage"));
+const UsersPage = lazy(() => import("./pages/UsersPage"));
+const HomeCoursesPage = lazy(() => import("./pages/HomeCoursesPage"));
+const SelfStudyCoursesPage = lazy(() => import("./pages/SelfStudyCoursesPage"));
+const SelfStudySubjectPage = lazy(() => import("./pages/SelfStudySubjectPage"));
+const SelfStudySubjectTopicPage = lazy(() => import("./pages/SelfStudySubjectTopicPage"));
+const SelfStudyTopicTestPage = lazy(() => import("./pages/SelfStudyTopicTestPage"));
+const SelfStudyTestQuestionPage = lazy(() => import("./pages/SelfStudyTestQuestionPage"));
+const YearlyResultPage = lazy(() => import("./pages/YearlyResultPage"));
+const PracticeSetPage = lazy(() => import("./pages/PracticeSetPage"));
+const PracticeCategoryPage = lazy(() => import("./pages/PracticeCategoryPage"));
+const PracticeQuestionPage = lazy(() => import("./pages/PracticeQuestionPage"));
+const HomeResultImagesPage = lazy(() => import("./pages/HomeResultImagesPage"));
+const HomeNoticePage = lazy(() => import("./pages/HomeNoticePage"));
+const AdminSendMailPage = lazy(() => import("./pages/AdminSendMailPage"));
 
 function App() {
   return (
@@ -33,7 +34,14 @@ function App() {
       />
 
  
-        <Routes>
+        <Suspense
+          fallback={
+            <div className="grid min-h-screen place-items-center text-muted-foreground">
+              Loading admin workspace...
+            </div>
+          }
+        >
+          <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
@@ -97,7 +105,8 @@ function App() {
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
+          </Routes>
+        </Suspense>
    
     </>
   );

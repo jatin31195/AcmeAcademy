@@ -623,21 +623,21 @@ const UsersPage = () => {
       </PageHeader>
 
       {/* Filters */}
-      <div className="flex items-center gap-4 mb-6">
-        <div className="relative flex-1 max-w-md">
+      <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
+        <div className="relative w-full lg:max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search users..."
-            className="pl-10 bg-secondary border-border"
+            className="h-10 pl-10 bg-secondary border-border"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant={filter === "all" ? "default" : "outline"}
-            className="border-border"
+            className="h-9 border-border px-3 text-xs sm:text-sm"
             onClick={() => setFilter("all")}
           >
             <Filter className="h-4 w-4 mr-2" />
@@ -645,21 +645,21 @@ const UsersPage = () => {
           </Button>
           <Button
             variant={filter === "verified" ? "default" : "outline"}
-            className="border-border"
+            className="h-9 border-border px-3 text-xs sm:text-sm"
             onClick={() => setFilter("verified")}
           >
             Verified
           </Button>
           <Button
             variant={filter === "pending" ? "default" : "outline"}
-            className="border-border"
+            className="h-9 border-border px-3 text-xs sm:text-sm"
             onClick={() => setFilter("pending")}
           >
             Pending
           </Button>
           <Button
             variant={filter === "rejected" ? "default" : "outline"}
-            className="border-border"
+            className="h-9 border-border px-3 text-xs sm:text-sm"
             onClick={() => setFilter("rejected")}
           >
             Rejected
@@ -667,47 +667,37 @@ const UsersPage = () => {
         </div>
       </div>
 
-      {/* Users Table */}
-      <DataTable
-        columns={[
-          { key: "name", header: "Name" },
-          { key: "email", header: "Email" },
-          {
-            key: "phone",
-            header: "Phone",
-            render: (user) => user.phone || "-",
-          },
-          {
-            key: "verificationStatus",
-            header: "Verification",
-            render: (user) => (
-              <Badge
-                variant="outline"
-                className={statusBadgeClass[user.verificationStatus] || ""}
-              >
-                {user.verificationStatus || "pending"}
-              </Badge>
-            ),
-          },
-          {
-            key: "lock",
-            header: "Edit Lock",
-            render: (user) => (
-              <Badge variant={user.verificationProfileLocked ? "default" : "secondary"}>
-                {user.verificationProfileLocked ? "Locked" : "Unlocked"}
-              </Badge>
-            ),
-          },
-          { key: "joined", header: "Joined" },
-          {
-            key: "actions",
-            header: "Actions",
-            render: (user) => (
-              <div className="flex items-center gap-2">
+      {/* Users List/Table */}
+      <div className="space-y-4">
+        <div className="grid gap-3 md:hidden">
+          {filteredUsers.map((user) => (
+            <div key={user.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-base font-semibold text-foreground">
+                    {user.name || user.fullname || user.username || "User"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{user.email || "-"}</p>
+                </div>
+                <Badge
+                  variant="outline"
+                  className={statusBadgeClass[user.verificationStatus] || ""}
+                >
+                  {user.verificationStatus || "pending"}
+                </Badge>
+              </div>
+
+              <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+                <p><span className="font-medium text-foreground">Phone:</span> {user.phone || "-"}</p>
+                <p><span className="font-medium text-foreground">Edit Lock:</span> {user.verificationProfileLocked ? "Locked" : "Unlocked"}</p>
+                <p><span className="font-medium text-foreground">Joined:</span> {user.joined || formatDate(user.createdAt)}</p>
+              </div>
+
+              <div className="mt-4 flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-border"
+                  className="h-9 flex-1 border-border"
                   onClick={() => openDetails(user.id)}
                 >
                   <Eye className="h-4 w-4 mr-1" />
@@ -715,33 +705,99 @@ const UsersPage = () => {
                 </Button>
                 <Button
                   size="sm"
-                  className="gradient-primary text-primary-foreground"
+                  className="gradient-primary h-9 flex-1 text-primary-foreground"
                   onClick={() => openEdit(user.id)}
                 >
                   <Pencil className="h-4 w-4 mr-1" />
                   Edit
                 </Button>
               </div>
-            ),
-          },
-        ]}
-        data={filteredUsers}
-      />
+            </div>
+          ))}
+
+          {!filteredUsers.length && !loading && (
+            <div className="rounded-xl border border-border bg-card p-6 text-center text-muted-foreground">
+              No users found.
+            </div>
+          )}
+        </div>
+
+        <DataTable
+          className="hidden md:block"
+          columns={[
+            { key: "name", header: "Name" },
+            { key: "email", header: "Email" },
+            {
+              key: "phone",
+              header: "Phone",
+              render: (user) => user.phone || "-",
+            },
+            {
+              key: "verificationStatus",
+              header: "Verification",
+              render: (user) => (
+                <Badge
+                  variant="outline"
+                  className={statusBadgeClass[user.verificationStatus] || ""}
+                >
+                  {user.verificationStatus || "pending"}
+                </Badge>
+              ),
+            },
+            {
+              key: "lock",
+              header: "Edit Lock",
+              render: (user) => (
+                <Badge variant={user.verificationProfileLocked ? "default" : "secondary"}>
+                  {user.verificationProfileLocked ? "Locked" : "Unlocked"}
+                </Badge>
+              ),
+            },
+            { key: "joined", header: "Joined" },
+            {
+              key: "actions",
+              header: "Actions",
+              render: (user) => (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 border-border px-2 text-xs"
+                    onClick={() => openDetails(user.id)}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    View
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="gradient-primary h-8 px-2 text-xs text-primary-foreground"
+                    onClick={() => openEdit(user.id)}
+                  >
+                    <Pencil className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                </div>
+              ),
+            },
+          ]}
+          data={filteredUsers}
+        />
+      </div>
 
       {loading && <p className="mt-4 text-muted-foreground">Loading users...</p>}
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="max-w-6xl max-h-[92vh] overflow-y-auto border border-slate-700 bg-slate-950 text-slate-100 shadow-2xl">
-          <DialogHeader>
+        <DialogContent className="max-h-[92vh] max-w-6xl overflow-y-auto border border-white/20 bg-gradient-to-br from-slate-900/85 via-slate-900/80 to-indigo-950/75 text-slate-100 shadow-[0_24px_80px_rgba(15,23,42,0.6)] backdrop-blur-2xl">
+          <DialogHeader className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4">
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div>
-                <DialogTitle className="text-2xl">
+                <DialogTitle className="text-xl sm:text-2xl">
                   {activeUser?.fullname || activeUser?.username || "User"}
                 </DialogTitle>
                 <div className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
-                  <span className="inline-flex items-center gap-1"><Mail className="h-4 w-4" /> {activeUser?.email || "-"}</span>
-                  <span className="inline-flex items-center gap-1"><Phone className="h-4 w-4" /> {activeUser?.phone || "-"}</span>
-                  <span className="inline-flex items-center gap-1"><User className="h-4 w-4" /> {activeUser?.username || "-"}</span>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Mail className="h-4 w-4" /> {activeUser?.email || "-"}</span>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Phone className="h-4 w-4" /> {activeUser?.phone || "-"}</span>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><User className="h-4 w-4" /> {activeUser?.username || "-"}</span>
                   <Badge variant="outline" className={statusBadgeClass[activeUser?.verificationStatus] || ""}>
                     {activeUser?.verificationStatus || "pending"}
                   </Badge>
@@ -751,7 +807,7 @@ const UsersPage = () => {
               <Button
                 type="button"
                 onClick={downloadStudentDataCard}
-                className="gradient-primary text-primary-foreground shrink-0"
+                className="gradient-primary w-full text-primary-foreground sm:w-auto shrink-0"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Download Complete Data
@@ -760,10 +816,10 @@ const UsersPage = () => {
           </DialogHeader>
 
           <Tabs defaultValue="overview" className="mt-2">
-            <TabsList className="bg-slate-800/80">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="verification">Verification</TabsTrigger>
-              <TabsTrigger value="logs">Activity</TabsTrigger>
+            <TabsList className="h-auto w-full flex-wrap justify-start gap-2 rounded-xl border border-white/10 bg-white/5 p-1.5 backdrop-blur">
+              <TabsTrigger className="data-[state=active]:bg-white/20 data-[state=active]:text-white" value="overview">Overview</TabsTrigger>
+              <TabsTrigger className="data-[state=active]:bg-white/20 data-[state=active]:text-white" value="verification">Verification</TabsTrigger>
+              <TabsTrigger className="data-[state=active]:bg-white/20 data-[state=active]:text-white" value="logs">Activity</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="mt-4">
@@ -784,7 +840,7 @@ const UsersPage = () => {
                   ["Joined", formatDate(activeUser?.createdAt)],
                   ["Last Updated", formatDate(activeUser?.updatedAt)],
                 ].map(([label, value]) => (
-                  <div key={label} className="rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
+                  <div key={label} className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
                     <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
                     <p className="mt-1 font-medium text-slate-100">{value || "-"}</p>
                   </div>
@@ -793,7 +849,7 @@ const UsersPage = () => {
             </TabsContent>
 
             <TabsContent value="verification" className="mt-4">
-              <div className="rounded-xl border border-slate-700 bg-slate-900 p-4 mb-4">
+              <div className="mb-4 rounded-xl border border-white/15 bg-white/5 p-4 backdrop-blur-sm">
                 <p className="text-xs uppercase tracking-wide text-slate-400 mb-3">
                   Verification Decision Panel
                 </p>
@@ -913,7 +969,7 @@ const UsersPage = () => {
                   ["ID Type", activeUser?.verificationProfile?.idType],
                   ["Terms Accepted", activeUser?.verificationProfile?.termsAccepted ? "Yes" : "No"],
                 ].map(([label, value]) => (
-                  <div key={label} className="rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
+                  <div key={label} className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
                     <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
                     <p className="mt-1 font-medium text-slate-100">{value || "-"}</p>
                   </div>
@@ -935,7 +991,7 @@ const UsersPage = () => {
             <TabsContent value="logs" className="mt-4">
               <div className="space-y-3">
                 {(activeUser?.activityLogs || []).slice(-20).reverse().map((log, index) => (
-                  <div key={`${log.action}-${index}`} className="rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
+                  <div key={`${log.action}-${index}`} className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
                     <div className="flex items-center justify-between gap-3">
                       <p className="font-semibold text-slate-100">{log.action}</p>
                       <p className="text-xs text-slate-400">{formatDate(log.at)}</p>
@@ -953,12 +1009,12 @@ const UsersPage = () => {
       </Dialog>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border border-slate-700 bg-slate-950 text-slate-100 shadow-2xl">
-          <DialogHeader>
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto border border-white/20 bg-gradient-to-br from-slate-900/85 via-slate-900/80 to-cyan-950/70 text-slate-100 shadow-[0_24px_80px_rgba(15,23,42,0.6)] backdrop-blur-2xl">
+          <DialogHeader className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4">
             <DialogTitle>Edit User Details (Admin Only)</DialogTitle>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {[
               ["fullname", "Full Name"],
               ["username", "Username"],
@@ -997,8 +1053,8 @@ const UsersPage = () => {
               const isVerificationStatusField = key === "verificationStatus";
 
               return (
-              <div key={key}>
-                <p className="text-xs text-muted-foreground mb-1">{label}</p>
+              <div key={key} className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
+                <p className="mb-1 text-xs text-slate-300">{label}</p>
                 {isVerificationStatusField ? (
                   <div className="flex flex-wrap gap-2">
                     {[
@@ -1011,7 +1067,7 @@ const UsersPage = () => {
                         type="button"
                         size="sm"
                         variant={editForm[key] === value ? "default" : "outline"}
-                        className={editForm[key] === value ? "gradient-primary text-primary-foreground" : "border-border"}
+                        className={editForm[key] === value ? "gradient-primary px-2 text-xs text-primary-foreground sm:px-3 sm:text-sm" : "border-border px-2 text-xs sm:px-3 sm:text-sm"}
                         onClick={() => onChange(key, value)}
                       >
                         {text}
@@ -1019,12 +1075,12 @@ const UsersPage = () => {
                     ))}
                   </div>
                 ) : isBooleanField ? (
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button
                       type="button"
                       size="sm"
                       variant={truthy(editForm[key]) ? "default" : "outline"}
-                      className={truthy(editForm[key]) ? "bg-emerald-600 hover:bg-emerald-500 text-white" : "border-border"}
+                      className={truthy(editForm[key]) ? "bg-emerald-600 px-2 text-xs text-white hover:bg-emerald-500 sm:px-3 sm:text-sm" : "border-border px-2 text-xs sm:px-3 sm:text-sm"}
                       onClick={() => onChange(key, true)}
                     >
                       True
@@ -1033,7 +1089,7 @@ const UsersPage = () => {
                       type="button"
                       size="sm"
                       variant={!truthy(editForm[key]) ? "default" : "outline"}
-                      className={!truthy(editForm[key]) ? "bg-rose-600 hover:bg-rose-500 text-white" : "border-border"}
+                      className={!truthy(editForm[key]) ? "bg-rose-600 px-2 text-xs text-white hover:bg-rose-500 sm:px-3 sm:text-sm" : "border-border px-2 text-xs sm:px-3 sm:text-sm"}
                       onClick={() => onChange(key, false)}
                     >
                       False
@@ -1043,7 +1099,7 @@ const UsersPage = () => {
                   <Input
                     value={String(editForm[key] ?? "")}
                     onChange={(e) => onChange(key, e.target.value)}
-                    className="bg-secondary border-border"
+                    className="border-white/20 bg-white/10"
                   />
                 )}
               </div>
@@ -1051,11 +1107,11 @@ const UsersPage = () => {
             })}
           </div>
 
-          <div className="mt-6 flex items-center justify-end gap-2">
-            <Button variant="outline" onClick={() => setEditOpen(false)}>
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
+            <Button className="w-full sm:w-auto" variant="outline" onClick={() => setEditOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={saveEdit} disabled={saving} className="gradient-primary text-primary-foreground">
+            <Button onClick={saveEdit} disabled={saving} className="gradient-primary w-full text-primary-foreground sm:w-auto">
               {saving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
