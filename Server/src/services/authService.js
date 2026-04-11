@@ -24,15 +24,18 @@ export const createUser = async ({
   whatsapp,
 }) => {
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new User({
-    username,
+  const userData = {
     fullname,
     email,
     password: hashedPassword,
-    dob,
     phone,
-    whatsapp,
-  });
+  };
+
+  if (username && String(username).trim()) userData.username = String(username).trim();
+  if (dob) userData.dob = dob;
+  if (whatsapp !== undefined) userData.whatsapp = String(whatsapp || "").trim();
+
+  const user = new User(userData);
   return await user.save();
 };
 

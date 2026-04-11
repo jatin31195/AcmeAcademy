@@ -39,6 +39,13 @@ const STATES = [
 ];
 const ID_TYPES = ["Aadhar Card", "Government ID", "College ID Proof"];
 const YEARS = ["2025", "2026", "2027", "2028", "2029"];
+const BATCH_OPTIONS = [
+  "RBC",
+  "Target Batch",
+  "Dropper Batch",
+  "Acme Premium Batch",
+  "Acme Special Batch",
+];
 
 const text = [
   "At ACME Academy, we don’t just teach — we mentor, inspire, and transform.",
@@ -1141,7 +1148,18 @@ const StudentProfilePage = () => {
               <label style={{ display: "block", fontSize: 13, fontWeight: 500, marginBottom: 4 }}>
                 Batches Enrolled
               </label>
-              <input style={inputStyle} value={form.batchesEnrolled} onChange={(e) => set("batchesEnrolled", e.target.value)} />
+              <select
+                style={inputStyle}
+                value={form.batchesEnrolled}
+                onChange={(e) => set("batchesEnrolled", e.target.value)}
+              >
+                <option value="">Select batch</option>
+                {BATCH_OPTIONS.map((batch) => (
+                  <option key={batch} value={batch}>
+                    {batch}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </FormSection>

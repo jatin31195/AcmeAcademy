@@ -4,9 +4,10 @@ const userSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true,
       trim: true,
+      default: undefined,
     },
     fullname: {
       type: String,
@@ -25,7 +26,7 @@ const userSchema = new mongoose.Schema(
     },
     dob: {
       type: Date,
-      required: true,
+      default: null,
     },
     
     whatsapp: {

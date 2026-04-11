@@ -129,14 +129,9 @@ export const sendEmailOtp = async (req, res) => {
       )}`
     );
 
-    const detailsText = String(response?.data?.Details || "");
-    const isVoiceFallback = /voice|call/i.test(detailsText);
-
-    if (response?.data?.Status !== "Success" || !response?.data?.Details || isVoiceFallback) {
+    if (response?.data?.Status !== "Success" || !response?.data?.Details) {
       return res.status(502).json({
-        message: isVoiceFallback
-          ? "Provider triggered voice fallback instead of SMS. Check 2Factor SMS template/DLT mapping and disable call fallback in account settings."
-          : response?.data?.Details || "Failed to initiate OTP session",
+        message: response?.data?.Details || "Failed to send SMS OTP",
       });
     }
 
@@ -229,7 +224,15 @@ export const verifyEmailOtp = async (req, res) => {
 export const registerUser = async (req, res) => {
   try {
     cleanupExpiredOtpState();
-    const { username, fullname, email, password, dob, whatsapp, phone, otpToken } = req.body;
+    const { fullname, name, email, password, phone, otpToken } = req.body;
+    const resolvedFullname = String(fullname || name || "").trim();
+
+    if (!resolvedFullname) {
+      return res.status(400).json({ message: "Name is required for signup" });
+    }
+    if (!email || !String(email).trim()) {
+      return res.status(400).json({ message: "Email is required for signup" });
+    }
 
     if (!password || !String(password).trim()) {
       return res.status(400).json({ message: "Password is required for signup" });
@@ -250,14 +253,10 @@ export const registerUser = async (req, res) => {
 
     verifiedOtpTokenStore.delete(otpToken);
 
-    const existingEmail = await userService.getUserByEmail(email);
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const existingEmail = await userService.getUserByEmail(normalizedEmail);
     if (existingEmail)
       return res.status(400).json({ message: "Email already registered" });
-
-    const existingUsername = await userService.getUserByUsername(username);
-    if (existingUsername) {
-      return res.status(400).json({ message: "Username already registered" });
-    }
 
     const existingPhone = await userService.getUserByPhone(normalizedPhone);
     if (existingPhone)
@@ -265,13 +264,10 @@ export const registerUser = async (req, res) => {
 
     // ✅ Create user
     const user = await userService.createUser({
-      username,
-      fullname,
-      email,
+      fullname: resolvedFullname,
+      email: normalizedEmail,
       password: String(password).trim(),
-      dob,
       phone: normalizedPhone,
-      whatsapp,
     });
 
     let welcomeEmailSent = false;
@@ -295,7 +291,7 @@ export const registerUser = async (req, res) => {
         <h2 style="color:#1e40af; text-align:center;">🎉 Welcome to ACME Academy!</h2>
 
         <p style="font-size:16px; color:#333; text-align:center; margin: 15px 0;">
-          Dear <strong>${fullname || "Student"}</strong>,
+          Dear <strong>${resolvedFullname || "Student"}</strong>,
         </p>
 
         <p style="font-size:15px; line-height:1.6; color:#444;">

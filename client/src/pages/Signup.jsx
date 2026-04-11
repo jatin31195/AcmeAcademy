@@ -19,13 +19,10 @@ const Signup = () => {
   const navigate = useNavigate();
 
   const [userDetails, setUserDetails] = useState({
-    username: "",
-    fullname: "",
+    name: "",
     email: "",
     password: "",
-    dob: "",
     phone: "",
-    whatsapp: "",
   });
 
   const [otp, setOtp] = useState("");
@@ -42,9 +39,9 @@ const Signup = () => {
 
 
   const sendOtp = async () => {
-    const { username, fullname, email, password, dob, phone } = userDetails;
+    const { name, email, password, phone } = userDetails;
 
-    if (!username || !fullname || !email || !password || !dob || !phone) {
+    if (!name || !email || !password || !phone) {
       toast.error("Please fill all required fields");
       return;
     }
@@ -105,7 +102,10 @@ const Signup = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...userDetails,
+          fullname: userDetails.name,
+          email: userDetails.email,
+          password: userDetails.password,
+          phone: userDetails.phone,
           otpToken: verifiedToken,
         }),
       });
@@ -162,20 +162,17 @@ const Signup = () => {
               <h2 className="text-2xl text-white font-bold mb-6 text-center">
                 Register Account
               </h2>
+              <p className="mb-5 text-sm text-gray-400 text-center leading-relaxed">
+                Fill in your basic details now. You can complete the rest of your profile later from Edit Profile and Verification.
+                <br />
+                Remember: this email and password will be used for future login.
+              </p>
               <div className="flex flex-col gap-4">
                 <input
                   type="text"
-                  name="username"
-                  placeholder="Username"
-                  value={userDetails.username}
-                  onChange={handleChange}
-                  className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                />
-                <input
-                  type="text"
-                  name="fullname"
-                  placeholder="Full Name"
-                  value={userDetails.fullname}
+                  name="name"
+                  placeholder="Name"
+                  value={userDetails.name}
                   onChange={handleChange}
                   className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
@@ -198,23 +195,8 @@ const Signup = () => {
                 <input
                   type="tel"
                   name="phone"
-                  placeholder="Phone (10 digits)"
+                  placeholder="Phone Number"
                   value={userDetails.phone}
-                  onChange={handleChange}
-                  className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                />
-                <input
-                  type="date"
-                  name="dob"
-                  value={userDetails.dob}
-                  onChange={handleChange}
-                  className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                />
-                <input
-                  type="text"
-                  name="whatsapp"
-                  placeholder="WhatsApp (optional)"
-                  value={userDetails.whatsapp}
                   onChange={handleChange}
                   className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
