@@ -246,23 +246,42 @@ def test_sheets():
 
 @app.route("/check", methods=["POST"])
 def check():
+
+    # Debug: Log incoming request headers and form data
+    app.logger.info("/check called")
+    app.logger.info(f"Headers: {dict(request.headers)}")
+    app.logger.info(f"Form: {request.form}")
+    app.logger.info(f"Files: {list(request.files.keys())}")
+
     if "response_sheet" not in request.files or "answer_key" not in request.files:
+        app.logger.warning("Missing required files: response_sheet or answer_key")
         return jsonify({"error": "Both PDF files are required."}), 400
 
+
     try:
-        response_text = extract_text(request.files["response_sheet"])
-        answer_text   = extract_text(request.files["answer_key"])
+        # Log file info
+        resp_file = request.files["response_sheet"]
+        ans_file = request.files["answer_key"]
+        app.logger.info(f"response_sheet: filename={resp_file.filename}, content_type={resp_file.content_type}")
+        app.logger.info(f"answer_key: filename={ans_file.filename}, content_type={ans_file.content_type}")
+
+        response_text = extract_text(resp_file)
+        answer_text   = extract_text(ans_file)
 
         answer_map   = parse_answer_key(answer_text)
         response_map = parse_response_sheet(response_text)
 
         if not answer_map:
+            app.logger.warning("Could not parse Answer Key PDF.")
+            app.logger.debug(f"Answer Key sample: {answer_text[:500]}")
             return jsonify({
                 "error": "Could not parse Answer Key PDF.",
                 "debug_answer_sample": answer_text[:500]
             }), 400
 
         if not response_map:
+            app.logger.warning("Could not parse Response Sheet PDF.")
+            app.logger.debug(f"Response Sheet sample: {response_text[:500]}")
             return jsonify({
                 "error": "Could not parse Response Sheet PDF.",
                 "debug_response_sample": response_text[:500]
@@ -308,9 +327,11 @@ def check():
         if sheet_error:
             response["sheet_warning"] = f"Score calculated OK but sheet save failed: {sheet_error}"
 
+        app.logger.info(f"Score calculated: {score}, correct: {correct}, incorrect: {incorrect}, unattempted: {unattempted}")
         return jsonify(response)
 
     except Exception as e:
+        app.logger.error(f"Exception in /check: {e}", exc_info=True)
         return jsonify({"error": str(e)}), 500
 
 
