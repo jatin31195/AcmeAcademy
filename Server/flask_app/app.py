@@ -112,20 +112,18 @@ def extract_text(file_stream):
 
 
 def parse_answer_key(text):
-    # New format: 11-digit Question ID + 12-digit Answer ID
-    result = dict(re.findall(r"(\d{11})\s+(\d{12})", text))
+    # flexible spacing (space, newline, tab)
+    result = dict(re.findall(r"(\d{11})\s*(\d{12})", text))
     if result:
         return result
-    # Reversed new format: 12-digit + 11-digit
-    result = dict(re.findall(r"(\d{12})\s+(\d{11})", text))
+
+    # reverse format
+    result = dict(re.findall(r"(\d{12})\s*(\d{11})", text))
     if result:
         return result
-    # Legacy format: both 10-digit
-    result = dict(re.findall(r"(\d{10})\s+(\d{10})", text))
-    if result:
-        return result
-    # Broad fallback: any 8–12 digit pairs
-    return dict(re.findall(r"(\d{8,12})\s+(\d{8,12})", text))
+
+    # fallback (very flexible)
+    return dict(re.findall(r"(\d{8,15})\s*(\d{8,15})", text))
 
 
 def parse_response_sheet(text):
@@ -146,11 +144,11 @@ def parse_response_sheet(text):
         qid, chosen, options = None, None, [None] * 4
         for line in block:
             if "Question ID" in line:
-                m = re.search(r"(\d{8,12})", line)
+                m = re.search(r"(\d{8,15})", line)
                 qid = m.group(1) if m else None
             for idx in range(4):
                 if f"Option {idx+1} ID" in line:
-                    m = re.search(r"(\d{8,12})", line)
+                    m = re.search(r"(\d{8,15})", line)
                     options[idx] = m.group(1) if m else None
             if "Chosen Option" in line:
                 m = re.search(r"(\d+|Not Attempted)", line, re.IGNORECASE)
