@@ -10,7 +10,6 @@ from google.oauth2.service_account import Credentials
 from dotenv import load_dotenv
 
 # ── Load .env BEFORE anything else ───────────────────────────────────────────
-# This tells Python to read your .env file from the same folder as this script
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"), override=True)
 
 app = Flask(__name__)
@@ -24,9 +23,8 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive",
 ]
 
-SHEET_ID               = os.environ.get("GOOGLE_SHEET_ID", "").strip()
-WORKSHEET_NAME        = os.environ.get("GOOGLE_WORKSHEET_NAME", "Results").strip()
-
+SHEET_ID       = os.environ.get("GOOGLE_SHEET_ID", "").strip()
+WORKSHEET_NAME = os.environ.get("GOOGLE_WORKSHEET_NAME", "Results").strip()
 
 
 def get_sheet():
@@ -41,9 +39,7 @@ def get_sheet():
             "GOOGLE_SHEET_ID is empty or missing in your .env file."
         )
 
-    # Accept either a file path (e.g. service_account.json) or raw JSON string
     if raw.endswith(".json") and not raw.startswith("{"):
-        # It's a file path — resolve relative to this script's directory
         json_path = os.path.join(os.path.dirname(__file__), raw)
         if not os.path.exists(json_path):
             raise RuntimeError(
@@ -53,7 +49,6 @@ def get_sheet():
         with open(json_path, "r") as f:
             info = json.load(f)
     else:
-        # It's a raw JSON string
         try:
             info = json.loads(raw)
         except json.JSONDecodeError as e:
@@ -117,9 +112,19 @@ def extract_text(file_stream):
 
 
 def parse_answer_key(text):
+    # New format: 11-digit Question ID + 12-digit Answer ID
+    result = dict(re.findall(r"(\d{11})\s+(\d{12})", text))
+    if result:
+        return result
+    # Reversed new format: 12-digit + 11-digit
+    result = dict(re.findall(r"(\d{12})\s+(\d{11})", text))
+    if result:
+        return result
+    # Legacy format: both 10-digit
     result = dict(re.findall(r"(\d{10})\s+(\d{10})", text))
     if result:
         return result
+    # Broad fallback: any 8–12 digit pairs
     return dict(re.findall(r"(\d{8,12})\s+(\d{8,12})", text))
 
 
@@ -186,8 +191,6 @@ def index():
     return jsonify({"status": "CUET Flask API running ✅"})
 
 
-# ── TEST ROUTE — open this in browser to check if sheets is working ───────────
-# Visit: http://127.0.0.1:5001/test-sheets
 @app.route("/test-sheets", methods=["GET"])
 def test_sheets():
     diagnostics = {
