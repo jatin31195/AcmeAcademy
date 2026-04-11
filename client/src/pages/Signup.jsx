@@ -3,6 +3,7 @@ import { CgSpinner } from "react-icons/cg";
 import OtpInput from "otp-input-react";
 import { toast, Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import logo from "/logo.png";
 import { BASE_URL } from "../config";
 
@@ -17,12 +18,15 @@ const readErrorMessage = async (response, fallbackMessage) => {
 
 const Signup = () => {
   const navigate = useNavigate();
+  const currentYear = new Date().getFullYear();
 
   const [userDetails, setUserDetails] = useState({
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     phone: "",
+    targetYear: "",
   });
 
   const [otp, setOtp] = useState("");
@@ -31,6 +35,8 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
   const [accountCreated, setAccountCreated] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,10 +45,25 @@ const Signup = () => {
 
 
   const sendOtp = async () => {
-    const { name, email, password, phone } = userDetails;
+    const { name, email, password, confirmPassword, phone, targetYear } = userDetails;
 
     if (!name || !email || !password || !phone) {
       toast.error("Please fill all required fields");
+      return;
+    }
+
+    if (!confirmPassword) {
+      toast.error("Please confirm your password");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Password and confirm password must match");
+      return;
+    }
+
+    if (!targetYear) {
+      toast.error("Please select your target year");
       return;
     }
 
@@ -106,6 +127,7 @@ const Signup = () => {
           email: userDetails.email,
           password: userDetails.password,
           phone: userDetails.phone,
+          targetYear: userDetails.targetYear,
           otpToken: verifiedToken,
         }),
       });
@@ -162,10 +184,10 @@ const Signup = () => {
               <h2 className="text-2xl text-white font-bold mb-6 text-center">
                 Register Account
               </h2>
-              <p className="mb-5 text-sm text-gray-400 text-center leading-relaxed">
+              <p className="mb-5 text-sm text-white font-semibold text-center leading-relaxed">
                 Fill in your basic details now. You can complete the rest of your profile later from Edit Profile and Verification.
                 <br />
-                Remember: this email and password will be used for future login.
+                <span className="text-white font-bold">Remember:</span> this email and password will be used for future login.
               </p>
               <div className="flex flex-col gap-4">
                 <input
@@ -184,14 +206,55 @@ const Signup = () => {
                   onChange={handleChange}
                   className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={userDetails.password}
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="Password"
+                    value={userDetails.password}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 pr-11 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-white"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    placeholder="Confirm Password"
+                    value={userDetails.confirmPassword}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 pr-11 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-white"
+                    aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                <select
+                  name="targetYear"
+                  value={userDetails.targetYear}
                   onChange={handleChange}
-                  className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                />
+                  className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                >
+                  <option value="">Select Target Year</option>
+                  {Array.from({ length: 11 }, (_, index) => currentYear + index).map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
                 <input
                   type="tel"
                   name="phone"

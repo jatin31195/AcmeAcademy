@@ -223,8 +223,9 @@ export const verifyEmailOtp = async (req, res) => {
 export const registerUser = async (req, res) => {
   try {
     cleanupExpiredOtpState();
-    const { fullname, name, email, password, phone, otpToken } = req.body;
+    const { fullname, name, email, password, phone, targetYear, otpToken } = req.body;
     const resolvedFullname = String(fullname || name || "").trim();
+    const parsedTargetYear = targetYear === undefined || targetYear === "" ? null : toNumberOrNull(targetYear);
 
     if (!resolvedFullname) {
       return res.status(400).json({ message: "Name is required for signup" });
@@ -235,6 +236,10 @@ export const registerUser = async (req, res) => {
 
     if (!password || !String(password).trim()) {
       return res.status(400).json({ message: "Password is required for signup" });
+    }
+
+    if (targetYear !== undefined && targetYear !== "" && !parsedTargetYear) {
+      return res.status(400).json({ message: "Invalid targetYear" });
     }
 
     const normalizedPhone = getPhoneFromIndianInput(phone);
@@ -267,6 +272,7 @@ export const registerUser = async (req, res) => {
       email: normalizedEmail,
       password: String(password).trim(),
       phone: normalizedPhone,
+      targetYear: parsedTargetYear,
     });
 
     let welcomeEmailSent = false;
