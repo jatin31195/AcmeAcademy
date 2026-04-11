@@ -71,6 +71,30 @@ export const UserProvider = ({ children }) => {
       writeUserCache(userData);
       setError("");
     } catch (err) {
+      const status = err?.response?.status;
+
+      if (status === 401) {
+        try {
+          await axios.post(
+            `${API_BASE}/refresh`,
+            {},
+            { withCredentials: true }
+          );
+
+          const retryRes = await axios.get(`${API_BASE}/profile`, {
+            withCredentials: true,
+          });
+
+          const retryUserData = enrichUserData(retryRes.data?.data?.user || {});
+          setUser(retryUserData);
+          writeUserCache(retryUserData);
+          setError("");
+          return;
+        } catch (refreshErr) {
+          console.error("❌ Failed to refresh user session:", refreshErr);
+        }
+      }
+
       console.error("❌ Failed to fetch user:", err);
       if (!readUserCache() && !authUser) {
         setUser(null);
