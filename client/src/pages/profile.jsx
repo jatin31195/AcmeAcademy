@@ -455,15 +455,20 @@ function LivePhotoCapture({ onChange, value }) {
       return;
     }
 
+    const maxWidth = 640;
+    const scale = width > maxWidth ? maxWidth / width : 1;
+    const outWidth = Math.max(1, Math.round(width * scale));
+    const outHeight = Math.max(1, Math.round(height * scale));
+
     const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = outWidth;
+    canvas.height = outHeight;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     await new Promise((resolve) => requestAnimationFrame(resolve));
-    ctx.drawImage(videoRef.current, 0, 0);
-    onChange(canvas.toDataURL("image/jpeg", 0.92));
+    ctx.drawImage(videoRef.current, 0, 0, outWidth, outHeight);
+    onChange(canvas.toDataURL("image/jpeg", 0.7));
     setCameraError("");
 
     stopStream(stream);
@@ -582,7 +587,7 @@ function SignaturePad({ onChange, value }) {
   const end = () => {
     drawing.current = false;
     if (canvasRef.current) {
-      onChange(canvasRef.current.toDataURL());
+      onChange(canvasRef.current.toDataURL("image/jpeg", 0.8));
     }
   };
 
@@ -811,11 +816,6 @@ const StudentProfilePage = () => {
     try {
       setSubmitting(true);
       const payload = new FormData();
-      const acceptedAtIso = new Date().toISOString();
-      const profileCardImageDataUrl = await buildVerificationCardImage({
-        ...form,
-        acceptedAt: acceptedAtIso,
-      });
 
       payload.append("mobile", form.mobile);
       payload.append("address", form.address);
@@ -832,8 +832,6 @@ const StudentProfilePage = () => {
       payload.append("idType", form.idType);
       payload.append("livePhotoDataUrl", form.livePhoto);
       payload.append("signatureDataUrl", form.signature);
-      payload.append("profileCardImageDataUrl", profileCardImageDataUrl);
-      payload.append("profileCardAcceptedAt", acceptedAtIso);
       payload.append("termsAccepted", String(form.termsAccepted));
 
       payload.append("idFront", form.idFront);
