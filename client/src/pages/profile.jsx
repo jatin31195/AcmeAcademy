@@ -99,6 +99,71 @@ const readFileAsDataUrl = (file) =>
     reader.readAsDataURL(file);
   });
 
+const compressImageFile = async (
+  file,
+  { maxWidth = 1400, maxHeight = 1400, quality = 0.72 } = {}
+) => {
+  if (!file || !String(file.type || "").startsWith("image/")) {
+    return file;
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      const width = img.naturalWidth || img.width;
+      const height = img.naturalHeight || img.height;
+
+      if (!width || !height) {
+        URL.revokeObjectURL(url);
+        resolve(file);
+        return;
+      }
+
+      const scale = Math.min(maxWidth / width, maxHeight / height, 1);
+      const targetWidth = Math.max(1, Math.round(width * scale));
+      const targetHeight = Math.max(1, Math.round(height * scale));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) {
+        URL.revokeObjectURL(url);
+        resolve(file);
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+      canvas.toBlob(
+        (blob) => {
+          URL.revokeObjectURL(url);
+
+          if (!blob || blob.size >= file.size) {
+            resolve(file);
+            return;
+          }
+
+          const safeBase = file.name.replace(/\.[^.]+$/, "") || "upload";
+          resolve(new File([blob], `${safeBase}.jpg`, { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        quality
+      );
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file);
+    };
+
+    img.src = url;
+  });
+};
+
 const buildVerificationCardImage = async (data) => {
   const canvas = document.createElement("canvas");
   canvas.width = 1000;
@@ -817,6 +882,27 @@ const StudentProfilePage = () => {
       setSubmitting(true);
       const payload = new FormData();
 
+      const idFrontFile = await compressImageFile(form.idFront, {
+        maxWidth: 1800,
+        maxHeight: 1800,
+        quality: 0.75,
+      });
+      const idBackFile = await compressImageFile(form.idBack, {
+        maxWidth: 1800,
+        maxHeight: 1800,
+        quality: 0.75,
+      });
+      const passportPhotoFile = await compressImageFile(form.passportPhoto, {
+        maxWidth: 1200,
+        maxHeight: 1200,
+        quality: 0.72,
+      });
+      const marksheetFile = await compressImageFile(form.marksheet, {
+        maxWidth: 1800,
+        maxHeight: 1800,
+        quality: 0.75,
+      });
+
       payload.append("mobile", form.mobile);
       payload.append("address", form.address);
       payload.append("targetExam", form.targetExams[0] || "");
@@ -834,16 +920,20 @@ const StudentProfilePage = () => {
       payload.append("signatureDataUrl", form.signature);
       payload.append("termsAccepted", String(form.termsAccepted));
 
-      payload.append("idFront", form.idFront);
-      payload.append("idBack", form.idBack);
-      if (form.marksheet) payload.append("marksheet", form.marksheet);
-      payload.append("passportPhoto", form.passportPhoto);
+      payload.append("idFront", idFrontFile);
+      payload.append("idBack", idBackFile);
+      if (marksheetFile) payload.append("marksheet", marksheetFile);
+      payload.append("passportPhoto", passportPhotoFile);
 
-      Object.entries(form.applicationForms).forEach(([exam, file]) => {
-        if (file) {
-          payload.append(`applicationForm_${exam}`, file);
-        }
-      });
+      for (const [exam, file] of Object.entries(form.applicationForms)) {
+        if (!file) continue;
+        const optimizedFile = await compressImageFile(file, {
+          maxWidth: 1800,
+          maxHeight: 1800,
+          quality: 0.75,
+        });
+        payload.append(`applicationForm_${exam}`, optimizedFile);
+      }
 
       await submitVerificationWithRetry(payload);
 
