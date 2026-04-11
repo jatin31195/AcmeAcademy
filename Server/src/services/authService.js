@@ -15,6 +15,7 @@ export const createUser = async ({
   email,
   password,
   phone,
+  targetYear,
 }) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const userData = {
@@ -22,6 +23,7 @@ export const createUser = async ({
     email,
     password: hashedPassword,
     phone,
+    targetYear: targetYear ?? null,
   };
 
   const user = new User(userData);
