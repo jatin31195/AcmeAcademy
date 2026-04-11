@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
@@ -30,6 +30,64 @@ const EXAMS = [
     ready: false,
   },
 ];
+
+const ANSWER_KEY_STORAGE_KEY = "acme_score_checker_answer_key_cuet_pg_v1";
+
+const fileToDataUrl = (file) =>
+  new Promise((resolve) => {
+    if (!file) {
+      resolve("");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+    reader.onerror = () => resolve("");
+    reader.readAsDataURL(file);
+  });
+
+const dataUrlToFile = async (dataUrl, fileName, mimeType) => {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  return new File([blob], fileName, { type: mimeType || blob.type || "application/pdf" });
+};
+
+const readStoredAnswerKey = async () => {
+  try {
+    const raw = localStorage.getItem(ANSWER_KEY_STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    if (!parsed?.dataUrl || !parsed?.name) return null;
+
+    return dataUrlToFile(parsed.dataUrl, parsed.name, parsed.type);
+  } catch {
+    return null;
+  }
+};
+
+const saveAnswerKeyToStorage = async (file) => {
+  try {
+    if (!file) {
+      localStorage.removeItem(ANSWER_KEY_STORAGE_KEY);
+      return;
+    }
+
+    const dataUrl = await fileToDataUrl(file);
+    if (!dataUrl) return;
+
+    localStorage.setItem(
+      ANSWER_KEY_STORAGE_KEY,
+      JSON.stringify({
+        name: file.name,
+        type: file.type,
+        dataUrl,
+      })
+    );
+  } catch {
+    // Ignore storage failures (private mode / quota)
+  }
+};
 
 // ── Scorecard download ────────────────────────────────────────────────────────
 const downloadScoreCard = (result, examLabel) => {
@@ -226,6 +284,22 @@ const ScoreCheckerPage = () => {
   const [result,       setResult]       = useState(null);
   const [filter,       setFilter]       = useState("All");
 
+  useEffect(() => {
+    let mounted = true;
+
+    const hydrateAnswerKey = async () => {
+      const storedAnswerKey = await readStoredAnswerKey();
+      if (!mounted || !storedAnswerKey) return;
+      setAnswerFile(storedAnswerKey);
+    };
+
+    hydrateAnswerKey();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   if (authLoading) {
     return (
       <div className="min-h-screen grid place-items-center bg-white text-gray-600">
@@ -240,8 +314,17 @@ const ScoreCheckerPage = () => {
 
   const reset = () => {
     setExam(null);
-    setResponseFile(null); setAnswerFile(null);
+    setResponseFile(null);
     setResult(null); setError(null); setFilter("All");
+  };
+
+  const handleResponseFileChange = (file) => {
+    setResponseFile(file);
+  };
+
+  const handleAnswerFileChange = async (file) => {
+    setAnswerFile(file);
+    await saveAnswerKeyToStorage(file);
   };
 
   const handleCheck = async () => {
@@ -372,8 +455,8 @@ const ScoreCheckerPage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
-                  <UploadZone label="Response Sheet PDF" icon="📄" file={responseFile} onFile={setResponseFile} />
-                  <UploadZone label="Answer Key PDF"     icon="🔑" file={answerFile}   onFile={setAnswerFile}   />
+                  <UploadZone label="Response Sheet PDF" icon="📄" file={responseFile} onFile={handleResponseFileChange} />
+                  <UploadZone label="Answer Key PDF"     icon="🔑" file={answerFile}   onFile={handleAnswerFileChange}   />
                 </div>
 
                 <AnimatePresence>
