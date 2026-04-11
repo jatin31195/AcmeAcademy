@@ -103,7 +103,10 @@ function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/refund" element={<RefundPolicy />} />
-        <Route path="/score-checker" element={<ScoreCheckerPage />} />
+        {/* Protected ScoreChecker route */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/score-checker" element={<ScoreCheckerPage />} />
+        </Route>
 
         {/* Protected routes */}
         <Route path="/dashboard" element={<Dashboard />} />
