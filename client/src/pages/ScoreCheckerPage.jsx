@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
+import { useAuth } from "../AuthContext";
 import { Flask_URL } from "@/config";
 const FLASK_URL = Flask_URL;
 
@@ -216,11 +217,8 @@ const UploadZone = ({ label, icon, file, onFile }) => {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 const ScoreCheckerPage = () => {
+  const { user, loading: authLoading } = useAuth();
   const [exam,         setExam]         = useState(null);
-  const [step,         setStep]         = useState("info");   // "info" | "upload"
-  const [userName,     setUserName]     = useState("");
-  const [userPhone,    setUserPhone]    = useState("");
-  const [phoneError,   setPhoneError]   = useState("");
   const [responseFile, setResponseFile] = useState(null);
   const [answerFile,   setAnswerFile]   = useState(null);
   const [loading,      setLoading]      = useState(false);
@@ -228,23 +226,22 @@ const ScoreCheckerPage = () => {
   const [result,       setResult]       = useState(null);
   const [filter,       setFilter]       = useState("All");
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-white text-gray-600">
+        Loading session...
+      </div>
+    );
+  }
+
   const canSubmit = responseFile && answerFile && !loading;
+  const userName = String(user?.fullname || user?.name || "").trim();
+  const userPhone = String(user?.phone || user?.whatsapp || "").replace(/\D/g, "").slice(-10);
 
   const reset = () => {
-    setExam(null); setStep("info");
-    setUserName(""); setUserPhone(""); setPhoneError("");
+    setExam(null);
     setResponseFile(null); setAnswerFile(null);
     setResult(null); setError(null); setFilter("All");
-  };
-
-  const handleInfoNext = () => {
-    if (!userName.trim()) return;
-    if (!/^\d{10}$/.test(userPhone)) {
-      setPhoneError("Enter a valid 10-digit mobile number.");
-      return;
-    }
-    setPhoneError("");
-    setStep("upload");
   };
 
   const handleCheck = async () => {
@@ -254,8 +251,8 @@ const ScoreCheckerPage = () => {
       const form = new FormData();
       form.append("response_sheet", responseFile);
       form.append("answer_key",     answerFile);
-      form.append("user_name",      userName.trim());
-      form.append("user_phone",     `+91${userPhone.trim()}`);
+      form.append("user_name",      userName);
+      form.append("user_phone",     userPhone ? `+91${userPhone}` : "");
       const res  = await fetch(`${FLASK_URL}/check`, { method: "POST", body: form });
       const data = await res.json();
       if (data.error) setError(data.error);
@@ -323,7 +320,7 @@ const ScoreCheckerPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
                   {EXAMS.map((e, i) => (
                     <motion.button key={e.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.12 }}
-                      onClick={() => { setExam(e.id); setStep("info"); }}
+                        onClick={() => { setExam(e.id); }}
                       whileHover={{ scale: 1.03, y: -4 }} whileTap={{ scale: 0.97 }}
                       className={`relative group rounded-3xl p-8 text-left bg-white/70 backdrop-blur-xl border border-white/30 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden ${e.border}`}
                     >
@@ -349,79 +346,15 @@ const ScoreCheckerPage = () => {
               </motion.div>
             )}
 
-            {/* ── STEP 1: NAME & PHONE ── */}
-            {exam === "CUET_PG" && step === "info" && !result && (
-              <motion.div key="info-step" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
+            {/* ── STEP 1: FILE UPLOAD ── */}
+            {exam === "CUET_PG" && !result && (
+              <motion.div key="cuet-upload" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
                 <div className="flex items-center gap-3 mb-8">
                   <button onClick={reset} className="text-gray-400 hover:text-purple-600 text-sm transition-colors">← Change Exam</button>
                   <span className="text-gray-200">|</span>
                   <span className="text-purple-600 text-sm font-semibold">📘 CUET PG</span>
-                </div>
-
-                <div className="max-w-md mx-auto bg-white/70 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl p-8">
-                  <p className="text-xs text-gray-400 font-bold tracking-[0.2em] uppercase mb-6 text-center">Step 1 of 2 — Your Details</p>
-
-                  {/* Name */}
-                  <div className="mb-5">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name <span className="text-red-400">*</span></label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Rahul Kumar"
-                      value={userName}
-                      onChange={(e) => setUserName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none text-sm text-gray-800 bg-white transition-all"
-                    />
-                  </div>
-
-                  {/* Phone */}
-                  <div className="mb-2">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Mobile Number <span className="text-red-400">*</span></label>
-                    <div className="flex gap-2">
-                      {/* India +91 fixed */}
-                      <div className="flex items-center gap-2 px-3 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold text-gray-600 select-none shrink-0">
-                        🇮🇳 +91
-                      </div>
-                      <input
-                        type="tel"
-                        maxLength={10}
-                        placeholder="10-digit number"
-                        value={userPhone}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, "").slice(0, 10);
-                          setUserPhone(val);
-                          if (phoneError) setPhoneError("");
-                        }}
-                        className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none text-sm text-gray-800 bg-white transition-all"
-                      />
-                    </div>
-                    {phoneError && <p className="text-red-500 text-xs mt-1.5">{phoneError}</p>}
-                  </div>
-
-                  <p className="text-xs text-gray-400 mb-6">Your details are only used to personalise your score card.</p>
-
-                  <motion.button
-                    onClick={handleInfoNext}
-                    disabled={!userName.trim() || userPhone.length !== 10}
-                    whileHover={userName.trim() && userPhone.length === 10 ? { scale: 1.03 } : {}}
-                    whileTap={userName.trim()  && userPhone.length === 10 ? { scale: 0.97 } : {}}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3.5 rounded-xl text-sm font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Continue to Upload →
-                  </motion.button>
-                </div>
-              </motion.div>
-            )}
-
-            {/* ── STEP 2: FILE UPLOAD ── */}
-            {exam === "CUET_PG" && step === "upload" && !result && (
-              <motion.div key="cuet-upload" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-                <div className="flex items-center gap-3 mb-8">
-                  <button onClick={() => setStep("info")} className="text-gray-400 hover:text-purple-600 text-sm transition-colors">← Back</button>
                   <span className="text-gray-200">|</span>
-                  <span className="text-purple-600 text-sm font-semibold">📘 CUET PG</span>
-                  <span className="text-gray-200">|</span>
-                  {/* show name they entered */}
-                  <span className="text-gray-500 text-sm">👤 {userName}</span>
+                  <span className="text-gray-500 text-sm">👤 {userName || "Logged-in user"}</span>
                 </div>
 
                 {/* steps strip */}

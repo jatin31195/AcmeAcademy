@@ -11,6 +11,9 @@ import {
   getUserTestAttempts,
   sendEmailOtp,
   verifyEmailOtp,
+  sendPasswordResetOtp,
+  verifyPasswordResetOtp,
+  resetPassword,
   adminUpdateVerificationProfile,
 } from "../controllers/authController.js";
 import { verifyUser } from "../middlewares/authMiddleware.js";
@@ -46,4 +49,7 @@ router.patch(
 router.get("/user/all-test", verifyUser, getUserTestAttempts);
 router.post("/send-otp", sendEmailOtp);
 router.post("/verify-otp", verifyEmailOtp);
+router.post("/forgot-password/send-otp", sendPasswordResetOtp);
+router.post("/forgot-password/verify-otp", verifyPasswordResetOtp);
+router.post("/forgot-password/reset", resetPassword);
 export default router;

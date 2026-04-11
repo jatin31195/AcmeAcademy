@@ -153,6 +153,150 @@ export const sendEmailOtp = async (req, res) => {
   }
 };
 
+export const sendPasswordResetOtp = async (req, res) => {
+  try {
+    cleanupExpiredOtpState();
+    const { email } = req.body;
+
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    if (!normalizedEmail) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await userService.getUserByEmail(normalizedEmail);
+    if (!user) {
+      return res.status(404).json({ message: "User not found with this email" });
+    }
+
+    const normalizedPhone = getPhoneFromIndianInput(user.phone || user.whatsapp);
+    if (!normalizedPhone) {
+      return res.status(400).json({ message: "No valid phone number found for this account" });
+    }
+
+    if (!process.env.TWO_FACTOR_API_KEY) {
+      return res.status(500).json({ message: "2Factor is not configured" });
+    }
+
+    const response = await axios.get(
+      `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/91${normalizedPhone}/AUTOGEN/${encodeURIComponent(
+        TWO_FACTOR_TEMPLATE
+      )}`
+    );
+
+    if (response?.data?.Status !== "Success" || !response?.data?.Details) {
+      return res.status(502).json({
+        message: response?.data?.Details || "Failed to send reset OTP",
+      });
+    }
+
+    const sessionId = String(response.data.Details);
+    otpSessionStore.set(sessionId, {
+      phone: normalizedPhone,
+      purpose: "reset-password",
+      userId: String(user._id),
+      email: normalizedEmail,
+      createdAt: Date.now(),
+    });
+
+    return res.status(200).json({
+      message: "Reset OTP sent successfully",
+      sessionId,
+      maskedPhone: normalizedPhone.replace(/(\d{2})\d{6}(\d{2})/, "$1******$2"),
+    });
+  } catch (err) {
+    console.error("Send reset OTP error:", err?.response?.data || err.message || err);
+    return res.status(500).json({ message: "Failed to send reset OTP" });
+  }
+};
+
+export const verifyPasswordResetOtp = async (req, res) => {
+  try {
+    cleanupExpiredOtpState();
+    const { sessionId, otp } = req.body;
+
+    if (!sessionId || !otp) {
+      return res.status(400).json({ message: "sessionId and otp are required" });
+    }
+
+    const storedSession = otpSessionStore.get(String(sessionId));
+    if (!storedSession || storedSession.purpose !== "reset-password") {
+      return res.status(400).json({ message: "OTP session not found or expired" });
+    }
+
+    if (!process.env.TWO_FACTOR_API_KEY) {
+      return res.status(500).json({ message: "2Factor is not configured" });
+    }
+
+    const response = await axios.get(
+      `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/VERIFY/${sessionId}/${String(
+        otp
+      ).trim()}`
+    );
+
+    const otpMatched =
+      response?.data?.Details === "OTP Matched" || response?.data?.Status === "Success";
+
+    if (!otpMatched) {
+      return res.status(400).json({ message: response?.data?.Details || "Invalid OTP" });
+    }
+
+    const resetToken = crypto.randomBytes(24).toString("hex");
+    verifiedOtpTokenStore.set(resetToken, {
+      phone: storedSession.phone,
+      purpose: "reset-password",
+      userId: storedSession.userId,
+      email: storedSession.email,
+      createdAt: Date.now(),
+    });
+
+    otpSessionStore.delete(String(sessionId));
+
+    return res.status(200).json({
+      verified: true,
+      message: "Reset OTP verified successfully",
+      resetToken,
+      maskedPhone: storedSession.phone.replace(/(\d{2})\d{6}(\d{2})/, "$1******$2"),
+    });
+  } catch (err) {
+    console.error("Verify reset OTP error:", err?.response?.data || err.message || err);
+    return res.status(500).json({ message: "Server error verifying reset OTP" });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    cleanupExpiredOtpState();
+    const { resetToken, newPassword } = req.body;
+
+    if (!resetToken || !newPassword || !String(newPassword).trim()) {
+      return res.status(400).json({ message: "resetToken and newPassword are required" });
+    }
+
+    const verifiedTokenEntry = verifiedOtpTokenStore.get(resetToken);
+    if (!verifiedTokenEntry || verifiedTokenEntry.purpose !== "reset-password") {
+      return res.status(403).json({ message: "Reset OTP is missing or expired" });
+    }
+
+    const updatedUser = await userService.updateUserPassword(
+      verifiedTokenEntry.userId,
+      String(newPassword).trim()
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    verifiedOtpTokenStore.delete(resetToken);
+
+    return res.status(200).json({
+      message: "Password reset successfully",
+    });
+  } catch (err) {
+    console.error("Reset password error:", err.message || err);
+    return res.status(500).json({ message: "Failed to reset password" });
+  }
+};
+
 export const verifyEmailOtp = async (req, res) => {
   try {
     cleanupExpiredOtpState();

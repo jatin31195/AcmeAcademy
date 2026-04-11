@@ -103,7 +103,7 @@ function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/refund" element={<RefundPolicy />} />
-        <Route path="/score-checker" element={<ScoreCheckerPage />} /> {/* ← ADD */}
+        <Route path="/score-checker" element={<ScoreCheckerPage />} />
 
         {/* Protected routes */}
         <Route path="/dashboard" element={<Dashboard />} />
@@ -115,7 +115,7 @@ function App() {
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
 
-      {!hideFloat && <ScoreCheckerFloat />}   {/* ← ADD — floats on all pages */}
+      {!hideFloat && <ScoreCheckerFloat />}
       {!hideFooter && <Footer />}
     </>
   );

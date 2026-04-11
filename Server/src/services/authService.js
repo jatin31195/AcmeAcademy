@@ -61,3 +61,12 @@ export const loginUserByPhone = async (phone) => {
 
   return { user, accessToken, refreshToken };
 };
+
+export const updateUserPassword = async (userId, password) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  return await User.findByIdAndUpdate(
+    userId,
+    { password: hashedPassword },
+    { new: true }
+  );
+};
