@@ -51,10 +51,9 @@ const cleanupExpiredOtpState = () => {
 
 const buildVerificationSummary = (userDoc) => {
   const p = userDoc.verificationProfile || {};
-  const acceptedBy = userDoc.fullname || userDoc.username || "Student";
+  const acceptedBy = userDoc.fullname || "Student";
   return {
     name: userDoc.fullname || "",
-    username: userDoc.username || "",
     mobile: userDoc.phone || p.mobile || userDoc.whatsapp || "",
     email: userDoc.email || "",
     address: p.address || "",
@@ -356,9 +355,7 @@ export const registerUser = async (req, res) => {
       const duplicateField = Object.keys(err?.keyValue || {})[0];
       const duplicateValue = duplicateField ? err.keyValue[duplicateField] : "";
       const fieldLabel =
-        duplicateField === "username"
-          ? "Username"
-          : duplicateField === "email"
+        duplicateField === "email"
             ? "Email"
             : duplicateField === "phone"
               ? "Phone"
@@ -433,7 +430,7 @@ export const loginUser = async (req, res) => {
       .json({
         message: "Login successful",
         userId: user._id,
-        username: user.username,
+        fullname: user.fullname,
       });
   } catch (err) {
     console.error("Login error:", err);
@@ -732,7 +729,7 @@ export const submitVerificationProfile = async (req, res) => {
       action: "VERIFICATION_TERMS_ACCEPTED",
       message: "Student accepted terms and submitted verification profile.",
       meta: {
-        acceptedBy: user.fullname || user.username || "Student",
+        acceptedBy: user.fullname || "Student",
         mobile: normalizedMobile,
         acceptedAt: acceptedAtSafe,
       },

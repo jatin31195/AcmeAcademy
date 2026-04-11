@@ -84,7 +84,6 @@ const UserProfileCard = () => {
     () =>
       user?.verificationSummary || {
         name: user?.fullname || "",
-        username: user?.username || "",
         mobile: user?.phone || user?.whatsapp || "",
         email: user?.email || "",
         address: "",
@@ -186,7 +185,7 @@ const UserProfileCard = () => {
   const handleDownloadProfile = () => {
     if (verificationSummary.downloadProfileCardDataUrl) {
       const link = document.createElement("a");
-      link.download = `${verificationSummary.username || "user"}-verification-profile.jpg`;
+      link.download = `${verificationSummary.name || "user"}-verification-profile.jpg`;
       link.href = verificationSummary.downloadProfileCardDataUrl;
       link.click();
       return;
@@ -244,7 +243,6 @@ const UserProfileCard = () => {
 
     const rows = [
       ["Student Name", verificationSummary.name || "-"],
-      ["Username", verificationSummary.username || "-"],
       ["Mobile", verificationSummary.mobile || "-"],
       ["Email", verificationSummary.email || "-"],
       ["Target Exam", verificationSummary.targetExam || "-"],
@@ -316,6 +314,7 @@ const UserProfileCard = () => {
       ctx.stroke();
 
       const acceptedBy = verificationSummary.name || verificationSummary.username || "Student";
+
       ctx.font = "600 12px Georgia, serif";
       ctx.fillStyle = "#065f46";
       ctx.fillText(
@@ -345,6 +344,7 @@ const UserProfileCard = () => {
           ctx.fillText(acceptedBy, 70, 686);
           const link = document.createElement("a");
           link.download = `${verificationSummary.username || "user"}-verification-profile.jpg`;
+          link.download = `${verificationSummary.name || "user"}-verification-profile.jpg`;
           link.href = canvas.toDataURL("image/jpeg", 0.92);
           link.click();
         };
@@ -353,7 +353,7 @@ const UserProfileCard = () => {
           ctx.fillStyle = "#1e1b4b";
           ctx.fillText(acceptedBy, 70, 686);
           const link = document.createElement("a");
-          link.download = `${verificationSummary.username || "user"}-verification-profile.jpg`;
+          link.download = `${verificationSummary.name || "user"}-verification-profile.jpg`;
           link.href = canvas.toDataURL("image/jpeg", 0.92);
           link.click();
         };
@@ -366,7 +366,7 @@ const UserProfileCard = () => {
       ctx.fillText(acceptedBy, 70, 686);
 
       const link = document.createElement("a");
-      link.download = `${verificationSummary.username || "user"}-verification-profile.jpg`;
+      link.download = `${verificationSummary.name || "user"}-verification-profile.jpg`;
       link.href = canvas.toDataURL("image/jpeg", 0.92);
       link.click();
     };
@@ -488,7 +488,6 @@ const UserProfileCard = () => {
             {isVerificationLocked ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                  <InfoItem icon={User} label="Username" value={verificationSummary.username} />
                   <InfoItem icon={User} label="Mobile" value={verificationSummary.mobile} />
                   <InfoItem icon={Target} label="Exam" value={verificationSummary.targetExam} />
                   <InfoItem icon={BookOpen} label="Year" value={verificationSummary.targetYear} />

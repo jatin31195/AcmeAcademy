@@ -10,18 +10,11 @@ export const getUserByPhone = async (phone) => {
   return await User.findOne({ phone });
 };
 
-export const getUserByUsername = async (username) => {
-  return await User.findOne({ username });
-};
-
 export const createUser = async ({
-  username,
   fullname,
   email,
   password,
-  dob,
   phone,
-  whatsapp,
 }) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const userData = {
@@ -30,10 +23,6 @@ export const createUser = async ({
     password: hashedPassword,
     phone,
   };
-
-  if (username && String(username).trim()) userData.username = String(username).trim();
-  if (dob) userData.dob = dob;
-  if (whatsapp !== undefined) userData.whatsapp = String(whatsapp || "").trim();
 
   const user = new User(userData);
   return await user.save();

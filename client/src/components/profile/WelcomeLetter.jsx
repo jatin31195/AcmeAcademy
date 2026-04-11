@@ -84,7 +84,7 @@ const WelcomeLetter = ({ data }) => {
               <tbody>
                 {[
                   ["Full Name", data.fullName],
-                  ["Username", data.username],
+                  ["Name", data.fullName],
                   ["Mobile", data.mobile],
                   ["Email", data.email],
                   ["Target Exams", data.targetExams.join(", ")],

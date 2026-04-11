@@ -56,7 +56,6 @@ const TERMS_PROMOTION_CLAUSE =
   "Students must complete their profile after enrolling by providing correct personal and academic details. If a student secures a good rank or selection in NIMCET or any MCA entrance exam, the institute may use the student's name, photo, rank, and result for promotional purposes on the website, social media, or other educational materials. By enrolling in the course, students agree to these profile completion and promotion terms.";
 
 const initialData = {
-  username: "",
   fullName: "",
   mobile: "",
   email: "",
@@ -166,12 +165,11 @@ const buildVerificationCardImage = async (data) => {
   };
 
   drawRow("Student Name", data.fullName, 52, 172, 430);
-  drawRow("Username", data.username, 514, 172, 434);
-  drawRow("Mobile", data.mobile, 52, 260, 430);
-  drawRow("Email", data.email, 514, 260, 434);
-  drawRow("Target Exam", data.targetExams?.[0] || "-", 52, 348, 280);
-  drawRow("Target Year", data.targetYear, 350, 348, 180);
-  drawRow("Course Enrolled", data.batchesEnrolled, 548, 348, 400);
+  drawRow("Mobile", data.mobile, 514, 172, 434);
+  drawRow("Email", data.email, 52, 260, 430);
+  drawRow("Target Exam", data.targetExams?.[0] || "-", 514, 260, 434);
+  drawRow("Target Year", data.targetYear, 52, 348, 280);
+  drawRow("Course Enrolled", data.batchesEnrolled, 350, 348, 320);
   drawRow("Address", data.address, 52, 436, 620);
 
   const passportImageDataUrl = await readFileAsDataUrl(data.passportPhoto);
@@ -193,7 +191,7 @@ const buildVerificationCardImage = async (data) => {
     }
   }
 
-  const acceptedBy = data.fullName || data.username || "Student";
+  const acceptedBy = data.fullName || "Student";
   const acceptedAt = data.acceptedAt ? new Date(data.acceptedAt) : new Date();
   const acceptedAtText = acceptedAt.toLocaleString("en-IN", {
     dateStyle: "medium",
@@ -727,7 +725,6 @@ const StudentProfilePage = () => {
     if (!user) return;
     setForm((prev) => ({
       ...prev,
-      username: user.username || "",
       fullName: user.fullname || "",
       email: user.email || "",
       mobile: user.phone || user.whatsapp || "",
@@ -783,7 +780,7 @@ const StudentProfilePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.fullName || !form.username || !form.mobile || !form.email) {
+    if (!form.fullName || !form.mobile || !form.email) {
       return showToast("Please fill all required personal details.");
     }
     if (!form.idFront || !form.idBack) {
@@ -939,12 +936,6 @@ const StudentProfilePage = () => {
       <form onSubmit={handleSubmit} style={{ maxWidth: 700, margin: "0 auto", padding: "24px 16px 48px" }}>
         <FormSection title="Personal Details" icon="👤" step={1}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 500, marginBottom: 4 }}>
-                Username <span style={{ color: "#e53e3e" }}>*</span>
-              </label>
-              <input style={inputStyle} value={form.username} onChange={(e) => set("username", e.target.value)} />
-            </div>
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 500, marginBottom: 4 }}>
                 Full Name <span style={{ color: "#e53e3e" }}>*</span>
