@@ -13,6 +13,7 @@ import {
   Clock3,
   Lock,
   Unlock,
+  Download,
   ExternalLink,
 } from "lucide-react";
 
@@ -128,6 +129,40 @@ const DocumentCard = ({ label, url }) => {
   );
 };
 
+const isPreviewableImage = (url) => {
+  const normalized = String(url || "").toLowerCase();
+  return (
+    normalized.startsWith("data:image/") ||
+    /\.(png|jpe?g|webp|gif|svg)(\?|$)/i.test(normalized)
+  );
+};
+
+const loadImage = (src) =>
+  new Promise((resolve) => {
+    if (!src) {
+      resolve(null);
+      return;
+    }
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+
+const getFileName = (url, fallbackLabel = "document") => {
+  if (!url) return fallbackLabel;
+  try {
+    const parsed = new URL(url);
+    const parts = parsed.pathname.split("/").filter(Boolean);
+    return parts[parts.length - 1] || fallbackLabel;
+  } catch {
+    const parts = String(url).split("/").filter(Boolean);
+    return parts[parts.length - 1] || fallbackLabel;
+  }
+};
+
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
@@ -232,6 +267,294 @@ const UsersPage = () => {
     } catch (err) {
       alert(err.message || "Unable to load user for edit");
     }
+  };
+
+  const downloadStudentDataCard = async () => {
+    if (!activeUser?._id) return;
+
+    const vp = activeUser.verificationProfile || {};
+    const documents = getDocumentItems(activeUser);
+    const documentPreviews = await Promise.all(
+      documents.map(async (document) => ({
+        ...document,
+        image: isPreviewableImage(document.url) ? await loadImage(document.url) : null,
+      }))
+    );
+
+    const overviewFields = [
+      ["Full Name", activeUser.fullname],
+      ["Username", activeUser.username],
+      ["Email", activeUser.email],
+      ["Phone", activeUser.phone],
+      ["WhatsApp", activeUser.whatsapp],
+      ["DOB", formatDate(activeUser.dob)],
+      ["Gender", activeUser.gender],
+      ["Father Name", activeUser.fatherName],
+      ["College", activeUser.collegeName],
+      ["Application ID", activeUser.nimcetApplicationId],
+      ["Target Exam", activeUser.targetExam],
+      ["Target Year", activeUser.targetYear],
+      ["Joined", formatDate(activeUser.createdAt)],
+      ["Last Updated", formatDate(activeUser.updatedAt)],
+    ];
+
+    const verificationFields = [
+      ["Verification Status", activeUser.verificationStatus],
+      ["Locked", activeUser.verificationProfileLocked ? "Yes" : "No"],
+      ["Submitted", activeUser.verificationProfileSubmitted ? "Yes" : "No"],
+      ["Submitted At", formatDate(activeUser.verificationSubmittedAt)],
+      ["Mobile", vp.mobile],
+      ["Address", vp.address],
+      ["Target Exam", vp.targetExam],
+      ["Target Year", vp.targetYear],
+      ["Course Enrolled", vp.courseEnrolled],
+      ["Batches Enrolled", vp.batchesEnrolled],
+      ["Father Name", vp.fatherName],
+      ["Mother Name", vp.motherName],
+      ["Parents Contact", vp.parentsContact],
+      ["City", vp.city],
+      ["State", vp.state],
+      ["ID Type", vp.idType],
+      ["Terms Accepted", vp.termsAccepted ? "Yes" : "No"],
+    ];
+
+    const overviewRows = Math.ceil(overviewFields.length / 2);
+    const verificationRows = Math.ceil(verificationFields.length / 2);
+    const docRows = Math.ceil(documentPreviews.length / 3);
+    const canvasWidth = 1600;
+    const canvasHeight = 360 + overviewRows * 96 + verificationRows * 96 + docRows * 228 + 220;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const bg = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+    bg.addColorStop(0, "#f8f7ff");
+    bg.addColorStop(0.45, "#f4f0ff");
+    bg.addColorStop(1, "#fff7fb");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    const topBar = ctx.createLinearGradient(0, 0, canvasWidth, 0);
+    topBar.addColorStop(0, "#7c3aed");
+    topBar.addColorStop(0.5, "#9333ea");
+    topBar.addColorStop(1, "#ec4899");
+    ctx.fillStyle = topBar;
+    ctx.fillRect(0, 0, canvasWidth, 10);
+
+    ctx.fillStyle = "rgba(124,58,237,0.06)";
+    for (let x = 50; x < canvasWidth; x += 42) {
+      for (let y = 50; y < canvasHeight; y += 42) {
+        ctx.beginPath();
+        ctx.arc(x, y, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    const drawSectionTitle = (title, subtitle, y) => {
+      ctx.font = "bold 20px Georgia, serif";
+      ctx.fillStyle = "#1e1b4b";
+      ctx.fillText(title, 70, y);
+      if (subtitle) {
+        ctx.font = "500 11px Georgia, serif";
+        ctx.fillStyle = "#6b7280";
+        ctx.fillText(subtitle, 70, y + 18);
+      }
+    };
+
+    const drawFieldCard = (label, value, x, y, width = 710) => {
+      ctx.fillStyle = "rgba(255,255,255,0.88)";
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, 74, 16);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(124,58,237,0.12)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, 74, 16);
+      ctx.stroke();
+
+      ctx.font = "600 10px Georgia, serif";
+      ctx.fillStyle = "#8b5cf6";
+      ctx.fillText(label.toUpperCase(), x + 16, y + 22);
+
+      ctx.font = "bold 18px Georgia, serif";
+      ctx.fillStyle = "#1e1b4b";
+      const text = String(value || "-");
+      const safeText = text.length > 34 ? `${text.slice(0, 31)}...` : text;
+      ctx.fillText(safeText, x + 16, y + 50);
+    };
+
+    const drawDocumentCard = (document, x, y, width = 460, height = 200) => {
+      ctx.fillStyle = "rgba(255,255,255,0.92)";
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, height, 18);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(124,58,237,0.14)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, height, 18);
+      ctx.stroke();
+
+      ctx.font = "700 12px Georgia, serif";
+      ctx.fillStyle = "#7c3aed";
+      ctx.fillText(document.label, x + 16, y + 24);
+
+      if (document.url && document.image) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(x + 16, y + 38, width - 32, 118, 14);
+        ctx.clip();
+        const image = document.image;
+        const imageRatio = image.width / image.height;
+        const frameRatio = (width - 32) / 118;
+        let drawWidth = width - 32;
+        let drawHeight = 118;
+        let drawX = x + 16;
+        let drawY = y + 38;
+
+        if (imageRatio > frameRatio) {
+          drawHeight = (width - 32) / imageRatio;
+          drawY = y + 38 + (118 - drawHeight) / 2;
+        } else {
+          drawWidth = 118 * imageRatio;
+          drawX = x + 16 + ((width - 32) - drawWidth) / 2;
+        }
+
+        ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = "#f8fafc";
+        ctx.beginPath();
+        ctx.roundRect(x + 16, y + 38, width - 32, 118, 14);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(148,163,184,0.45)";
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.roundRect(x + 16, y + 38, width - 32, 118, 14);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.font = "bold 26px Georgia, serif";
+        ctx.fillStyle = "#94a3b8";
+        ctx.fillText(document.url ? "PDF" : "—", x + 26, y + 104);
+
+        ctx.font = "600 11px Georgia, serif";
+        ctx.fillStyle = "#475569";
+        ctx.fillText(document.url ? getFileName(document.url, document.label) : "Not uploaded", x + 76, y + 100);
+
+        ctx.font = "500 10px Georgia, serif";
+        ctx.fillStyle = "#94a3b8";
+        ctx.fillText(document.url ? "Preview shown as file card" : "No document attached", x + 76, y + 118);
+      }
+    };
+
+    const logoImg = await loadImage("/logo.png");
+
+    ctx.fillStyle = "rgba(124,58,237,0.12)";
+    ctx.beginPath();
+    ctx.arc(80, 82, 34, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (logoImg) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(80, 82, 30, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(logoImg, 50, 52, 60, 60);
+      ctx.restore();
+    }
+
+    ctx.font = "bold 24px Georgia, serif";
+    ctx.fillStyle = "#1e1b4b";
+    ctx.fillText("ACME", 130, 70);
+    ctx.font = "600 12px Georgia, serif";
+    ctx.fillStyle = "#7c3aed";
+    ctx.fillText("ACADEMY", 130, 90);
+    ctx.font = "500 10px Georgia, serif";
+    ctx.fillStyle = "#9ca3af";
+    ctx.fillText("Admin Complete Student Data Export", 130, 108);
+
+    ctx.fillStyle = "rgba(124,58,237,0.08)";
+    ctx.beginPath();
+    ctx.roundRect(70, 130, 1460, 92, 22);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(124,58,237,0.14)";
+    ctx.beginPath();
+    ctx.roundRect(70, 130, 1460, 92, 22);
+    ctx.stroke();
+
+    ctx.font = "bold 28px Georgia, serif";
+    ctx.fillStyle = "#1e1b4b";
+    ctx.fillText(activeUser.fullname || activeUser.username || "Student", 100, 180);
+
+    ctx.font = "500 12px Georgia, serif";
+    ctx.fillStyle = "#6b7280";
+    ctx.fillText(activeUser.email || "-", 100, 205);
+
+    ctx.font = "600 12px Georgia, serif";
+    ctx.fillStyle = "#065f46";
+    ctx.fillText(`Verification Status: ${activeUser.verificationStatus || "pending"}`, 820, 180);
+    ctx.fillText(`Profile Lock: ${activeUser.verificationProfileLocked ? "Locked" : "Unlocked"}`, 820, 202);
+
+    let currentY = 260;
+    drawSectionTitle("Overview", "Primary account and profile data", currentY);
+    currentY += 34;
+
+    overviewFields.forEach((field, index) => {
+      const row = Math.floor(index / 2);
+      const col = index % 2;
+      const x = col === 0 ? 70 : 820;
+      const y = currentY + row * 96;
+      drawFieldCard(field[0], field[1], x, y);
+    });
+
+    currentY = currentY + overviewRows * 96 + 52;
+    drawSectionTitle("Verification", "Complete submitted profile snapshot", currentY);
+    currentY += 34;
+
+    verificationFields.forEach((field, index) => {
+      const row = Math.floor(index / 2);
+      const col = index % 2;
+      const x = col === 0 ? 70 : 820;
+      const y = currentY + row * 96;
+      drawFieldCard(field[0], field[1], x, y);
+    });
+
+    currentY = currentY + verificationRows * 96 + 60;
+    drawSectionTitle("Uploaded Documents", "Preview cards for images and file tiles for PDFs", currentY);
+    currentY += 34;
+
+    documentPreviews.forEach((document, index) => {
+      const row = Math.floor(index / 3);
+      const col = index % 3;
+      const x = 70 + col * 490;
+      const y = currentY + row * 228;
+      drawDocumentCard(document, x, y);
+    });
+
+    const footerY = currentY + docRows * 228 + 40;
+    ctx.fillStyle = "rgba(16,185,129,0.08)";
+    ctx.beginPath();
+    ctx.roundRect(70, footerY, 1460, 74, 18);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(16,185,129,0.22)";
+    ctx.beginPath();
+    ctx.roundRect(70, footerY, 1460, 74, 18);
+    ctx.stroke();
+
+    ctx.font = "600 12px Georgia, serif";
+    ctx.fillStyle = "#065f46";
+    ctx.fillText("Generated from admin student records with attached document previews.", 92, footerY + 30);
+    ctx.font = "500 11px Georgia, serif";
+    ctx.fillStyle = "#047857";
+    ctx.fillText(new Date().toLocaleString("en-IN", { dateStyle: "long", timeStyle: "short" }), 92, footerY + 50);
+
+    const link = document.createElement("a");
+    link.download = `${(activeUser.fullname || activeUser.username || "student").replace(/\s+/g, "_")}-complete-data-card.jpg`;
+    link.href = canvas.toDataURL("image/jpeg", 0.95);
+    link.click();
   };
 
   const onChange = (field, value) => {
@@ -410,16 +733,29 @@ const UsersPage = () => {
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
         <DialogContent className="max-w-6xl max-h-[92vh] overflow-y-auto border border-slate-700 bg-slate-950 text-slate-100 shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl">
-              {activeUser?.fullname || activeUser?.username || "User"}
-            </DialogTitle>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
-              <span className="inline-flex items-center gap-1"><Mail className="h-4 w-4" /> {activeUser?.email || "-"}</span>
-              <span className="inline-flex items-center gap-1"><Phone className="h-4 w-4" /> {activeUser?.phone || "-"}</span>
-              <span className="inline-flex items-center gap-1"><User className="h-4 w-4" /> {activeUser?.username || "-"}</span>
-              <Badge variant="outline" className={statusBadgeClass[activeUser?.verificationStatus] || ""}>
-                {activeUser?.verificationStatus || "pending"}
-              </Badge>
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div>
+                <DialogTitle className="text-2xl">
+                  {activeUser?.fullname || activeUser?.username || "User"}
+                </DialogTitle>
+                <div className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
+                  <span className="inline-flex items-center gap-1"><Mail className="h-4 w-4" /> {activeUser?.email || "-"}</span>
+                  <span className="inline-flex items-center gap-1"><Phone className="h-4 w-4" /> {activeUser?.phone || "-"}</span>
+                  <span className="inline-flex items-center gap-1"><User className="h-4 w-4" /> {activeUser?.username || "-"}</span>
+                  <Badge variant="outline" className={statusBadgeClass[activeUser?.verificationStatus] || ""}>
+                    {activeUser?.verificationStatus || "pending"}
+                  </Badge>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                onClick={downloadStudentDataCard}
+                className="gradient-primary text-primary-foreground shrink-0"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download Complete Data
+              </Button>
             </div>
           </DialogHeader>
 
