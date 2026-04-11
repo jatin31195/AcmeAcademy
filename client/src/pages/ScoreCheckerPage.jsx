@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import { useAuth } from "../AuthContext";
 import { Flask_URL } from "@/config";
+import answerKeyPdfUrl from "@/assets/question_answer_ids_separated_1.pdf";
 const FLASK_URL = Flask_URL;
 
 const EXAMS = [
@@ -31,62 +32,12 @@ const EXAMS = [
   },
 ];
 
-const ANSWER_KEY_STORAGE_KEY = "acme_score_checker_answer_key_cuet_pg_v1";
-
-const fileToDataUrl = (file) =>
-  new Promise((resolve) => {
-    if (!file) {
-      resolve("");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
-    reader.onerror = () => resolve("");
-    reader.readAsDataURL(file);
-  });
-
-const dataUrlToFile = async (dataUrl, fileName, mimeType) => {
-  const response = await fetch(dataUrl);
+const loadBundledAnswerKey = async () => {
+  const response = await fetch(answerKeyPdfUrl);
   const blob = await response.blob();
-  return new File([blob], fileName, { type: mimeType || blob.type || "application/pdf" });
-};
-
-const readStoredAnswerKey = async () => {
-  try {
-    const raw = localStorage.getItem(ANSWER_KEY_STORAGE_KEY);
-    if (!raw) return null;
-
-    const parsed = JSON.parse(raw);
-    if (!parsed?.dataUrl || !parsed?.name) return null;
-
-    return dataUrlToFile(parsed.dataUrl, parsed.name, parsed.type);
-  } catch {
-    return null;
-  }
-};
-
-const saveAnswerKeyToStorage = async (file) => {
-  try {
-    if (!file) {
-      localStorage.removeItem(ANSWER_KEY_STORAGE_KEY);
-      return;
-    }
-
-    const dataUrl = await fileToDataUrl(file);
-    if (!dataUrl) return;
-
-    localStorage.setItem(
-      ANSWER_KEY_STORAGE_KEY,
-      JSON.stringify({
-        name: file.name,
-        type: file.type,
-        dataUrl,
-      })
-    );
-  } catch {
-    // Ignore storage failures (private mode / quota)
-  }
+  return new File([blob], "question_answer_ids_separated_1.pdf", {
+    type: blob.type || "application/pdf",
+  });
 };
 
 // ── Scorecard download ────────────────────────────────────────────────────────
@@ -279,6 +230,7 @@ const ScoreCheckerPage = () => {
   const [exam,         setExam]         = useState(null);
   const [responseFile, setResponseFile] = useState(null);
   const [answerFile,   setAnswerFile]   = useState(null);
+  const [answerKeyReady, setAnswerKeyReady] = useState(false);
   const [loading,      setLoading]      = useState(false);
   const [error,        setError]        = useState(null);
   const [result,       setResult]       = useState(null);
@@ -288,9 +240,15 @@ const ScoreCheckerPage = () => {
     let mounted = true;
 
     const hydrateAnswerKey = async () => {
-      const storedAnswerKey = await readStoredAnswerKey();
-      if (!mounted || !storedAnswerKey) return;
-      setAnswerFile(storedAnswerKey);
+      try {
+        const bundledAnswerKey = await loadBundledAnswerKey();
+        if (!mounted) return;
+        setAnswerFile(bundledAnswerKey);
+        setAnswerKeyReady(true);
+      } catch {
+        if (!mounted) return;
+        setAnswerKeyReady(false);
+      }
     };
 
     hydrateAnswerKey();
@@ -308,7 +266,7 @@ const ScoreCheckerPage = () => {
     );
   }
 
-  const canSubmit = responseFile && answerFile && !loading;
+  const canSubmit = responseFile && answerFile && answerKeyReady && !loading;
   const userName = String(user?.fullname || user?.name || "").trim();
   const userPhone = String(user?.phone || user?.whatsapp || "").replace(/\D/g, "").slice(-10);
 
@@ -322,18 +280,13 @@ const ScoreCheckerPage = () => {
     setResponseFile(file);
   };
 
-  const handleAnswerFileChange = async (file) => {
-    setAnswerFile(file);
-    await saveAnswerKeyToStorage(file);
-  };
-
   const handleCheck = async () => {
     if (!canSubmit) return;
     setLoading(true); setError(null); setResult(null);
     try {
       const form = new FormData();
       form.append("response_sheet", responseFile);
-      form.append("answer_key",     answerFile);
+      form.append("answer_key", answerFile);
       form.append("user_name",      userName);
       form.append("user_phone",     userPhone ? `+91${userPhone}` : "");
       const res  = await fetch(`${FLASK_URL}/check`, { method: "POST", body: form });
@@ -454,10 +407,15 @@ const ScoreCheckerPage = () => {
                   ))}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
+                <div className="grid grid-cols-1 gap-5 mb-8">
                   <UploadZone label="Response Sheet PDF" icon="📄" file={responseFile} onFile={handleResponseFileChange} />
-                  <UploadZone label="Answer Key PDF"     icon="🔑" file={answerFile}   onFile={handleAnswerFileChange}   />
                 </div>
+
+                {answerFile && answerKeyReady && (
+                  <div className="mb-8 rounded-2xl border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-700">
+                    The official answer key is preloaded automatically. Only upload the response sheet.
+                  </div>
+                )}
 
                 <AnimatePresence>
                   {error && (
@@ -484,7 +442,7 @@ const ScoreCheckerPage = () => {
                       : "Calculate My Score →"
                     }
                   </motion.button>
-                  <p className="text-gray-400 text-xs mt-3">Files processed locally · Never stored</p>
+                  <p className="text-gray-400 text-xs mt-3">Response sheet only · Answer key is built in</p>
                 </div>
               </motion.div>
             )}
