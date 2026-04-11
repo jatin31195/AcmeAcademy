@@ -42,7 +42,10 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    // Email validation (enterprise-level)
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     if (!email || !password) return toast.error("Please enter email and password");
+    if (!emailRegex.test(email)) return toast.error("Please enter a valid email address");
 
     setLoading(true);
     try {
@@ -58,13 +61,11 @@ const Login = () => {
 
       toast.success("Welcome back!");
 
-      
       await Promise.all([
         login(data.user || { email }),
         fetchUser()
       ]);
 
-      
       navigate(from, { replace: true });
       window.scrollTo(0, 0);
 
