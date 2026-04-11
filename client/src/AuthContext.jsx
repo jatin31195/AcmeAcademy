@@ -28,7 +28,6 @@ export const AuthProvider = ({ children }) => {
         });
 
         if (refreshRes.ok) {
-          console.log("Access token refreshed successfully ✅");
           const { user: refreshedUser } = await refreshRes.json();
           setUser(refreshedUser);
           return refreshedUser;
