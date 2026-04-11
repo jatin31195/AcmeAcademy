@@ -799,7 +799,10 @@ const StudentProfilePage = () => {
       return showToast("Please select at least one target exam.");
     }
     if (!form.address || !form.targetYear || !form.batchesEnrolled) {
-      return showToast("Please fill address, target year and batch details.");
+      if (!form.targetYear) {
+        return showToast("Target year is missing in your profile. Please re-login or contact support.");
+      }
+      return showToast("Please fill address and batch details.");
     }
     if (!form.termsAccepted) {
       return showToast("Please accept the Terms and Conditions.");
@@ -1126,14 +1129,22 @@ const StudentProfilePage = () => {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 500, marginBottom: 4 }}>
-                Target Year <span style={{ color: "#e53e3e" }}>*</span>
+                Target Year
               </label>
-              <select style={inputStyle} value={form.targetYear} onChange={(e) => set("targetYear", e.target.value)}>
-                <option value="">Select year</option>
-                {YEARS.map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
+              {form.targetYear ? (
+                <input
+                  style={{ ...inputStyle, background: "#f8fafc", color: "#334155" }}
+                  value={form.targetYear}
+                  readOnly
+                />
+              ) : (
+                <select style={inputStyle} value={form.targetYear} onChange={(e) => set("targetYear", e.target.value)}>
+                  <option value="">Select year</option>
+                  {YEARS.map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              )}
             </div>
             <div>
               <label style={{ display: "block", fontSize: 13, fontWeight: 500, marginBottom: 4 }}>
