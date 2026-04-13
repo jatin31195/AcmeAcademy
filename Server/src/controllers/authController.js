@@ -1,3 +1,38 @@
+// OTP verification using 2Factor API (direct phone/otp, not session-based)
+export const verifyOtp = async (req, res) => {
+  try {
+    const { phone, otp } = req.body;
+    if (!phone || !otp) {
+      return res.status(400).json({ message: "phone and otp are required" });
+    }
+
+    if (!process.env.TWO_FACTOR_API_KEY) {
+      return res.status(500).json({ message: "2Factor is not configured" });
+    }
+
+    const normalizedPhone = getPhoneFromIndianInput(phone);
+    if (!normalizedPhone) {
+      return res.status(400).json({ message: "Valid 10-digit phone is required" });
+    }
+
+    // Call 2Factor API for OTP verification
+    const url = `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/VERIFY3/${normalizedPhone}/${String(otp).trim()}`;
+    const response = await axios.get(url);
+
+    if (response?.data?.Status !== "Success") {
+      return res.status(400).json({ message: response?.data?.Details || "OTP verification failed" });
+    }
+
+    return res.status(200).json({
+      verified: true,
+      message: "OTP verified successfully",
+      details: response.data,
+    });
+  } catch (err) {
+    console.error("2Factor OTP verify error:", err?.response?.data || err.message || err);
+    return res.status(500).json({ message: "Server error verifying OTP" });
+  }
+};
 import * as userService from "../services/authService.js";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
@@ -12,7 +47,7 @@ const otpSessionStore = new Map();
 const verifiedOtpTokenStore = new Map();
 const OTP_TTL_MS = 5 * 60 * 1000;
 const VERIFIED_TOKEN_TTL_MS = 15 * 60 * 1000;
-const TWO_FACTOR_TEMPLATE = process.env.TWO_FACTOR_TEMPLATE || "LoginSignup";
+const TWO_FACTOR_TEMPLATE = process.env.TWO_FACTOR_TEMPLATE || "OTP1";
 
 const toNumberOrNull = (value) => {
   const num = Number(value);
@@ -123,7 +158,7 @@ export const sendEmailOtp = async (req, res) => {
     }
 
     const response = await axios.get(
-      `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/91${normalizedPhone}/AUTOGEN/${encodeURIComponent(
+      `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/91${normalizedPhone}/AUTOGEN1/${encodeURIComponent(
         TWO_FACTOR_TEMPLATE
       )}`
     );
@@ -178,7 +213,7 @@ export const sendPasswordResetOtp = async (req, res) => {
     }
 
     const response = await axios.get(
-      `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/91${normalizedPhone}/AUTOGEN/${encodeURIComponent(
+      `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/91${normalizedPhone}/AUTOGEN1/${encodeURIComponent(
         TWO_FACTOR_TEMPLATE
       )}`
     );
