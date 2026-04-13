@@ -158,7 +158,7 @@ export const sendEmailOtp = async (req, res) => {
     }
 
     const response = await axios.get(
-      `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/91${normalizedPhone}/AUTOGEN1/${encodeURIComponent(
+      `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/91${normalizedPhone}/AUTOGEN/${encodeURIComponent(
         TWO_FACTOR_TEMPLATE
       )}`
     );
@@ -213,7 +213,7 @@ export const sendPasswordResetOtp = async (req, res) => {
     }
 
     const response = await axios.get(
-      `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/91${normalizedPhone}/AUTOGEN1/${encodeURIComponent(
+      `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/91${normalizedPhone}/AUTOGEN/${encodeURIComponent(
         TWO_FACTOR_TEMPLATE
       )}`
     );
