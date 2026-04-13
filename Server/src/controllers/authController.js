@@ -363,15 +363,14 @@ export const verifyEmailOtp = async (req, res) => {
     return res.status(500).json({ message: "Server error verifying OTP" });
   }
 };
+// Session-based OTP verification (same as verifyEmailOtp, as requested)
 export const verifyOtp = async (req, res) => {
   try {
-    const { phone, otp } = req.body;
-    if (!phone || !otp) {
-      return res.status(400).json({ message: "phone and otp are required" });
-    }
+    cleanupExpiredOtpState();
+    const { sessionId, otp, phone } = req.body;
 
-    if (!process.env.TWO_FACTOR_API_KEY) {
-      return res.status(500).json({ message: "2Factor is not configured" });
+    if (!sessionId || !otp || !phone) {
+      return res.status(400).json({ message: "sessionId, otp and phone are required" });
     }
 
     const normalizedPhone = getPhoneFromIndianInput(phone);
@@ -379,21 +378,53 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: "Valid 10-digit phone is required" });
     }
 
-    // Call 2Factor API for OTP verification
-    const url = `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/VERIFY3/${normalizedPhone}/${String(otp).trim()}`;
-    const response = await axios.get(url);
-
-    if (response?.data?.Status !== "Success") {
-      return res.status(400).json({ message: response?.data?.Details || "OTP verification failed" });
+    const storedSession = otpSessionStore.get(String(sessionId));
+    if (!storedSession) {
+      return res.status(400).json({ message: "OTP session not found or expired" });
     }
+
+    if (storedSession.phone !== normalizedPhone) {
+      return res.status(400).json({ message: "Phone does not match OTP session" });
+    }
+
+    if (Date.now() - storedSession.createdAt > OTP_TTL_MS) {
+      otpSessionStore.delete(String(sessionId));
+      return res.status(400).json({ message: "OTP expired" });
+    }
+
+    if (!process.env.TWO_FACTOR_API_KEY) {
+      return res.status(500).json({ message: "2Factor is not configured" });
+    }
+
+    const response = await axios.get(
+      `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/VERIFY/${sessionId}/${String(otp).trim()}`
+    );
+
+    const otpMatched =
+      response?.data?.Details === "OTP Matched" || response?.data?.Status === "Success";
+
+    if (!otpMatched) {
+      return res.status(400).json({ message: response?.data?.Details || "Invalid OTP" });
+    }
+
+    const verificationToken = crypto.randomBytes(24).toString("hex");
+    verifiedOtpTokenStore.set(verificationToken, {
+      phone: storedSession.phone,
+      purpose: storedSession.purpose,
+      createdAt: Date.now(),
+    });
+
+    otpSessionStore.delete(String(sessionId));
 
     return res.status(200).json({
       verified: true,
       message: "OTP verified successfully",
-      details: response.data,
+      verificationToken,
+      phone: storedSession.phone,
+      purpose: storedSession.purpose,
     });
   } catch (err) {
-    console.error("2Factor OTP verify error:", err?.response?.data || err.message || err);
+    console.error("Verify OTP error:", err?.response?.data || err.message || err);
     return res.status(500).json({ message: "Server error verifying OTP" });
   }
 };
