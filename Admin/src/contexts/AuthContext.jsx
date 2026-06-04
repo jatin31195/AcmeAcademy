@@ -7,7 +7,9 @@ const AuthContext = createContext(null);
 /* =======================
    AXIOS INSTANCE
 ======================= */
-const api = axios.create({
+// Exported so feature components can share the SAME instance and benefit from
+// the 401 auto-refresh interceptor below (instead of using bare fetch()).
+export const api = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
   timeout: 15000,
@@ -15,6 +17,9 @@ const api = axios.create({
 
 const INACTIVITY_MS = 30 * 60 * 1000;
 const REVALIDATE_MS = 5 * 60 * 1000;
+// Access token lives 15 min — refresh well before that so it never lapses
+// mid-session (the cause of the random logouts).
+const PROACTIVE_REFRESH_MS = 12 * 60 * 1000;
 
 export const AuthProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
@@ -126,6 +131,39 @@ export const AuthProvider = ({ children }) => {
     }, REVALIDATE_MS);
 
     return () => clearInterval(intervalId);
+  }, [admin]);
+
+  /* =======================
+     PROACTIVE TOKEN REFRESH
+     Renew the 15-min access token before it expires, and again whenever the
+     admin returns to the tab. Prevents the intermittent "logged out" issue.
+  ======================= */
+  useEffect(() => {
+    if (!admin) return;
+
+    const refresh = async () => {
+      try {
+        await api.post("/api/admin/auth/refresh");
+      } catch {
+        // If refresh fails (e.g. refresh token truly expired), revalidate;
+        // the interceptor / checkAuth will then sign out cleanly.
+        checkAuth();
+      }
+    };
+
+    const intervalId = setInterval(refresh, PROACTIVE_REFRESH_MS);
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", refresh);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", refresh);
+    };
   }, [admin]);
 
   /* =======================

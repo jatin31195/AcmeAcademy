@@ -10,7 +10,7 @@
  *  - On "Insert", we hand the parent a `$...$`-wrapped string in the portal's
  *    storage format. Storage format and student renderer are untouched.
  */
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -89,7 +89,7 @@ const TOOLBAR = [
 
 const EquationEditorDialog = ({ open, onOpenChange, onInsert, initialLatex = "" }) => {
   const [latex, setLatex] = useState(initialLatex);
-  const [api, setApi] = useState(null);
+  const apiRef = useRef(null);
 
   const preview = sanitizeForKatex(latex);
 
@@ -97,7 +97,7 @@ const EquationEditorDialog = ({ open, onOpenChange, onInsert, initialLatex = "" 
     const snippet = wrapInDollars(latex);
     if (snippet) onInsert?.(snippet);
     setLatex("");
-    api?.clear();
+    apiRef.current?.clear();
     onOpenChange(false);
   };
 
@@ -121,7 +121,7 @@ const EquationEditorDialog = ({ open, onOpenChange, onInsert, initialLatex = "" 
                     key={it.label}
                     type="button"
                     title={it.title}
-                    onClick={() => api?.insert(it.latex)}
+                    onClick={() => apiRef.current?.insert(it.latex)}
                     className="min-w-[44px] rounded-md border border-border bg-secondary px-2.5 py-1.5 text-sm font-medium transition hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-900/30"
                   >
                     {it.label}
@@ -140,7 +140,7 @@ const EquationEditorDialog = ({ open, onOpenChange, onInsert, initialLatex = "" 
           <MathField
             value={latex}
             onChange={setLatex}
-            apiRef={(a) => setApi(a)}
+            apiRef={apiRef}
             placeholder="e.g. \frac{a+b}{c}"
           />
         </div>

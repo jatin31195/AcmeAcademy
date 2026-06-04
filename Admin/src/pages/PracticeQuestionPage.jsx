@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from "react";
-import { Plus, Trash2, Pencil } from "lucide-react";
-import MathInsertButton from "@/components/math/MathInsertButton";
+import { useEffect, useState } from "react";
+import { Plus, Trash2, Pencil, Sigma } from "lucide-react";
+import KatexQuestionDialog from "@/components/math/KatexQuestionDialog";
 import { useParams } from "react-router-dom";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ const PracticeQuestionPage = () => {
   const [useNewTopic, setUseNewTopic] = useState(false);
 
   const [open, setOpen] = useState(false);
+  const [katexOpen, setKatexOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // ✅ NEW (edit support)
@@ -47,14 +48,6 @@ const PracticeQuestionPage = () => {
   const [currentId, setCurrentId] = useState(null);
 
   const [form, setForm] = useState(emptyForm);
-
-  // DOM refs for each text field so the math editor can insert at the caret.
-  const fieldRefs = useRef({});
-  const setFieldRef = (name) => (el) => {
-    if (el) fieldRefs.current[name] = el;
-  };
-  const setField = (name) => (next) =>
-    setForm((p) => ({ ...p, [name]: next }));
 
   /* ---------------- FETCH TOPICS ---------------- */
   const fetchTopics = async () => {
@@ -231,17 +224,28 @@ const renderWithMath = (text) => {
         title="Practice Questions"
         description="Manage questions under this practice category"
       >
-        <Button
-          className="bg-indigo-600 hover:bg-indigo-500 text-white"
-          onClick={() => {
-            setMode("create");
-            setForm(emptyForm);
-            setOpen(true);
-          }}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Question
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            className="bg-indigo-600 hover:bg-indigo-500 text-white"
+            onClick={() => {
+              setMode("create");
+              setForm(emptyForm);
+              setOpen(true);
+            }}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Question
+          </Button>
+
+          <Button
+            variant="outline"
+            className="border-indigo-300 text-indigo-700 hover:bg-indigo-50 dark:text-indigo-300"
+            onClick={() => setKatexOpen(true)}
+          >
+            <Sigma className="h-4 w-4 mr-2" />
+            Add Question (Equation Editor)
+          </Button>
+        </div>
       </PageHeader>
              {topics.length > 0 && (
         <div className="mb-4">
@@ -412,80 +416,39 @@ const renderWithMath = (text) => {
           </DialogHeader>
 
           <div className="grid gap-4">
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Question
-                </label>
-                <MathInsertButton
-                  getTarget={() => fieldRefs.current.question}
-                  value={form.question}
-                  onValueChange={setField("question")}
-                />
-              </div>
-              <Textarea
-                ref={setFieldRef("question")}
-                name="question"
-                placeholder="Enter the full question statement here"
-                value={form.question}
-                onChange={handleChange}
-              />
-            </div>
+            <Textarea
+  name="question"
+  placeholder="Enter the full question statement here"
+  value={form.question}
+  onChange={handleChange}
+/>
 
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-  <div className="space-y-1.5">
-    <div className="flex items-center justify-between">
-      <label className="text-xs font-medium text-muted-foreground">Option A</label>
-      <MathInsertButton getTarget={() => fieldRefs.current.optionA} value={form.optionA} onValueChange={setField("optionA")} label="fx" />
-    </div>
-    <Input
-      ref={setFieldRef("optionA")}
-      name="optionA"
-      placeholder="Option A"
-      value={form.optionA}
-      onChange={handleChange}
-    />
-  </div>
-  <div className="space-y-1.5">
-    <div className="flex items-center justify-between">
-      <label className="text-xs font-medium text-muted-foreground">Option B</label>
-      <MathInsertButton getTarget={() => fieldRefs.current.optionB} value={form.optionB} onValueChange={setField("optionB")} label="fx" />
-    </div>
-    <Input
-      ref={setFieldRef("optionB")}
-      name="optionB"
-      placeholder="Option B"
-      value={form.optionB}
-      onChange={handleChange}
-    />
-  </div>
-  <div className="space-y-1.5">
-    <div className="flex items-center justify-between">
-      <label className="text-xs font-medium text-muted-foreground">Option C</label>
-      <MathInsertButton getTarget={() => fieldRefs.current.optionC} value={form.optionC} onValueChange={setField("optionC")} label="fx" />
-    </div>
-    <Input
-      ref={setFieldRef("optionC")}
-      name="optionC"
-      placeholder="Option C"
-      value={form.optionC}
-      onChange={handleChange}
-    />
-  </div>
-  <div className="space-y-1.5">
-    <div className="flex items-center justify-between">
-      <label className="text-xs font-medium text-muted-foreground">Option D</label>
-      <MathInsertButton getTarget={() => fieldRefs.current.optionD} value={form.optionD} onValueChange={setField("optionD")} label="fx" />
-    </div>
-    <Input
-      ref={setFieldRef("optionD")}
-      name="optionD"
-      placeholder="Option D"
-      value={form.optionD}
-      onChange={handleChange}
-    />
-  </div>
+  <Input
+    name="optionA"
+    placeholder="Option A"
+    value={form.optionA}
+    onChange={handleChange}
+  />
+  <Input
+    name="optionB"
+    placeholder="Option B"
+    value={form.optionB}
+    onChange={handleChange}
+  />
+  <Input
+    name="optionC"
+    placeholder="Option C"
+    value={form.optionC}
+    onChange={handleChange}
+  />
+  <Input
+    name="optionD"
+    placeholder="Option D"
+    value={form.optionD}
+    onChange={handleChange}
+  />
             </div>
 
             <Input
@@ -550,25 +513,12 @@ const renderWithMath = (text) => {
 </div>
 
 
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Solution
-                </label>
-                <MathInsertButton
-                  getTarget={() => fieldRefs.current.solutionText}
-                  value={form.solutionText}
-                  onValueChange={setField("solutionText")}
-                />
-              </div>
-              <Textarea
-                ref={setFieldRef("solutionText")}
-                name="solutionText"
-                placeholder="Explain the solution step by step (optional but recommended)"
-                value={form.solutionText}
-                onChange={handleChange}
-              />
-            </div>
+            <Textarea
+  name="solutionText"
+  placeholder="Explain the solution step by step (optional but recommended)"
+  value={form.solutionText}
+  onChange={handleChange}
+/>
 
           </div>
 
@@ -586,6 +536,18 @@ const renderWithMath = (text) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ---------------- SEPARATE EQUATION-EDITOR POPUP ---------------- */}
+      <KatexQuestionDialog
+        open={katexOpen}
+        onOpenChange={setKatexOpen}
+        practiceTopicId={practiceTopicId}
+        topics={topics}
+        onSaved={() => {
+          fetchQuestions(selectedTopic);
+          fetchTopics();
+        }}
+      />
     </div>
   );
 };

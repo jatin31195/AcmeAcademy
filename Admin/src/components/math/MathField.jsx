@@ -23,22 +23,28 @@ const MathField = ({ value = "", onChange, apiRef, placeholder = "" }) => {
   const ref = useRef(null);
 
   // Expose a minimal imperative API to the parent (toolbar).
-  useImperativeHandle(apiRef, () => ({
-    insert: (latex, options) =>
-      ref.current?.insert(latex, {
-        focus: true,
-        feedback: false,
-        mode: "math",
-        insertionMode: "replaceSelection",
-        selectionMode: "placeholder",
-        ...options,
-      }),
-    focus: () => ref.current?.focus(),
-    clear: () => {
-      if (ref.current) ref.current.value = "";
-    },
-    getValue: () => ref.current?.value ?? "",
-  }));
+  // The empty deps array keeps the handle stable across renders — without it
+  // React recreates it every render, which (with a callback ref) loops forever.
+  useImperativeHandle(
+    apiRef,
+    () => ({
+      insert: (latex, options) =>
+        ref.current?.insert(latex, {
+          focus: true,
+          feedback: false,
+          mode: "math",
+          insertionMode: "replaceSelection",
+          selectionMode: "placeholder",
+          ...options,
+        }),
+      focus: () => ref.current?.focus(),
+      clear: () => {
+        if (ref.current) ref.current.value = "";
+      },
+      getValue: () => ref.current?.value ?? "",
+    }),
+    []
+  );
 
   // Keep the element's value in sync when the parent value changes externally.
   useEffect(() => {
