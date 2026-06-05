@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Plus, Trash2, Pencil, Sigma } from "lucide-react";
 import KatexQuestionDialog from "@/components/math/KatexQuestionDialog";
+import QuestionMathField from "@/components/math/QuestionMathField";
+import { renderWithMath, hasMath } from "@/lib/renderWithMath";
 import { useParams } from "react-router-dom";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 
 import {
@@ -41,7 +41,11 @@ const PracticeQuestionPage = () => {
 
   const [open, setOpen] = useState(false);
   const [katexOpen, setKatexOpen] = useState(false);
+  const [katexMode, setKatexMode] = useState("create");
+  const [katexQuestion, setKatexQuestion] = useState(null);
+  const [katexQuestionId, setKatexQuestionId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const fieldRefs = useRef({});
 
   // ✅ NEW (edit support)
   const [mode, setMode] = useState("create"); // create | edit
@@ -90,6 +94,22 @@ const PracticeQuestionPage = () => {
     setForm((p) => ({ ...p, [name]: value }));
   };
 
+  const setField = (name, value) => setForm((p) => ({ ...p, [name]: value }));
+
+  const openKatexCreate = () => {
+    setKatexMode("create");
+    setKatexQuestion(null);
+    setKatexQuestionId(null);
+    setKatexOpen(true);
+  };
+
+  const openKatexEdit = (q) => {
+    setKatexMode("edit");
+    setKatexQuestion(q);
+    setKatexQuestionId(q._id);
+    setKatexOpen(true);
+  };
+
   /* ---------------- OPEN EDIT ---------------- */
   const openEdit = (q) => {
     setMode("edit");
@@ -107,6 +127,7 @@ const PracticeQuestionPage = () => {
     });
 
     setUseNewTopic(false);
+    fieldRefs.current = {};
     setOpen(true);
   };
 
@@ -169,54 +190,19 @@ const PracticeQuestionPage = () => {
 
     fetchQuestions(selectedTopic);
   };
-const renderWithMath = (text) => {
-  if (!text) return "No question text";
-
-  const parts = text.split(/(\$[^$]+\$)/g);
-
-  return parts.map((part, i) => {
-    if (part.startsWith("$") && part.endsWith("$")) {
-      let math = part.slice(1, -1).trim();
-      const isMatrix = /\\begin\{bmatrix\}|\\begin\{pmatrix\}|\\\\/.test(math);
-
-      math = math
-        .replace(/\\\\/g, "\\")
-        .replace(/\\times/g, " \\times ")
-        .replace(/\\div/g, " \\div ")
-        .replace(/\\cdot/g, " \\cdot ")
-        .replace(/\\pm/g, " \\pm ")
-        .replace(/\\le/g, " \\le ")
-        .replace(/\\ge/g, " \\ge ")
-        .replace(/\\neq/g, " \\neq ")
-        .replace(/\\infty/g, " \\infty ")
-        .replace(/\\sqrt/g, " \\sqrt ")
-        .replace(/\\frac/g, " \\frac ")
-        .replace(/\\sum/g, " \\sum ")
-        .replace(/\\to/g, " \\to ")
-        .replace(/\\alpha/g, " \\alpha ")
-        .replace(/\\beta/g, " \\beta ")
-        .replace(/\\gamma/g, " \\gamma ")
-        .replace(/\\delta/g, " \\delta ")
-        .replace(/\\theta/g, " \\theta ")
-        .replace(/\\pi/g, " \\pi ")
-        .replace(/\\phi/g, " \\phi ")
-        .replace(/\\sigma/g, " \\sigma ")
-        .replace(/\\mu/g, " \\mu ")
-        .replace(/\\lambda/g, " \\lambda ")
-        .replace(/\{?(\d+)\s*\\choose\s*(\d+)\}?/g, "{$1 \\choose $2}")
-        .replace(/\{?(\d+)\s*[Cc]\s*(\d+)\}?/g, "{$1 \\choose $2}")
-        .replace(/\{?(\d+)\s*[Pp]\s*(\d+)\}?/g, "{$1 \\mathrm{P} $2}");
-
-      return isMatrix ? (
-        <BlockMath key={i} math={math} />
-      ) : (
-        <InlineMath key={i} math={math} />
-      );
-    }
-
-    return <span key={i}>{part}</span>;
-  });
-};
+  const MathPreviewSection = ({ label, text }) => {
+    if (!text) return null;
+    return (
+      <div>
+        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {label}
+        </p>
+        <div className="text-sm leading-relaxed">
+          {renderWithMath(text, <span className="text-muted-foreground">—</span>)}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="animate-fade-in">
@@ -230,6 +216,7 @@ const renderWithMath = (text) => {
             onClick={() => {
               setMode("create");
               setForm(emptyForm);
+              fieldRefs.current = {};
               setOpen(true);
             }}
           >
@@ -240,7 +227,7 @@ const renderWithMath = (text) => {
           <Button
             variant="outline"
             className="border-indigo-300 text-indigo-700 hover:bg-indigo-50 dark:text-indigo-300"
-            onClick={() => setKatexOpen(true)}
+            onClick={openKatexCreate}
           >
             <Sigma className="h-4 w-4 mr-2" />
             Add Question (Equation Editor)
@@ -309,6 +296,16 @@ const renderWithMath = (text) => {
 
       <Button
         size="sm"
+        variant="outline"
+        className="flex items-center gap-1 border-indigo-300 text-indigo-700 hover:bg-indigo-50 dark:text-indigo-300"
+        onClick={() => openKatexEdit(q)}
+      >
+        <Sigma className="h-4 w-4" />
+        Equation Editor
+      </Button>
+
+      <Button
+        size="sm"
         className="bg-red-600 hover:bg-red-500 text-white flex items-center gap-1"
         onClick={() => handleDelete(q._id)}
       >
@@ -330,13 +327,22 @@ const renderWithMath = (text) => {
       </p>
     </div>
 
-    {/* KaTeX Preview */}
+    {/* KaTeX Preview — question, options, answer, solution */}
     <details className="rounded-lg bg-muted/40 p-3">
       <summary className="cursor-pointer text-sm font-medium text-indigo-600">
         View Math Preview (KaTeX)
       </summary>
-      <div className="mt-3 text-sm leading-relaxed">
-        {renderWithMath(q.question)}
+      <div className="mt-3 space-y-3">
+        <MathPreviewSection label="Question" text={q.question} />
+        {q.options?.map((opt, i) => (
+          <MathPreviewSection
+            key={i}
+            label={`Option ${String.fromCharCode(65 + i)}`}
+            text={opt}
+          />
+        ))}
+        <MathPreviewSection label="Answer" text={q.answer} />
+        <MathPreviewSection label="Solution" text={q.solutionText} />
       </div>
     </details>
 
@@ -363,7 +369,7 @@ const renderWithMath = (text) => {
               <span className="font-semibold text-muted-foreground">
                 {String.fromCharCode(65 + i)}.
               </span>
-              <span>{opt}</span>
+              <span>{hasMath(opt) ? renderWithMath(opt) : opt}</span>
             </div>
           ))}
         </div>
@@ -377,8 +383,22 @@ const renderWithMath = (text) => {
           <span className="font-semibold text-green-700 dark:text-green-300">
             Correct Answer:
           </span>{" "}
-          {q.answer}
+          {hasMath(q.answer) ? renderWithMath(q.answer) : q.answer}
         </p>
+      </div>
+    )}
+
+    {/* Solution */}
+    {q.solutionText && (
+      <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3">
+        <p className="mb-1 text-sm font-semibold text-blue-700 dark:text-blue-300">
+          Solution
+        </p>
+        <div className="text-sm leading-relaxed">
+          {hasMath(q.solutionText)
+            ? renderWithMath(q.solutionText)
+            : q.solutionText}
+        </div>
       </div>
     )}
   </div>
@@ -416,47 +436,53 @@ const renderWithMath = (text) => {
           </DialogHeader>
 
           <div className="grid gap-4">
-            <Textarea
-  name="question"
-  placeholder="Enter the full question statement here"
-  value={form.question}
-  onChange={handleChange}
-/>
-
+            <QuestionMathField
+              label="Question"
+              name="question"
+              value={form.question}
+              onChange={setField}
+              fieldRefs={fieldRefs}
+              multiline
+            />
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-  <Input
-    name="optionA"
-    placeholder="Option A"
-    value={form.optionA}
-    onChange={handleChange}
-  />
-  <Input
-    name="optionB"
-    placeholder="Option B"
-    value={form.optionB}
-    onChange={handleChange}
-  />
-  <Input
-    name="optionC"
-    placeholder="Option C"
-    value={form.optionC}
-    onChange={handleChange}
-  />
-  <Input
-    name="optionD"
-    placeholder="Option D"
-    value={form.optionD}
-    onChange={handleChange}
-  />
+              <QuestionMathField
+                label="Option A"
+                name="optionA"
+                value={form.optionA}
+                onChange={setField}
+                fieldRefs={fieldRefs}
+              />
+              <QuestionMathField
+                label="Option B"
+                name="optionB"
+                value={form.optionB}
+                onChange={setField}
+                fieldRefs={fieldRefs}
+              />
+              <QuestionMathField
+                label="Option C"
+                name="optionC"
+                value={form.optionC}
+                onChange={setField}
+                fieldRefs={fieldRefs}
+              />
+              <QuestionMathField
+                label="Option D"
+                name="optionD"
+                value={form.optionD}
+                onChange={setField}
+                fieldRefs={fieldRefs}
+              />
             </div>
 
-            <Input
-  name="answer"
-  placeholder="Enter the correct answer (exact option text)"
-  value={form.answer}
-  onChange={handleChange}
-/>
+            <QuestionMathField
+              label="Correct Answer"
+              name="answer"
+              value={form.answer}
+              onChange={setField}
+              fieldRefs={fieldRefs}
+            />
     {/* ---------------- TOPIC ---------------- */}
 <div className="space-y-2">
   <label className="text-sm font-medium text-muted-foreground">
@@ -513,12 +539,14 @@ const renderWithMath = (text) => {
 </div>
 
 
-            <Textarea
-  name="solutionText"
-  placeholder="Explain the solution step by step (optional but recommended)"
-  value={form.solutionText}
-  onChange={handleChange}
-/>
+            <QuestionMathField
+              label="Solution"
+              name="solutionText"
+              value={form.solutionText}
+              onChange={setField}
+              fieldRefs={fieldRefs}
+              multiline
+            />
 
           </div>
 
@@ -543,6 +571,9 @@ const renderWithMath = (text) => {
         onOpenChange={setKatexOpen}
         practiceTopicId={practiceTopicId}
         topics={topics}
+        mode={katexMode}
+        questionId={katexQuestionId}
+        initialQuestion={katexQuestion}
         onSaved={() => {
           fetchQuestions(selectedTopic);
           fetchTopics();
