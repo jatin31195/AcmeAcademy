@@ -40,6 +40,14 @@ const Contact = () => {
   });
   const [loading, setLoading] = useState(false);
 
+  // 🔹 Scroll to a section when arriving with a hash (e.g. #free-counselling)
+  useEffect(() => {
+    if (window.location.hash) {
+      const el = document.querySelector(window.location.hash);
+      if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+    }
+  }, []);
+
   // 🔹 Handle Form Input
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -335,7 +343,7 @@ const  jsonLd={
       </section>
 
      
-      <section className="py-14 sm:py-20 bg-gray-50">
+      <section id="free-counselling" className="scroll-mt-24 py-14 sm:py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <motion.h2
             initial={{ opacity: 0, y: -20 }}
