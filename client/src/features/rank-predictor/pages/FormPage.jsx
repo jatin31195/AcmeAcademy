@@ -33,7 +33,7 @@ export default function FormPage() {
     e.preventDefault();
     setError("");
     if (!form.name.trim())               return setError("Full name is required.");
-    if (!form.regNo.startsWith("NIT2025"))return setError("Registration number must start with 'NIT2025'.");
+    if (!form.regNo.startsWith("NIT2026"))return setError("Registration number must start with 'NIT2026'.");
     const marks = parseInt(form.marks);
     if (isNaN(marks)||marks<0||marks>1000) return setError("Enter valid marks between 0 and 1000.");
     if (!form.city.trim())               return setError("City is required.");
@@ -177,10 +177,10 @@ export default function FormPage() {
               <div style={{ marginBottom:"16px" }}>
                 <label style={labelStyle}>Registration Number</label>
                 <input name="regNo" value={form.regNo} onChange={handleChange}
-                  required placeholder="NIT2025XXXXXX" style={inputStyle}
+                  required placeholder="NIT2026XXXXXX" style={inputStyle}
                   onFocus={e=>e.target.style.borderColor="#2563eb"}
                   onBlur={e=>e.target.style.borderColor=inputBdr}/>
-                <p style={{ marginTop:"5px", fontSize:"12px", color:txtMuted }}>Must begin with NIT2025</p>
+                <p style={{ marginTop:"5px", fontSize:"12px", color:txtMuted }}>Must begin with NIT2026</p>
               </div>
 
               {/* Row 3 */}
