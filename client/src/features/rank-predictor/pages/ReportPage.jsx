@@ -3,15 +3,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import marksToRank from "../data/marks_to_rank.json";
 import collegeCutoffs from "../data/college_cutoffs.json";
 import { generatePdf } from "../utils/generatePdf";
-import { getTieredColleges } from "../utils/collegeTiers.js";
+import { chanceFor } from "../utils/collegeTiers.js";
 import { reportNumber } from "../utils/branding.js";
 import { RP_BASE, ACME } from "../constants.js";
 import logo from "../assets/logo.png";
 
 import ReportHeader from "../components/ReportHeader.jsx";
 import ResultHero from "../components/ResultHero.jsx";
-import MatchSummary from "../components/MatchSummary.jsx";
-import CollegeTierSection from "../components/CollegeTierSection.jsx";
+import CollegeCard from "../components/CollegeCard.jsx";
 import ShareResult from "../components/ShareResult.jsx";
 
 import photo1 from "../assets/image1.jpg";
@@ -55,12 +54,24 @@ const ReportPage = () => {
   const colleges = { top: topC?.college || "Not Eligible", fallback: fallbackC?.college || "None" };
   /* ───────────────────────────────────────────────────────────── */
 
-  // PRESENTATION-ONLY: regroup existing cutoff bands into tiers.
-  const { dream, target, safe } = getTieredColleges(data.category, rr);
-  const counts = { dream: dream.length, target: target.length, safe: safe.length };
-  const eligibleCount = counts.dream + counts.target + counts.safe;
-  const previewColleges = [...safe, ...target, ...dream].slice(0, 3).map((c) => c.college);
-  const topCollege = (safe[0] || target[0] || dream[0])?.college || colleges.top;
+  // PRESENTATION-ONLY: pick the Top Eligible college + 1-2 Fallback options
+  // from the EXISTING cutoff bands. No prediction logic changed.
+  // Top Eligible = the band that contains the (optimistic) predicted rank;
+  // if the rank is better than every opening rank, the best college applies.
+  let topEligible = catList.find((c) => rr && c.low <= rr.rankLow && rr.rankLow <= c.high);
+  if (!topEligible && rr && catList.length && rr.rankLow < catList[0].low) topEligible = catList[0];
+
+  // Fallback = safer colleges whose opening rank is below the student's rank.
+  const fallbacks = rr ? catList.filter((c) => rr.rankLow < c.low).slice(0, 2) : [];
+
+  const topEligibleCard = topEligible ? { ...topEligible, tier: "Target", chance: chanceFor(topEligible, rr) } : null;
+  const fallbackCards = fallbacks.map((c) => ({ ...c, tier: "Safe", chance: chanceFor(c, rr) }));
+
+  // For the share card
+  const point = rr ? Math.round((rr.rankLow + rr.rankHigh) / 2) : null;
+  const eligibleCount = rr ? catList.filter((c) => point <= c.high).length : 0;
+  const previewColleges = [topEligible, ...fallbacks].filter(Boolean).slice(0, 3).map((c) => c.college);
+  const topCollege = topEligible?.college || colleges.top;
 
   const handleDownloadPDF = async () => {
     setPdfBusy(true);
@@ -86,24 +97,48 @@ const ReportPage = () => {
         {/* 1. HERO */}
         <ResultHero data={data} rr={rr} rankStr={rankStr} onDownloadPdf={handleDownloadPDF} pdfBusy={pdfBusy} />
 
-        {/* 2. MATCH SUMMARY */}
+        {/* 2. COLLEGE RECOMMENDATIONS — Top Eligible + Fallback */}
         <div style={card()}>
-          <MatchSummary counts={counts} />
-        </div>
+          <h2 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 800, color: "#0f172a" }}>
+            College Recommendations
+          </h2>
+          <p style={{ margin: "0 0 20px", fontSize: 13, color: "#64748b" }}>
+            Based on your predicted rank ({rankStr}) for the <strong style={{ color: "#0f172a" }}>{data.category}</strong> category
+          </p>
 
-        {/* 3. DREAM */}
-        <div style={card()}>
-          <CollegeTierSection tier="Dream" colleges={dream} category={data.category} />
-        </div>
+          {/* Top Eligible College */}
+          <h3 style={{ margin: "0 0 2px", fontSize: 15, fontWeight: 800, color: "#0f172a" }}>
+            Top Eligible College
+          </h3>
+          <p style={{ margin: "0 0 14px", fontSize: 12.5, color: "#64748b" }}>
+            The best college matched to your predicted rank
+          </p>
+          {topEligibleCard ? (
+            <div style={{ maxWidth: 360 }}>
+              <CollegeCard college={topEligibleCard} category={data.category} badge="Top Eligible" />
+            </div>
+          ) : (
+            <div style={emptyBox}>
+              Your predicted rank is outside the listed {data.category} cutoffs. Aim higher with ACME's NIMCET courses.
+            </div>
+          )}
 
-        {/* 4. TARGET */}
-        <div style={card()}>
-          <CollegeTierSection tier="Target" colleges={target} category={data.category} />
-        </div>
-
-        {/* 5. SAFE */}
-        <div style={card()}>
-          <CollegeTierSection tier="Safe" colleges={safe} category={data.category} />
+          {/* Fallback Option */}
+          <h3 style={{ margin: "26px 0 2px", fontSize: 15, fontWeight: 800, color: "#0f172a" }}>
+            Fallback Option
+          </h3>
+          <p style={{ margin: "0 0 14px", fontSize: 12.5, color: "#64748b" }}>
+            Safer backups you can confidently target, with your admission chances
+          </p>
+          {fallbackCards.length ? (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(250px,300px))", gap: 16 }}>
+              {fallbackCards.map((c) => (
+                <CollegeCard key={c.college} college={c} category={data.category} badge="Fallback" />
+              ))}
+            </div>
+          ) : (
+            <div style={emptyBox}>No safer fallback below your top college in this category.</div>
+          )}
         </div>
 
         {/* 6. PROFILE (+ existing achievers carousel) */}
@@ -190,5 +225,15 @@ function card() {
     boxShadow: "0 2px 16px rgba(0,0,0,0.05)",
   };
 }
+
+const emptyBox = {
+  border: "1px dashed #cbd5e1",
+  borderRadius: 14,
+  padding: "18px",
+  textAlign: "center",
+  color: "#64748b",
+  fontSize: 13,
+  background: "#f8fafc",
+};
 
 export default ReportPage;

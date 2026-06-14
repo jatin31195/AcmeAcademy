@@ -23,7 +23,7 @@ function initials(name = "") {
  * Display order: Image → Logo → Name → Tier badge → Chance badge → Location →
  * Seats → Fees → Avg Package → View Details.
  */
-const CollegeCard = ({ college, category }) => {
+const CollegeCard = ({ college, category, badge }) => {
   const meta = getCollegeMeta(college.college);
   const ts = TIER_STYLE[college.tier] || TIER_STYLE.Reach;
   const name = meta.name || college.college;
@@ -97,9 +97,9 @@ const CollegeCard = ({ college, category }) => {
         {/* dark gradient for badge legibility */}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,rgba(0,0,0,0.28),transparent 45%,transparent 75%,rgba(0,0,0,0.15))" }} />
 
-        {/* 4. TIER BADGE (top-left) */}
+        {/* 4. BADGE (top-left) — label override (e.g. "Top Eligible"/"Fallback") */}
         <span style={{ position: "absolute", top: 10, left: 10, background: "rgba(255,255,255,0.95)", color: ts.color, border: `1px solid ${ts.border}`, borderRadius: 999, padding: "4px 11px", fontSize: 11.5, fontWeight: 800, boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }}>
-          {ts.label}
+          {badge || ts.label}
         </span>
 
         {/* 5. CHANCE BADGE (top-right) */}

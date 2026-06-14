@@ -50,3 +50,14 @@ export function getTieredColleges(category, rr) {
     reach:  classified.filter((c) => c.tier === "Reach").sort((a, b) => a.low - b.low),
   };
 }
+
+/**
+ * Presentation-only admission chance (%) for a single college, derived from the
+ * existing predicted range vs the college's existing [low, high] band.
+ * Returns null when no range is available. No prediction logic is changed.
+ */
+export function chanceFor(college, rr) {
+  if (!rr || !college) return null;
+  const point = Math.round((rr.rankLow + rr.rankHigh) / 2);
+  return classify(college, point).chance;
+}
