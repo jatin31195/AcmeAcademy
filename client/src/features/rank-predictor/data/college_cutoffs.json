@@ -1,110 +1,494 @@
 {
   "General": [
-    { "college": "NIT Trichy", "low": 1, "high": 50 },
-    { "college": "MNNIT Allahabad", "low": 51, "high": 150 },
-    { "college": "NIT Warangal", "low": 151, "high": 200 },
-    { "college": "NIT Kurukshetra", "low": 201, "high": 280 },
-    { "college": "NIT Delhi", "low": 281, "high": 300 },
-    { "college": "NIT Bhopal", "low": 301, "high": 390 },
-    { "college": "NIT Jamshedpur", "low": 391, "high": 450 },
-    { "college": "NIT Patna", "low": 451, "high": 550 },
-    { "college": "NIT Raipur", "low": 551, "high": 650 },
-    { "college": "NIT Agartala", "low": 651, "high": 720 },
-    { "college": "NIT Meghalaya", "low": 721, "high": 800 },
-    { "college": "IIIT Bhopal", "low": 801, "high": 900 },
-    { "college": "IIIT Vadodara", "low": 901, "high": 980 },
-    { "college": "HCU", "low": 981, "high": 1050 },
-    { "college": "HBTU", "low": 1051, "high": 1200 },
-    { "college": "IPU", "low": 1201, "high": 1800 }
+    {
+      "college": "NIT Trichy",
+      "low": 1,
+      "high": 47
+    },
+    {
+      "college": "MNNIT Allahabad",
+      "low": 20,
+      "high": 149
+    },
+    {
+      "college": "NIT Warangal",
+      "low": 49,
+      "high": 180
+    },
+    {
+      "college": "NIT Kurukshetra",
+      "low": 41,
+      "high": 437
+    },
+    {
+      "college": "NIT Delhi",
+      "low": 55,
+      "high": 423
+    },
+    {
+      "college": "NIT Bhopal",
+      "low": 196,
+      "high": 342
+    },
+    {
+      "college": "NIT Jamshedpur",
+      "low": 311,
+      "high": 448
+    },
+    {
+      "college": "NIT Patna",
+      "low": 284,
+      "high": 821
+    },
+    {
+      "college": "NIT Raipur",
+      "low": 229,
+      "high": 631
+    },
+    {
+      "college": "NIT Agartala",
+      "low": 621,
+      "high": 762
+    },
+    {
+      "college": "NIT Meghalaya",
+      "low": 327,
+      "high": 758
+    },
+    {
+      "college": "IIIT Bhopal",
+      "low": 470,
+      "high": 836
+    },
+    {
+      "college": "IIIT Vadodara",
+      "low": 798,
+      "high": 1119
+    },
+    {
+      "college": "HCU",
+      "low": 981,
+      "high": 1050
+    },
+    {
+      "college": "HBTU",
+      "low": 1051,
+      "high": 1200
+    },
+    {
+      "college": "IPU",
+      "low": 1201,
+      "high": 1800
+    }
   ],
   "EWS": [
-    { "college": "NIT Trichy", "low": 1, "high": 110 },
-    { "college": "MNNIT Allahabad", "low": 111, "high": 200 },
-    { "college": "NIT Warangal", "low": 201, "high": 260 },
-    { "college": "NIT Kurukshetra", "low": 261, "high": 320 },
-    { "college": "NIT Delhi", "low": 321, "high": 350 },
-    { "college": "NIT Bhopal", "low": 351, "high": 410 },
-    { "college": "NIT Jamshedpur", "low": 411, "high": 480 },
-    { "college": "NIT Patna", "low": 481, "high": 580 },
-    { "college": "NIT Raipur", "low": 581, "high": 690 },
-    { "college": "NIT Agartala", "low": 691, "high": 780 },
-    { "college": "NIT Meghalaya", "low": 780, "high": 900 },
-    { "college": "IIIT Bhopal", "low": 901, "high": 1020 },
-    { "college": "IIIT Vadodara", "low": 1021, "high": 1150 },
-    { "college": "HCU", "low": 1151, "high": 1300 },
-    { "college": "HBTU", "low": 1301, "high": 1450 },
-    { "college": "IPU", "low": 1450, "high": 2000 }
+    {
+      "college": "NIT Trichy",
+      "low": 63,
+      "high": 105
+    },
+    {
+      "college": "MNNIT Allahabad",
+      "low": 150,
+      "high": 226
+    },
+    {
+      "college": "NIT Warangal",
+      "low": 214,
+      "high": 265
+    },
+    {
+      "college": "NIT Kurukshetra",
+      "low": 257,
+      "high": 545
+    },
+    {
+      "college": "NIT Delhi",
+      "low": 248,
+      "high": 619
+    },
+    {
+      "college": "NIT Bhopal",
+      "low": 348,
+      "high": 379
+    },
+    {
+      "college": "NIT Jamshedpur",
+      "low": 450,
+      "high": 534
+    },
+    {
+      "college": "NIT Patna",
+      "low": 541,
+      "high": 878
+    },
+    {
+      "college": "NIT Raipur",
+      "low": 620,
+      "high": 730
+    },
+    {
+      "college": "NIT Agartala",
+      "low": 733,
+      "high": 812
+    },
+    {
+      "college": "NIT Meghalaya",
+      "low": 758,
+      "high": 842
+    },
+    {
+      "college": "IIIT Bhopal",
+      "low": 784,
+      "high": 881
+    },
+    {
+      "college": "IIIT Vadodara",
+      "low": 939,
+      "high": 1146
+    },
+    {
+      "college": "HCU",
+      "low": 1151,
+      "high": 1300
+    },
+    {
+      "college": "HBTU",
+      "low": 1301,
+      "high": 1450
+    },
+    {
+      "college": "IPU",
+      "low": 1450,
+      "high": 2000
+    }
   ],
   "OBC": [
-    { "college": "NIT Trichy", "low": 1, "high": 120 },
-    { "college": "MNNIT Allahabad", "low": 121, "high": 220 },
-    { "college": "NIT Warangal", "low": 221, "high": 270 },
-    { "college": "NIT Kurukshetra", "low": 271, "high": 330 },
-    { "college": "NIT Delhi", "low": 331, "high": 350 },
-    { "college": "NIT Bhopal", "low": 351, "high": 410 },
-    { "college": "NIT Jamshedpur", "low": 411, "high": 480 },
-    { "college": "NIT Patna", "low": 481, "high": 580 },
-    { "college": "NIT Raipur", "low": 581, "high": 690 },
-    { "college": "NIT Agartala", "low": 691, "high": 780 },
-    { "college": "NIT Meghalaya", "low": 780, "high": 900 },
-    { "college": "IIIT Bhopal", "low": 901, "high": 1020 },
-    { "college": "IIIT Vadodara", "low": 1021, "high": 1150 },
-    { "college": "HCU", "low": 1151, "high": 1300 },
-    { "college": "HBTU", "low": 1301, "high": 1450 },
-    { "college": "IPU", "low": 1450, "high": 2000 }
+    {
+      "college": "NIT Trichy",
+      "low": 50,
+      "high": 141
+    },
+    {
+      "college": "MNNIT Allahabad",
+      "low": 152,
+      "high": 237
+    },
+    {
+      "college": "NIT Warangal",
+      "low": 184,
+      "high": 271
+    },
+    {
+      "college": "NIT Kurukshetra",
+      "low": 262,
+      "high": 604
+    },
+    {
+      "college": "NIT Delhi",
+      "low": 168,
+      "high": 572
+    },
+    {
+      "college": "NIT Bhopal",
+      "low": 341,
+      "high": 414
+    },
+    {
+      "college": "NIT Jamshedpur",
+      "low": 446,
+      "high": 523
+    },
+    {
+      "college": "NIT Patna",
+      "low": 522,
+      "high": 990
+    },
+    {
+      "college": "NIT Raipur",
+      "low": 617,
+      "high": 714
+    },
+    {
+      "college": "NIT Agartala",
+      "low": 732,
+      "high": 866
+    },
+    {
+      "college": "NIT Meghalaya",
+      "low": 828,
+      "high": 907
+    },
+    {
+      "college": "IIIT Bhopal",
+      "low": 787,
+      "high": 996
+    },
+    {
+      "college": "IIIT Vadodara",
+      "low": 937,
+      "high": 1199
+    },
+    {
+      "college": "HCU",
+      "low": 1151,
+      "high": 1300
+    },
+    {
+      "college": "HBTU",
+      "low": 1301,
+      "high": 1450
+    },
+    {
+      "college": "IPU",
+      "low": 1450,
+      "high": 2000
+    }
   ],
   "SC": [
-    { "college": "NIT Trichy", "low": 1, "high": 300 },
-    { "college": "MNNIT Allahabad", "low": 301, "high": 500 },
-    { "college": "NIT Warangal", "low": 501, "high": 800 },
-    { "college": "NIT Kurukshetra", "low": 801, "high": 1200 },
-    { "college": "NIT Delhi", "low": 1201, "high": 1300 },
-    { "college": "NIT Bhopal", "low": 1301, "high": 1450 },
-    { "college": "NIT Jamshedpur", "low": 1451, "high": 1600 },
-    { "college": "NIT Patna", "low": 1601, "high": 1800 },
-    { "college": "NIT Raipur", "low": 1801, "high": 2000 },
-    { "college": "NIT Agartala", "low": 2001, "high": 2200 },
-    { "college": "NIT Meghalaya", "low": 2201, "high": 2500 },
-    { "college": "IIIT Bhopal", "low": 2501, "high": 3000 },
-    { "college": "IIIT Vadodara", "low": 3001, "high": 4000 },
-    { "college": "HCU", "low": 4001, "high": 5000 },
-    { "college": "HBTU", "low": 5001, "high": 6000 },
-    { "college": "IPU", "low": 6001, "high": 8000 }
+    {
+      "college": "NIT Trichy",
+      "low": 92,
+      "high": 785
+    },
+    {
+      "college": "MNNIT Allahabad",
+      "low": 576,
+      "high": 1345
+    },
+    {
+      "college": "NIT Warangal",
+      "low": 886,
+      "high": 1272
+    },
+    {
+      "college": "NIT Kurukshetra",
+      "low": 788,
+      "high": 3090
+    },
+    {
+      "college": "NIT Delhi",
+      "low": 1259,
+      "high": 2778
+    },
+    {
+      "college": "NIT Bhopal",
+      "low": 1455,
+      "high": 2220
+    },
+    {
+      "college": "NIT Jamshedpur",
+      "low": 1768,
+      "high": 2409
+    },
+    {
+      "college": "NIT Patna",
+      "low": 1791,
+      "high": 4034
+    },
+    {
+      "college": "NIT Raipur",
+      "low": 2409,
+      "high": 2978
+    },
+    {
+      "college": "NIT Agartala",
+      "low": 2304,
+      "high": 3155
+    },
+    {
+      "college": "NIT Meghalaya",
+      "low": 2829,
+      "high": 3160
+    },
+    {
+      "college": "IIIT Bhopal",
+      "low": 1589,
+      "high": 3585
+    },
+    {
+      "college": "IIIT Vadodara",
+      "low": 3358,
+      "high": 4574
+    },
+    {
+      "college": "HCU",
+      "low": 4001,
+      "high": 5000
+    },
+    {
+      "college": "HBTU",
+      "low": 5001,
+      "high": 6000
+    },
+    {
+      "college": "IPU",
+      "low": 6001,
+      "high": 8000
+    }
   ],
   "ST": [
-    { "college": "NIT Trichy", "low": 1, "high": 500 },
-    { "college": "MNNIT Allahabad", "low": 501, "high": 800 },
-    { "college": "NIT Warangal", "low": 801, "high": 1000 },
-    { "college": "NIT Kurukshetra", "low": 1001, "high": 1500 },
-    { "college": "NIT Delhi", "low": 1501, "high": 1700 },
-    { "college": "NIT Bhopal", "low": 1701, "high": 1900 },
-    { "college": "NIT Jamshedpur", "low": 1901, "high": 2100 },
-    { "college": "NIT Patna", "low": 2101, "high": 2300 },
-    { "college": "NIT Raipur", "low": 2301, "high": 2500 },
-    { "college": "NIT Agartala", "low": 2501, "high": 2800 },
-    { "college": "NIT Meghalaya", "low": 2801, "high": 3500 },
-    { "college": "IIIT Bhopal", "low": 3501, "high": 4000 },
-    { "college": "IIIT Vadodara", "low": 4001, "high": 5000 },
-    { "college": "HCU", "low": 5001, "high": 6000 },
-    { "college": "HBTU", "low": 6001, "high": 6500 },
-    { "college": "IPU", "low": 6501, "high": 8500 }
+    {
+      "college": "NIT Trichy",
+      "low": 280,
+      "high": 2397
+    },
+    {
+      "college": "MNNIT Allahabad",
+      "low": 2563,
+      "high": 4002
+    },
+    {
+      "college": "NIT Warangal",
+      "low": 2557,
+      "high": 2708
+    },
+    {
+      "college": "NIT Kurukshetra",
+      "low": 3864,
+      "high": 6513
+    },
+    {
+      "college": "NIT Delhi",
+      "low": 4127,
+      "high": 6386
+    },
+    {
+      "college": "NIT Bhopal",
+      "low": 1955,
+      "high": 5862
+    },
+    {
+      "college": "NIT Jamshedpur",
+      "low": 1708,
+      "high": 4575
+    },
+    {
+      "college": "NIT Patna",
+      "low": 4967,
+      "high": 8746
+    },
+    {
+      "college": "NIT Raipur",
+      "low": 3788,
+      "high": 6582
+    },
+    {
+      "college": "NIT Agartala",
+      "low": 5459,
+      "high": 6833
+    },
+    {
+      "college": "NIT Meghalaya",
+      "low": 5915,
+      "high": 6956
+    },
+    {
+      "college": "IIIT Bhopal",
+      "low": 6298,
+      "high": 7771
+    },
+    {
+      "college": "IIIT Vadodara",
+      "low": 6386,
+      "high": 11742
+    },
+    {
+      "college": "HCU",
+      "low": 5001,
+      "high": 6000
+    },
+    {
+      "college": "HBTU",
+      "low": 6001,
+      "high": 6500
+    },
+    {
+      "college": "IPU",
+      "low": 6501,
+      "high": 8500
+    }
   ],
   "PWD": [
-    { "college": "NIT Trichy", "low": 1, "high": 600 },
-    { "college": "MNNIT Allahabad", "low": 601, "high": 850 },
-    { "college": "NIT Warangal", "low": 851, "high": 1000 },
-    { "college": "NIT Kurukshetra", "low": 1001, "high": 1500 },
-    { "college": "NIT Delhi", "low": 1501, "high": 1700 },
-    { "college": "NIT Bhopal", "low": 1701, "high": 1900 },
-    { "college": "NIT Jamshedpur", "low": 1901, "high": 2100 },
-    { "college": "NIT Patna", "low": 2101, "high": 2300 },
-    { "college": "NIT Raipur", "low": 2301, "high": 2500 },
-    { "college": "NIT Agartala", "low": 2501, "high": 2800 },
-    { "college": "NIT Meghalaya", "low": 2801, "high": 3500 },
-    { "college": "IIIT Bhopal", "low": 3501, "high": 4000 },
-    { "college": "IIIT Vadodara", "low": 4001, "high": 5000 },
-    { "college": "HCU", "low": 5001, "high": 6000 },
-    { "college": "HBTU", "low": 6001, "high": 6500 },
-    { "college": "IPU", "low": 6501, "high": 9000 }
+    {
+      "college": "NIT Trichy",
+      "low": 169,
+      "high": 8058
+    },
+    {
+      "college": "MNNIT Allahabad",
+      "low": 1121,
+      "high": 9232
+    },
+    {
+      "college": "NIT Warangal",
+      "low": 1481,
+      "high": 4808
+    },
+    {
+      "college": "NIT Kurukshetra",
+      "low": 3039,
+      "high": 8616
+    },
+    {
+      "college": "NIT Delhi",
+      "low": 2167,
+      "high": 11930
+    },
+    {
+      "college": "NIT Bhopal",
+      "low": 3616,
+      "high": 10349
+    },
+    {
+      "college": "NIT Jamshedpur",
+      "low": 5870,
+      "high": 9620
+    },
+    {
+      "college": "NIT Patna",
+      "low": 9620,
+      "high": 10693
+    },
+    {
+      "college": "NIT Raipur",
+      "low": 4508,
+      "high": 9709
+    },
+    {
+      "college": "NIT Agartala",
+      "low": 2501,
+      "high": 2800
+    },
+    {
+      "college": "NIT Meghalaya",
+      "low": 2801,
+      "high": 3500
+    },
+    {
+      "college": "IIIT Bhopal",
+      "low": 11457,
+      "high": 11457
+    },
+    {
+      "college": "IIIT Vadodara",
+      "low": 9780,
+      "high": 12002
+    },
+    {
+      "college": "HCU",
+      "low": 5001,
+      "high": 6000
+    },
+    {
+      "college": "HBTU",
+      "low": 6001,
+      "high": 6500
+    },
+    {
+      "college": "IPU",
+      "low": 6501,
+      "high": 9000
+    }
   ]
 }

@@ -60,7 +60,9 @@ const Navbar = () => {
       name: "Exam",
       dropdown: [
         { name: "Exam Pattern",   path: "/exam-pattern" },
-        { name: "Score Analyser", path: "/score-checker" }]
+        { name: "Score Analyser", path: "/score-checker" },
+        { name: "Rank Predictor", path: "/nimcet-rank-predictor" },
+      ]
     },
     { name: "Contact",        path: "/contact-acme-academy" },
   ];

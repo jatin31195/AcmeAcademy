@@ -127,7 +127,7 @@ function App() {
         <Route path="/score-checker" element={<ScoreCheckerPage />} />
 
         {/* ── NIMCET Rank Predictor ── */}
-        {/* <Route
+        <Route
           path={RP_BASE}
           element={
             <Suspense fallback={<RPLoader />}>
@@ -162,7 +162,7 @@ function App() {
               <RankProtectedRoute><RPAdminPage /></RankProtectedRoute>
             </Suspense>
           }
-        /> */}
+        />
 
         {/* Protected routes */}
         <Route path="/dashboard" element={<Dashboard />} />
