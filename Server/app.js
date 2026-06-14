@@ -18,6 +18,8 @@ import noticeRoute from "./src/routes/noticeRoute.js"
 import practiceTopicRoutes from "./src/routes/practiceTopicRoutes.js";
 import homeCourseRoute from "./src/routes/homeCourseRoute.js"
 import sitemapRoutes from "./src/routes/sitemap.js";
+import rankPredictorOtpRoutes from "./src/routes/rankpredictorOtp.js";
+import rankPredictorConfigRoutes from "./src/routes/rankpredictorRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 const app = express();
@@ -33,6 +35,7 @@ const allowedOrigins = [
   "https://acmeacademy.onrender.com",
   "https://acme-academy-rd7v.vercel.app",
   "http://localhost:5173",
+  "http://localhost:5174",
   "http://127.0.0.1:5173",
 ];
 
@@ -140,6 +143,9 @@ app.use("/api/practice-set", practiceSetRoutes);
 app.use("/api/practice-topic", practiceTopicRoutes);
 app.use("/api/get-notices",noticeRoute)
 app.use("/api/get-course",homeCourseRoute)
+// NIMCET Rank Predictor (phone OTP via 2factor.in + Firebase client config)
+app.use("/api/otp", rankPredictorOtpRoutes);
+app.use("/api/config", rankPredictorConfigRoutes);
 app.use(express.static(path.join(__dirname, "./public")));
 app.use("/", sitemapRoutes);
 app.use("/api/admin",adminRoutes);
