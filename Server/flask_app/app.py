@@ -872,6 +872,10 @@ NIMCET_HEADER = [
     "Computer Correct", "Computer Wrong", "Computer Score",
     "English Correct", "English Wrong", "English Score",
     "Total Correct", "Total Wrong", "Total Unattempted",
+    # Phone is appended at the END so existing sheet columns/rows stay aligned.
+    # (If the live sheet already has the old 19-column header, add a "Phone"
+    #  label in the next empty column — data is written there regardless.)
+    "Phone",
 ]
 
 
@@ -937,6 +941,8 @@ def save_nimcet_to_sheet(user_name, user_phone, app_no, name, stats, total,
             stats["Computer"]["correct"], stats["Computer"]["wrong"], stats["Computer"]["score"],
             stats["English"]["correct"], stats["English"]["wrong"], stats["English"]["score"],
             total_correct, total_wrong, total_unattempted,
+            # OTP-verified mobile number from the Score Checker (last column).
+            user_phone or "N/A",
         ],
         value_input_option="RAW",
     )
@@ -970,7 +976,7 @@ def nimcet_test_sheets():
         diagnostics["header"] = "✅ present"
         sheet.append_row(
             [datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-             "TEST-APP", "Test Candidate", 0] + [0] * 15,
+             "TEST-APP", "Test Candidate", 0] + [0] * 15 + ["TEST-PHONE"],
             value_input_option="RAW",
         )
         diagnostics["test_row"] = "✅ written (you can delete it)"
