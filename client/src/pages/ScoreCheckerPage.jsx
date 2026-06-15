@@ -3,9 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import { useAuth } from "../AuthContext";
-import { Flask_URL } from "@/config";
+import { Flask_URL, BASE_URL } from "@/config";
 import answerKeyPdfUrl from "@/assets/question_answer_ids_separated_1.pdf";
 const FLASK_URL = Flask_URL;
+// Node backend (Express) that proxies 2Factor OTP — same endpoints the
+// NIMCET Rank Predictor uses: POST /api/otp/send and POST /api/otp/verify.
+const NODE_URL = BASE_URL;
 
 const EXAMS = [
   {
@@ -245,6 +248,17 @@ const ScoreCheckerPage = () => {
   const [result,       setResult]       = useState(null);
   const [filter,       setFilter]       = useState("All");
 
+  // ── NIMCET phone-OTP gate (identical flow to the Rank Predictor) ──
+  // The user must verify a mobile number via 2Factor before the response-sheet
+  // upload step is shown. Verification is per-session (sessionId from 2Factor).
+  const [otpPhone,     setOtpPhone]     = useState("");
+  const [otpSessionId, setOtpSessionId] = useState("");
+  const [otpCode,      setOtpCode]      = useState("");
+  const [otpStep,      setOtpStep]      = useState("phone"); // "phone" | "otp"
+  const [otpVerified,  setOtpVerified]  = useState(false);
+  const [otpError,     setOtpError]     = useState("");
+  const [otpLoading,   setOtpLoading]   = useState(false);
+
   useEffect(() => {
     let mounted = true;
 
@@ -283,10 +297,54 @@ const ScoreCheckerPage = () => {
     setExam(null);
     setResponseFile(null);
     setResult(null); setError(null); setFilter("All");
+    // Reset the NIMCET OTP gate so switching exams starts verification fresh.
+    setOtpPhone(""); setOtpSessionId(""); setOtpCode("");
+    setOtpStep("phone"); setOtpVerified(false); setOtpError(""); setOtpLoading(false);
   };
 
   const handleResponseFileChange = (file) => {
     setResponseFile(file);
+  };
+
+  // ── Send OTP (POST /api/otp/send) — mirrors Rank Predictor's sendOtp ──
+  const sendNimcetOtp = async () => {
+    setOtpError("");
+    if (!/^\d{10}$/.test(otpPhone)) { setOtpError("Enter a valid 10-digit mobile number."); return; }
+    setOtpLoading(true);
+    try {
+      const res  = await fetch(`${NODE_URL}/api/otp/send`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: otpPhone }),
+      });
+      const data = await res.json().catch(() => ({}));
+      // Distinguish throttling / backend errors from a genuine provider failure.
+      if (res.status === 429) { setOtpError(data.message || "Too many OTP requests. Please wait a few minutes."); return; }
+      if (!res.ok)            { setOtpError(data.message || data.Details || "Failed to send OTP."); return; }
+      if (data.Status === "Success") { setOtpSessionId(data.Details); setOtpStep("otp"); }
+      else setOtpError(data.Details || "Failed to send OTP.");
+    } catch { setOtpError("Network error — please try again."); }
+    finally { setOtpLoading(false); }
+  };
+
+  // ── Verify OTP (POST /api/otp/verify) — mirrors Rank Predictor's verifyOtp ──
+  // phone is sent so the backend's per-phone verify limiter can key on it.
+  const verifyNimcetOtp = async () => {
+    setOtpError("");
+    if (!otpCode || otpCode.length < 4) { setOtpError("Enter the OTP you received."); return; }
+    setOtpLoading(true);
+    try {
+      const res  = await fetch(`${NODE_URL}/api/otp/verify`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: otpSessionId, otp: otpCode, phone: otpPhone }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 429) { setOtpError(data.message || "Too many attempts. Please wait a moment and try again."); return; }
+      if (!res.ok)            { setOtpError(data.message || data.Details || "Could not verify OTP. Please try again."); return; }
+      // Only a real 2Factor "Success" unlocks the upload step.
+      if (data.Status === "Success") { setOtpVerified(true); }
+      else setOtpError(data.Details || "Invalid OTP. Please check and try again.");
+    } catch { setOtpError("Network error — please try again."); }
+    finally { setOtpLoading(false); }
   };
 
   const handleCheck = async () => {
@@ -314,7 +372,9 @@ const ScoreCheckerPage = () => {
       const form = new FormData();
       form.append("response_sheet", responseFile);
       form.append("user_name",  userName);
-      form.append("user_phone", userPhone ? `+91${userPhone}` : "");
+      // Prefer the OTP-verified number; fall back to the logged-in user's phone.
+      const checkPhone = otpPhone || userPhone;
+      form.append("user_phone", checkPhone ? `+91${checkPhone}` : "");
       const res  = await fetch(`${FLASK_URL}/nimcet/check`, { method: "POST", body: form });
       const data = await res.json();
       if (data.error) setError(data.error);
@@ -442,15 +502,107 @@ const ScoreCheckerPage = () => {
               </motion.div>
             )}
 
-            {/* ── NIMCET: FILE UPLOAD ── */}
-            {exam === "NIMCET" && !result && (
+            {/* ── NIMCET: PHONE + OTP VERIFICATION (gate before upload) ── */}
+            {/* Same logic as the Rank Predictor: send OTP → verify → unlock upload. */}
+            {exam === "NIMCET" && !otpVerified && !result && (
+              <motion.div key="nimcet-otp" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
+                <div className="flex items-center gap-3 mb-8">
+                  <button onClick={reset} className="text-gray-400 hover:text-pink-600 text-sm transition-colors">← Change Exam</button>
+                  <span className="text-gray-200">|</span>
+                  <span className="text-pink-600 text-sm font-semibold">🏛️ NIMCET</span>
+                  <span className="text-gray-200">|</span>
+                  <span className="text-gray-500 text-sm">📱 Verify mobile to continue</span>
+                </div>
+
+                <div className="max-w-md mx-auto rounded-3xl bg-white/70 backdrop-blur-xl border border-white/30 shadow-xl p-8">
+                  <div className="text-center mb-6">
+                    <div className="text-4xl mb-3">{otpStep === "phone" ? "📱" : "🔐"}</div>
+                    <h2 className="text-xl font-extrabold text-gray-800 mb-1">
+                      {otpStep === "phone" ? "Verify Your Mobile Number" : "Enter OTP"}
+                    </h2>
+                    <p className="text-xs text-gray-500">
+                      {otpStep === "phone"
+                        ? "We'll send a one-time password to confirm it's you before you upload your response sheet."
+                        : `OTP sent to +91 ${otpPhone}`}
+                    </p>
+                  </div>
+
+                  {otpStep === "phone" ? (
+                    <>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Mobile Number</label>
+                      <div className="flex rounded-xl border-2 border-gray-200 overflow-hidden focus-within:border-pink-400 transition-colors mb-5 bg-white">
+                        <span className="px-4 py-3 bg-gray-50 border-r-2 border-gray-200 text-sm font-bold text-gray-500 select-none">+91</span>
+                        <input
+                          type="tel" inputMode="numeric" value={otpPhone}
+                          onChange={(e) => setOtpPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                          onKeyDown={(e) => e.key === "Enter" && sendNimcetOtp()}
+                          placeholder="98765 43210" maxLength={10}
+                          className="flex-1 px-4 py-3 outline-none text-base font-medium text-gray-800 bg-transparent"
+                        />
+                      </div>
+                      <motion.button
+                        onClick={sendNimcetOtp} disabled={otpLoading}
+                        whileHover={otpLoading ? {} : { scale: 1.02 }} whileTap={otpLoading ? {} : { scale: 0.98 }}
+                        className="w-full bg-gradient-to-r from-pink-600 to-rose-500 text-white py-3.5 rounded-full text-base font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {otpLoading
+                          ? <span className="flex items-center gap-2 justify-center"><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Sending…</span>
+                          : "Send OTP →"}
+                      </motion.button>
+                    </>
+                  ) : (
+                    <>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Enter OTP</label>
+                      <input
+                        type="text" inputMode="numeric" value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        onKeyDown={(e) => e.key === "Enter" && verifyNimcetOtp()}
+                        placeholder="------" maxLength={6}
+                        className="w-full px-4 py-4 rounded-xl border-2 border-gray-200 focus:border-pink-400 outline-none text-center text-2xl font-bold tracking-[0.5em] font-mono text-gray-800 mb-5 bg-white transition-colors"
+                      />
+                      <motion.button
+                        onClick={verifyNimcetOtp} disabled={otpLoading}
+                        whileHover={otpLoading ? {} : { scale: 1.02 }} whileTap={otpLoading ? {} : { scale: 0.98 }}
+                        className="w-full bg-gradient-to-r from-pink-600 to-rose-500 text-white py-3.5 rounded-full text-base font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {otpLoading
+                          ? <span className="flex items-center gap-2 justify-center"><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Verifying…</span>
+                          : "Verify & Continue →"}
+                      </motion.button>
+                      <button
+                        onClick={() => { setOtpStep("phone"); setOtpCode(""); setOtpError(""); }}
+                        className="w-full mt-3 text-pink-600 text-sm font-semibold hover:underline"
+                      >
+                        ← Change mobile number
+                      </button>
+                    </>
+                  )}
+
+                  <AnimatePresence>
+                    {otpError && (
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="mt-5 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-600 text-sm">
+                        ❌ {otpError}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <p className="mt-6 pt-5 border-t border-gray-100 text-center text-[11px] text-gray-400">
+                    🔒 Your number is secure and never shared
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── NIMCET: FILE UPLOAD (shown only after OTP verification) ── */}
+            {exam === "NIMCET" && otpVerified && !result && (
               <motion.div key="nimcet-upload" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
                 <div className="flex items-center gap-3 mb-8">
                   <button onClick={reset} className="text-gray-400 hover:text-pink-600 text-sm transition-colors">← Change Exam</button>
                   <span className="text-gray-200">|</span>
                   <span className="text-pink-600 text-sm font-semibold">🏛️ NIMCET</span>
                   <span className="text-gray-200">|</span>
-                  <span className="text-gray-500 text-sm">👤 {userName || "Logged-in user"}</span>
+                  <span className="text-gray-500 text-sm">✅ +91 {otpPhone}</span>
                 </div>
 
                 {/* steps strip */}
