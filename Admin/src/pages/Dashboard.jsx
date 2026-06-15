@@ -14,6 +14,7 @@ import PageHeader from "@/components/PageHeader";
 import StatsCard from "@/components/StatsCard";
 import DataTable from "@/components/DataTable";
 import { BASE_URL } from "@/config";
+import { cn } from "@/lib/utils";
 
 /* ---------- SIMPLE MODAL ---------- */
 /* ---------- USER DETAILS MODAL ---------- */
@@ -135,7 +136,7 @@ const Dashboard = () => {
           onClick={() =>
             setSelectedUser({ name: row.user, userId: row.userId })
           }
-          className="text-blue-600 hover:underline"
+          className="font-medium text-primary transition-colors hover:underline"
         >
           {row.user}
         </button>
@@ -151,7 +152,7 @@ const Dashboard = () => {
               `/admin/tests/${row.testId}/attempt/${row.attemptNumber}`
             )
           }
-          className="text-blue-600 hover:underline"
+          className="font-medium text-primary transition-colors hover:underline"
         >
           {row.testTitle}
         </button>
@@ -190,52 +191,91 @@ const Dashboard = () => {
 
       {/* ---------- TOP PERFORMERS ---------- */}
       <div className="grid gap-6 lg:grid-cols-2 mb-8">
-        <div className="rounded-xl p-6 border bg-card">
+        <div className="card-elevated p-5 sm:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Top Performers</h3>
-            <Trophy className="h-5 w-5 text-yellow-500" />
+            <div>
+              <h3 className="font-semibold tracking-tight">Top Performers</h3>
+              <p className="text-xs text-muted-foreground">Highest average scores</p>
+            </div>
+            <div className="grid h-9 w-9 place-items-center rounded-lg bg-amber-500/15">
+              <Trophy className="h-5 w-5 text-amber-500" />
+            </div>
           </div>
 
-          {topPerformers.map((p, i) => (
-            <div
-              key={i}
-              onClick={() =>
-                setSelectedUser({ name: p.name, userId: p.userId })
-              }
-              className="flex justify-between p-3 rounded-lg cursor-pointer hover:bg-muted"
-            >
-              <div>
-                <p className="font-medium">{p.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {p.tests} tests
-                </p>
+          <div className="space-y-1">
+            {topPerformers.map((p, i) => (
+              <div
+                key={i}
+                onClick={() =>
+                  setSelectedUser({ name: p.name, userId: p.userId })
+                }
+                className="flex items-center justify-between gap-3 rounded-lg p-3 cursor-pointer transition-colors hover:bg-muted"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span
+                    className={cn(
+                      "grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold",
+                      i === 0
+                        ? "bg-amber-500/20 text-amber-500"
+                        : i === 1
+                        ? "bg-slate-400/20 text-slate-300"
+                        : i === 2
+                        ? "bg-orange-500/20 text-orange-400"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{p.name}</p>
+                    <p className="text-xs text-muted-foreground">{p.tests} tests</p>
+                  </div>
+                </div>
+                <p className="shrink-0 font-semibold text-primary">Avg {p.avgScore}</p>
               </div>
-              <p className="font-semibold text-primary">
-                Avg {p.avgScore}
-              </p>
-            </div>
-          ))}
+            ))}
+
+            {!topPerformers.length && (
+              <div className="flex flex-col items-center gap-2 py-10 text-center text-muted-foreground">
+                <Trophy className="h-8 w-8 opacity-40" />
+                <p className="text-sm">No performer data yet.</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Placeholder chart */}
-        <div className="rounded-xl p-6 border bg-card flex items-center justify-center">
-          <TrendingUp className="h-12 w-12 text-primary" />
+        {/* Analytics placeholder */}
+        <div className="card-elevated flex flex-col items-center justify-center gap-3 p-6 text-center">
+          <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[hsl(var(--primary)/0.12)]">
+            <Activity className="h-7 w-7 text-primary" />
+          </div>
+          <div>
+            <p className="font-semibold tracking-tight">Performance Analytics</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Trend charts will appear here.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* ---------- RECENT ACTIVITY ---------- */}
-      <div className="rounded-xl border bg-card">
-        <div className="p-6 border-b">
-          <h3 className="font-semibold">Recent Activity</h3>
-          <p className="text-sm text-muted-foreground">
-            Click any row to explore details
-          </p>
+      <div className="card-elevated overflow-hidden">
+        <div className="flex items-center justify-between gap-3 border-b border-border/70 p-5 sm:p-6">
+          <div>
+            <h3 className="font-semibold tracking-tight">Recent Activity</h3>
+            <p className="text-sm text-muted-foreground">
+              Click any row to explore details
+            </p>
+          </div>
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-[hsl(var(--primary)/0.12)]">
+            <Activity className="h-5 w-5 text-primary" />
+          </div>
         </div>
 
         <DataTable
           columns={activityColumns}
           data={recentActivity}
-          className="border-0"
+          className="border-0 shadow-none rounded-none"
         />
       </div>
 

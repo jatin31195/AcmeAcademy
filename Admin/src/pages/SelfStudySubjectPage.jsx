@@ -169,11 +169,11 @@ const SelfStudySubjectPage = () => {
                     w-full mb-3
                     flex items-center justify-center gap-2
                     rounded-md
-                    bg-indigo-600 text-white
+                    bg-primary text-primary-foreground
                     py-2.5
                     text-sm font-semibold
                     shadow
-                    hover:bg-indigo-700
+                    hover:bg-primary/90
                     active:scale-95
                     transition
                     cursor-pointer

@@ -183,6 +183,7 @@ const FormInput = ({
     <div className={cn("space-y-2", className)}>
       <Label
         htmlFor={name}
+        className="text-sm font-medium"
         style={{ color: "hsl(var(--foreground))" }}
       >
         {label}

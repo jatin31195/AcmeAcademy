@@ -4,33 +4,24 @@ const StatsCard = ({ title, value, icon: Icon, trend, className }) => {
   return (
     <div
       className={cn(
-        "rounded-xl p-6 shadow-card transition-all duration-300 hover:shadow-glow border",
+        "group card-elevated hover-lift relative overflow-hidden p-5 sm:p-6",
         className
       )}
-      style={{
-        backgroundColor: "hsl(var(--card))",
-        borderColor: "hsl(var(--border))",
-      }}
     >
-      <div className="flex items-start justify-between">
-        <div>
-          <p
-            className="text-sm font-medium"
-            style={{ color: "hsl(var(--muted-foreground))" }}
-          >
-            {title}
-          </p>
+      {/* subtle brand glow on hover */}
+      <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[hsl(var(--primary)/0.12)] opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
 
-          <p
-            className="mt-2 text-3xl font-bold"
-            style={{ color: "hsl(var(--foreground))" }}
-          >
-            {value}
+      <div className="relative flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+
+          <p className="mt-2 text-3xl font-bold tracking-tight text-foreground">
+            {value ?? "—"}
           </p>
 
           {trend && (
             <p
-              className="mt-2 text-sm font-medium"
+              className="mt-2 inline-flex items-center gap-1 text-sm font-medium"
               style={{
                 color: trend.isPositive
                   ? "hsl(var(--success))"
@@ -43,14 +34,8 @@ const StatsCard = ({ title, value, icon: Icon, trend, className }) => {
           )}
         </div>
 
-        <div
-          className="rounded-lg p-3"
-          style={{ backgroundColor: "hsl(var(--primary) / 0.12)" }}
-        >
-          <Icon
-            className="h-6 w-6"
-            style={{ color: "hsl(var(--primary))" }}
-          />
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl gradient-primary shadow-glow transition-transform duration-300 group-hover:scale-110">
+          {Icon && <Icon className="h-6 w-6 text-white" />}
         </div>
       </div>
     </div>

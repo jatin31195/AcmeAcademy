@@ -191,7 +191,7 @@ const KatexQuestionDialog = ({
             Cancel
           </Button>
           <Button
-            className="w-full bg-indigo-600 text-white hover:bg-indigo-500 sm:w-auto"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto"
             onClick={handleSave}
             disabled={loading}
           >

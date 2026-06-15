@@ -50,6 +50,14 @@ export const AuthProvider = ({ children }) => {
       async (error) => {
         const originalRequest = error.config;
 
+        // Never run the refresh-retry logic for the refresh call itself.
+        // Otherwise a 401 from /refresh re-enters this handler and gets queued
+        // waiting on the very refresh in progress → deadlock (the session
+        // check then hangs on "Verifying secure session...").
+        if (originalRequest?.url?.includes("/api/admin/auth/refresh")) {
+          return Promise.reject(error);
+        }
+
         // If access token expired
         if (
           error.response?.status === 401 &&

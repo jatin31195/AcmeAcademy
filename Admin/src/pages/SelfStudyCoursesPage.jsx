@@ -158,11 +158,11 @@ const SelfStudyCoursesPage = () => {
         w-full mb-3
         flex items-center justify-center gap-2
         rounded-lg
-        bg-indigo-600 text-white
+        bg-primary text-primary-foreground
         py-2.5
         text-sm font-semibold
         shadow-md
-        hover:bg-indigo-700
+        hover:bg-primary/90
         hover:shadow-lg
         active:scale-95
         transition

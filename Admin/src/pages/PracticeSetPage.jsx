@@ -184,7 +184,7 @@ const PracticeSetPage = () => {
   {/* SHOW PRACTICE CATEGORIES */}
   <Button
     size="sm"
-    className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm cursor-pointer"
+    className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm cursor-pointer"
     onClick={() =>
       navigate(`/admin/practice-set/${s._id}/categories`)
     }
@@ -255,7 +255,7 @@ const PracticeSetPage = () => {
 </Button>
 
 <Button
-  className="bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer"
+  className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer"
   onClick={handleSubmit}
   disabled={loading}
 >

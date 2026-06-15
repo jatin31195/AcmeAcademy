@@ -119,7 +119,7 @@ const PracticeCategoryPage = () => {
         description="Manage categories under this practice set"
       >
         <Button
-          className="bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer shadow-sm"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-sm"
           onClick={() => {
             setMode("create");
             setForm(emptyForm);
@@ -248,7 +248,7 @@ const PracticeCategoryPage = () => {
               Cancel
             </Button>
             <Button
-              className="bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer"
               onClick={handleSubmit}
               disabled={loading}
             >

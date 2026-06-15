@@ -41,6 +41,7 @@ const Modal = ({
           ${sizeClasses[size]}
           max-h-[90vh]
           flex flex-col
+          rounded-2xl border-border/70 shadow-lg
           p-4 sm:w-full sm:p-6
         `}
         style={{

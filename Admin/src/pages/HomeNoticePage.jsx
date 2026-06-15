@@ -114,7 +114,7 @@ const HomeNoticePage = () => {
         description="Manage notices shown on the home page"
       >
         <Button
-          className="bg-indigo-600 hover:bg-indigo-500 text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={() => {
             setMode("create");
             setForm(emptyForm);
@@ -218,7 +218,7 @@ const HomeNoticePage = () => {
               Cancel
             </Button>
             <Button
-              className="bg-indigo-600 hover:bg-indigo-500 text-white"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={handleSubmit}
               disabled={loading}
             >

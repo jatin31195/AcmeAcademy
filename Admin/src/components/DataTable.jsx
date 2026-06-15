@@ -8,64 +8,60 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-const DataTable = ({ columns, data, className }) => {
+const DataTable = ({ columns, data = [], className }) => {
   return (
     <div
-      className={cn("rounded-xl border shadow-card", className)}
-      style={{
-        backgroundColor: "hsl(var(--card))",
-        borderColor: "hsl(var(--border))",
-      }}
+      className={cn(
+        "overflow-hidden rounded-xl border border-border/70 bg-card shadow-card",
+        className
+      )}
     >
       <div className="w-full overflow-x-auto">
-      <Table className="min-w-[760px]">
-        <TableHeader>
-          <TableRow
-            className="hover:bg-transparent"
-            style={{ borderColor: "hsl(var(--border))" }}
-          >
-            {columns.map((column) => (
-              <TableHead
-                key={String(column.key)}
-                className="whitespace-nowrap font-medium"
-                style={{ color: "hsl(var(--muted-foreground))" }}
-              >
-                {column.header}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
-          {data.map((item) => (
-            <TableRow
-              key={item.id}
-              style={{
-                borderColor: "hsl(var(--border))",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor =
-                  "hsl(var(--muted) / 0.5)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "transparent")
-              }
-            >
+        <Table className="min-w-[760px]">
+          <TableHeader>
+            <TableRow className="border-border/70 bg-secondary/40 hover:bg-secondary/40">
               {columns.map((column) => (
-                <TableCell
-                  key={`${item.id}-${String(column.key)}`}
-                  className="align-top"
-                  style={{ color: "hsl(var(--foreground))" }}
+                <TableHead
+                  key={String(column.key)}
+                  className="h-11 whitespace-nowrap text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                 >
-                  {column.render
-                    ? column.render(item)
-                    : String(item[column.key] ?? "")}
-                </TableCell>
+                  {column.header}
+                </TableHead>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+
+          <TableBody>
+            {data.length === 0 ? (
+              <TableRow className="hover:bg-transparent">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-28 text-center text-sm text-muted-foreground"
+                >
+                  No data available.
+                </TableCell>
+              </TableRow>
+            ) : (
+              data.map((item) => (
+                <TableRow
+                  key={item.id}
+                  className="border-border/60 transition-colors hover:bg-muted/40"
+                >
+                  {columns.map((column) => (
+                    <TableCell
+                      key={`${item.id}-${String(column.key)}`}
+                      className="align-top text-sm text-foreground"
+                    >
+                      {column.render
+                        ? column.render(item)
+                        : String(item[column.key] ?? "")}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

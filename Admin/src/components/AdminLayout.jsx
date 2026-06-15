@@ -25,32 +25,40 @@ const AdminLayout = () => {
       />
 
       <main className="lg:pl-64">
-        <header className="sticky top-0 z-20 border-b border-border/70 bg-background/90 backdrop-blur-md">
+        <header className="glass sticky top-0 z-20 border-b border-border/60">
           <div className="flex items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card text-foreground lg:hidden"
+                className="press inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-secondary lg:hidden"
                 onClick={() => setMobileOpen(true)}
                 aria-label="Open sidebar"
               >
                 <Menu className="h-5 w-5" />
               </button>
-              <p className="text-sm font-semibold text-foreground sm:text-base">Admin Control Panel</p>
+              <div className="leading-tight">
+                <p className="text-sm font-semibold text-foreground sm:text-[15px]">
+                  Admin Control Panel
+                </p>
+                <p className="hidden text-xs text-muted-foreground sm:block">
+                  Manage your platform
+                </p>
+              </div>
             </div>
 
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-secondary sm:text-sm"
+              className="press inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-secondary hover:border-primary/40 sm:text-sm"
               onClick={toggleTheme}
+              aria-label="Toggle theme"
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              {theme === "dark" ? "Light" : "Dark"}
+              <span className="hidden sm:inline">{theme === "dark" ? "Light" : "Dark"}</span>
             </button>
           </div>
         </header>
 
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div className="animate-fade-in p-4 sm:p-6 lg:p-8">
           <Outlet />
         </div>
       </main>

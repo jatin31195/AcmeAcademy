@@ -64,26 +64,38 @@ const Login = () => {
   };
 
   return (
-    
-    <div className="min-h-screen flex items-center justify-center p-4">
-      {/* Background glow */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-info/10 blur-3xl" />
+
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden p-4">
+      {/* Ambient background */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-primary/20 blur-[120px]" />
+        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-[hsl(var(--info)/0.18)] blur-[120px]" />
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+          }}
+        />
       </div>
 
-      <div className="relative w-full max-w-md animate-fade-in">
-        <div className="rounded-2xl border p-8 shadow-card bg-[hsl(var(--card))]">
-          
+      <div className="relative w-full max-w-md animate-scale-in">
+        <div className="card-elevated p-8 shadow-lg">
+
           {/* LOGO */}
           <div className="mb-8 text-center">
-            <img
-              src="/logo.png"   // 🔴 change path if needed
-              alt="ACME Academy Logo"
-              className="mx-auto mb-4 h-16 w-auto"
-            />
-            <h1 className="text-2xl font-bold">ACME Academy</h1>
-            <p className="mt-1 text-muted-foreground">Admin Portal</p>
+            <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-card border border-border/70 shadow-glow">
+              <img
+                src="/logo.png"   // 🔴 change path if needed
+                alt="ACME Academy Logo"
+                className="h-10 w-auto"
+              />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight">ACME Academy</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Sign in to your Admin Portal
+            </p>
           </div>
 
           {/* Form */}

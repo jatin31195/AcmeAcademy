@@ -212,7 +212,7 @@ const PracticeQuestionPage = () => {
       >
         <div className="flex flex-wrap gap-2">
           <Button
-            className="bg-indigo-600 hover:bg-indigo-500 text-white"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
             onClick={() => {
               setMode("create");
               setForm(emptyForm);
@@ -555,7 +555,7 @@ const PracticeQuestionPage = () => {
               Cancel
             </Button>
             <Button
-              className="w-full bg-indigo-600 text-white hover:bg-indigo-500 sm:w-auto"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto"
               onClick={handleSubmit}
               disabled={loading}
             >

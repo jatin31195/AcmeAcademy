@@ -178,7 +178,7 @@ const EquationEditorDialog = ({ open, onOpenChange, onInsert, initialLatex = "" 
             Cancel
           </Button>
           <Button
-            className="bg-indigo-600 text-white hover:bg-indigo-500"
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={handleInsert}
             disabled={!preview}
           >
