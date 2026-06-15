@@ -163,7 +163,7 @@ const PracticeSetPage = () => {
 
       {/* STATUS */}
       <td className="p-4 text-center">
-        <Badge className="bg-emerald-600/20 text-emerald-400 border border-emerald-500">
+        <Badge className="bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/50">
   Active
 </Badge>
 
@@ -174,7 +174,7 @@ const PracticeSetPage = () => {
   {/* EDIT */}
   <Button
     size="sm"
-    className="bg-slate-800 hover:bg-slate-700 text-white shadow-sm cursor-pointer"
+    className="bg-secondary hover:bg-muted text-foreground shadow-sm cursor-pointer"
     onClick={() => openEdit(s)}
   >
     <Pencil className="h-4 w-4 mr-1" />
@@ -243,25 +243,17 @@ const PracticeSetPage = () => {
           </div>
 
           <div className="flex justify-end gap-2 mt-6">
-            <Button variant="outline" onClick={() => setOpen(false)}>
+            <Button variant="outline" className="cursor-pointer" onClick={() => setOpen(false)}>
               Cancel
             </Button>
+
             <Button
-  variant="outline"
-  className="cursor-pointer border-slate-600 text-slate-200 hover:bg-slate-800"
-  onClick={() => setOpen(false)}
->
-  Cancel
-</Button>
-
-<Button
-  className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer"
-  onClick={handleSubmit}
-  disabled={loading}
->
-  {loading ? "Saving..." : "Save"}
-</Button>
-
+              className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer"
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

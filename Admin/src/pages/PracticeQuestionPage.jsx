@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Plus, Trash2, Pencil, Sigma } from "lucide-react";
+import { Plus, Trash2, Pencil, Sigma, Eye, EyeOff } from "lucide-react";
 import KatexQuestionDialog from "@/components/math/KatexQuestionDialog";
 import QuestionMathField from "@/components/math/QuestionMathField";
 import { renderWithMath, hasMath } from "@/lib/renderWithMath";
@@ -8,6 +8,7 @@ import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import "katex/dist/katex.min.css";
 
 import {
@@ -15,6 +16,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { BASE_URL } from "@/config";
 
@@ -29,6 +31,64 @@ const emptyForm = {
   answer: "",
   solutionText: "",
   topic: "",
+};
+
+/* One field: raw KaTeX source + its OWN independent show/hide math preview.
+   Defined at module scope so each instance keeps its own toggle state. */
+const FieldWithPreview = ({ label, text, tone = "default", emphasize = false }) => {
+  const [show, setShow] = useState(false);
+  if (text === undefined || text === null || text === "") return null;
+
+  const toneClasses =
+    tone === "success"
+      ? "border-emerald-500/30 bg-emerald-500/5"
+      : tone === "info"
+      ? "border-blue-500/30 bg-blue-500/5"
+      : "border-border bg-secondary/50";
+
+  return (
+    <div className={cn("rounded-lg border px-3 py-2.5", toneClasses)}>
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {label}
+        </p>
+        <button
+          type="button"
+          onClick={() => setShow((s) => !s)}
+          className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+        >
+          {show ? (
+            <>
+              <EyeOff className="h-3.5 w-3.5" />
+              Hide preview
+            </>
+          ) : (
+            <>
+              <Eye className="h-3.5 w-3.5" />
+              Show Maths preview
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Raw KaTeX / source */}
+      <code className="block whitespace-pre-wrap break-words font-mono text-xs text-foreground/80">
+        {text}
+      </code>
+
+      {/* This field's own rendered math preview */}
+      {show && (
+        <div className="mt-2 border-t border-border/50 pt-2">
+          <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+            Preview
+          </span>
+          <div className={cn("text-sm leading-relaxed", emphasize && "font-medium")}>
+            {hasMath(text) ? renderWithMath(text) : text}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 const PracticeQuestionPage = () => {
@@ -190,19 +250,6 @@ const PracticeQuestionPage = () => {
 
     fetchQuestions(selectedTopic);
   };
-  const MathPreviewSection = ({ label, text }) => {
-    if (!text) return null;
-    return (
-      <div>
-        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          {label}
-        </p>
-        <div className="text-sm leading-relaxed">
-          {renderWithMath(text, <span className="text-muted-foreground">—</span>)}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="animate-fade-in">
@@ -226,7 +273,7 @@ const PracticeQuestionPage = () => {
 
           <Button
             variant="outline"
-            className="border-indigo-300 text-indigo-700 hover:bg-indigo-50 dark:text-indigo-300"
+            className="border-primary/40 text-primary hover:bg-primary/10"
             onClick={openKatexCreate}
           >
             <Sigma className="h-4 w-4 mr-2" />
@@ -266,7 +313,7 @@ const PracticeQuestionPage = () => {
     shadow-sm
     transition
     hover:shadow-md
-    hover:border-indigo-300/50
+    hover:border-primary/40
   "
 >
   {/* ---------- HEADER ---------- */}
@@ -274,7 +321,7 @@ const PracticeQuestionPage = () => {
     <div className="space-y-1">
       <Badge
         variant="secondary"
-        className="bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
+        className="bg-primary/10 text-primary border-primary/20"
       >
         Topic: {q.topic || "General"}
       </Badge>
@@ -297,7 +344,7 @@ const PracticeQuestionPage = () => {
       <Button
         size="sm"
         variant="outline"
-        className="flex items-center gap-1 border-indigo-300 text-indigo-700 hover:bg-indigo-50 dark:text-indigo-300"
+        className="flex items-center gap-1 border-primary/40 text-primary hover:bg-primary/10"
         onClick={() => openKatexEdit(q)}
       >
         <Sigma className="h-4 w-4" />
@@ -316,91 +363,34 @@ const PracticeQuestionPage = () => {
   </div>
 
   {/* ---------- QUESTION BODY ---------- */}
+  {/* Each field shows raw KaTeX + its OWN independent preview toggle. */}
   <div className="px-5 py-4 space-y-4">
-    {/* Question Text */}
-    <div>
-      <h3 className="text-sm font-semibold text-muted-foreground mb-1">
-        Question
-      </h3>
-      <p className="text-base leading-relaxed font-medium">
-        {q.question}
-      </p>
-    </div>
+    {/* Question */}
+    <FieldWithPreview label="Question" text={q.question} emphasize />
 
-    {/* KaTeX Preview — question, options, answer, solution */}
-    <details className="rounded-lg bg-muted/40 p-3">
-      <summary className="cursor-pointer text-sm font-medium text-indigo-600">
-        View Math Preview (KaTeX)
-      </summary>
-      <div className="mt-3 space-y-3">
-        <MathPreviewSection label="Question" text={q.question} />
-        {q.options?.map((opt, i) => (
-          <MathPreviewSection
-            key={i}
-            label={`Option ${String.fromCharCode(65 + i)}`}
-            text={opt}
-          />
-        ))}
-        <MathPreviewSection label="Answer" text={q.answer} />
-        <MathPreviewSection label="Solution" text={q.solutionText} />
-      </div>
-    </details>
-
-    {/* Options */}
+    {/* Options — each option toggles its own preview */}
     {q.options?.length > 0 && (
       <div>
-        <h3 className="text-sm font-semibold text-muted-foreground mb-2">
+        <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
           Options
         </h3>
-
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {q.options.map((opt, i) => (
-            <div
+            <FieldWithPreview
               key={i}
-              className="
-                rounded-md
-                border
-                px-3 py-2
-                text-sm
-                bg-secondary
-                flex gap-2
-              "
-            >
-              <span className="font-semibold text-muted-foreground">
-                {String.fromCharCode(65 + i)}.
-              </span>
-              <span>{hasMath(opt) ? renderWithMath(opt) : opt}</span>
-            </div>
+              label={`Option ${String.fromCharCode(65 + i)}`}
+              text={opt}
+            />
           ))}
         </div>
       </div>
     )}
 
-    {/* Answer */}
-    {q.answer && (
-      <div className="rounded-lg bg-green-50 dark:bg-green-900/20 p-3">
-        <p className="text-sm">
-          <span className="font-semibold text-green-700 dark:text-green-300">
-            Correct Answer:
-          </span>{" "}
-          {hasMath(q.answer) ? renderWithMath(q.answer) : q.answer}
-        </p>
-      </div>
-    )}
+    {/* Correct Answer — own preview */}
+    <FieldWithPreview label="Correct Answer" text={q.answer} tone="success" />
 
-    {/* Solution */}
-    {q.solutionText && (
-      <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3">
-        <p className="mb-1 text-sm font-semibold text-blue-700 dark:text-blue-300">
-          Solution
-        </p>
-        <div className="text-sm leading-relaxed">
-          {hasMath(q.solutionText)
-            ? renderWithMath(q.solutionText)
-            : q.solutionText}
-        </div>
-      </div>
-    )}
+    {/* Solution — own preview */}
+    <FieldWithPreview label="Solution" text={q.solutionText} tone="info" />
   </div>
 </div>
 
@@ -415,24 +405,14 @@ const PracticeQuestionPage = () => {
 
       {/* ---------------- MODAL ---------------- */}
       <Dialog open={open} onOpenChange={setOpen}>
-       <DialogContent
-  className="
-    max-w-3xl
-    bg-[hsl(var(--card))]
-    text-foreground
-    border border-border
-    shadow-card
-    opacity-100
-  "
->
-
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto rounded-2xl border-border/70 bg-card text-foreground shadow-lg">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-foreground">
-  {mode === "create"
-    ? "Add Practice Question"
-    : "Edit Practice Question"}
-</DialogTitle>
-
+              {mode === "create" ? "Add Practice Question" : "Edit Practice Question"}
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Type plain text, or use “Insert equation” for math. Toggle each field’s preview to verify the rendering.
+            </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4">
@@ -445,35 +425,38 @@ const PracticeQuestionPage = () => {
               multiline
             />
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <QuestionMathField
-                label="Option A"
-                name="optionA"
-                value={form.optionA}
-                onChange={setField}
-                fieldRefs={fieldRefs}
-              />
-              <QuestionMathField
-                label="Option B"
-                name="optionB"
-                value={form.optionB}
-                onChange={setField}
-                fieldRefs={fieldRefs}
-              />
-              <QuestionMathField
-                label="Option C"
-                name="optionC"
-                value={form.optionC}
-                onChange={setField}
-                fieldRefs={fieldRefs}
-              />
-              <QuestionMathField
-                label="Option D"
-                name="optionD"
-                value={form.optionD}
-                onChange={setField}
-                fieldRefs={fieldRefs}
-              />
+            <div className="space-y-2 rounded-xl border border-border/70 bg-secondary/30 p-3 sm:p-4">
+              <p className="text-sm font-semibold text-foreground">Answer Options</p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <QuestionMathField
+                  label="Option A"
+                  name="optionA"
+                  value={form.optionA}
+                  onChange={setField}
+                  fieldRefs={fieldRefs}
+                />
+                <QuestionMathField
+                  label="Option B"
+                  name="optionB"
+                  value={form.optionB}
+                  onChange={setField}
+                  fieldRefs={fieldRefs}
+                />
+                <QuestionMathField
+                  label="Option C"
+                  name="optionC"
+                  value={form.optionC}
+                  onChange={setField}
+                  fieldRefs={fieldRefs}
+                />
+                <QuestionMathField
+                  label="Option D"
+                  name="optionD"
+                  value={form.optionD}
+                  onChange={setField}
+                  fieldRefs={fieldRefs}
+                />
+              </div>
             </div>
 
             <QuestionMathField
@@ -505,7 +488,7 @@ const PracticeQuestionPage = () => {
         text-foreground
         focus:outline-none
         focus:ring-2
-        focus:ring-indigo-500
+        focus:ring-primary
       "
     >
       <option value="">Select Existing Topic</option>

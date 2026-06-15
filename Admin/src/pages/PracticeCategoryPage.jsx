@@ -161,7 +161,7 @@ const PracticeCategoryPage = () => {
 
                 {/* QUESTIONS COUNT */}
                 <td className="p-4 text-center">
-                  <Badge className="bg-slate-700/50 text-slate-200 border border-slate-600">
+                  <Badge className="bg-secondary text-secondary-foreground border border-border">
                     {(c.Questions || []).length}
                   </Badge>
                 </td>
@@ -171,7 +171,7 @@ const PracticeCategoryPage = () => {
                   {/* EDIT */}
                   <Button
                     size="sm"
-                    className="bg-slate-800 hover:bg-slate-700 text-white cursor-pointer"
+                    className="bg-secondary hover:bg-muted text-foreground cursor-pointer"
                     onClick={() => openEdit(c)}
                   >
                     <Pencil className="h-4 w-4 mr-1" />
@@ -242,7 +242,7 @@ const PracticeCategoryPage = () => {
           <div className="flex justify-end gap-2 mt-6">
             <Button
               variant="outline"
-              className="cursor-pointer border-slate-600 text-slate-200 hover:bg-slate-800"
+              className="cursor-pointer"
               onClick={() => setOpen(false)}
             >
               Cancel

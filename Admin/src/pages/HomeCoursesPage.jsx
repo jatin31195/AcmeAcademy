@@ -233,11 +233,7 @@ const HomeCoursesPage = () => {
 
       {/* ---------------- MODAL ---------------- */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-xl 
-    bg-white dark:bg-zinc-900 
-    text-zinc-900 dark:text-zinc-100 
-    border border-zinc-200 dark:border-zinc-800 
-    shadow-xl cursor-pointer">
+        <DialogContent className="max-w-xl rounded-2xl bg-card text-foreground border border-border/70 shadow-lg">
           <DialogHeader>
             <DialogTitle>
               {editingId ? "Edit Home Course" : "Add Home Course"}

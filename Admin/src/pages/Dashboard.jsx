@@ -216,11 +216,11 @@ const Dashboard = () => {
                     className={cn(
                       "grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold",
                       i === 0
-                        ? "bg-amber-500/20 text-amber-500"
+                        ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
                         : i === 1
-                        ? "bg-slate-400/20 text-slate-300"
+                        ? "bg-slate-400/20 text-slate-600 dark:text-slate-300"
                         : i === 2
-                        ? "bg-orange-500/20 text-orange-400"
+                        ? "bg-orange-500/20 text-orange-600 dark:text-orange-400"
                         : "bg-muted text-muted-foreground"
                     )}
                   >

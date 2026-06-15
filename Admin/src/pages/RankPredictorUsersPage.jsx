@@ -216,7 +216,7 @@ const RankPredictorUsersPage = () => {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-300">
+        <div className="mb-4 rounded-xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-600 dark:text-rose-300">
           {error}
         </div>
       )}
@@ -280,7 +280,7 @@ const RankPredictorUsersPage = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 border-rose-500/40 px-2 text-xs text-rose-400 hover:bg-rose-500/10"
+                        className="h-8 border-rose-500/40 px-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
                         onClick={() => deleteEntry(u.id)}
                       >
                         <Trash2 className="h-4 w-4 mr-1" />

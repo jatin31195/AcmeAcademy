@@ -167,9 +167,9 @@ const handleUpdate = async () => {
   className="
     w-full
     sm:w-auto
-    bg-white
-    text-slate-900
-    border border-slate-300
+    bg-secondary
+    text-foreground
+    border border-border
     rounded-lg
     px-4 py-2
     sm:min-w-[200px]
@@ -185,11 +185,11 @@ const handleUpdate = async () => {
     setResults([]);
   }}
 >
-  <option value="" className="text-slate-500">
+  <option value="" className="text-muted-foreground">
     Select Exam
   </option>
   {exams.map((e) => (
-    <option key={e} value={e} className="text-slate-900">
+    <option key={e} value={e} className="text-foreground">
       {e}
     </option>
   ))}
@@ -200,9 +200,9 @@ const handleUpdate = async () => {
   className="
     w-full
     sm:w-auto
-    bg-white
-    text-slate-900
-    border border-slate-300
+    bg-secondary
+    text-foreground
+    border border-border
     rounded-lg
     px-4 py-2
     sm:min-w-[160px]
@@ -216,11 +216,11 @@ const handleUpdate = async () => {
   onChange={(e) => setSelectedYear(e.target.value)}
   disabled={!years.length}
 >
-  <option value="" className="text-slate-500">
+  <option value="" className="text-muted-foreground">
     Select Year
   </option>
   {years.map((y) => (
-    <option key={y} value={y} className="text-slate-900">
+    <option key={y} value={y} className="text-foreground">
       {y}
     </option>
   ))}

@@ -19,8 +19,8 @@ const QuestionMathField = ({
 
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-muted-foreground">{label}</label>
+      <div className="flex items-center justify-between gap-2">
+        <label className="text-sm font-medium text-foreground">{label}</label>
         <MathInsertButton
           getTarget={() => fieldRefs.current[name]}
           value={value}
@@ -36,9 +36,9 @@ const QuestionMathField = ({
         placeholder={`Type ${label.toLowerCase()} — use the button for equations`}
       />
       {hasMath(value) && (
-        <div className="rounded-md bg-muted/40 px-3 py-2 text-sm leading-relaxed">
-          <span className="mr-1 text-[11px] font-medium text-indigo-600">
-            Preview:
+        <div className="rounded-md border border-border/60 bg-muted/40 px-3 py-2 text-sm leading-relaxed">
+          <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
+            Preview
           </span>
           {renderWithMath(value)}
         </div>
