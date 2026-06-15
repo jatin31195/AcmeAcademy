@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { collection, addDoc, getDocs, query, where, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "../Firebase";
 import { useTheme } from "../useTheme";
 import { RP_BASE, RP_AUTH_KEY } from "../constants.js";
@@ -43,7 +43,20 @@ export default function FormPage() {
     try {
       const q = query(collection(db,"nimcet_users"), where("phone","==",phone));
       const snap = await getDocs(q);
-      if (!snap.empty) { navigate(`${RP_BASE}/report`,{state:snap.docs[0].data()}); return; }
+
+      // Allow up to 2 reports per phone. Existing docs (created before this
+      // change) have no `attempts` field, so they count as 1 already used.
+      let attempts = 0;
+      let existingDocRef = null;
+      if (!snap.empty) {
+        existingDocRef = snap.docs[0].ref;
+        attempts = snap.docs[0].data().attempts || 1;
+        if (attempts >= 2) {
+          setError("You have reached the maximum limit of 2 reports.");
+          setSubmitting(false);
+          return;
+        }
+      }
 
       const marksData  = (await import("../data/marks_to_rank.json")).default;
       const cutoffData = (await import("../data/college_cutoffs.json")).default;
@@ -65,8 +78,14 @@ export default function FormPage() {
         name:form.name.trim(), phone, marks, category:form.category,
         regNo:form.regNo.trim(), city:form.city.trim(), state:form.state.trim(),
         rank:predictedRank, topCollege, fallbackCollege, createdAt:serverTimestamp(),
+        attempts: attempts + 1,
       };
-      await addDoc(collection(db,"nimcet_users"), payload);
+      // Update the existing report (2nd attempt) or create the first one.
+      if (existingDocRef) {
+        await updateDoc(existingDocRef, payload);
+      } else {
+        await addDoc(collection(db,"nimcet_users"), payload);
+      }
       navigate(`${RP_BASE}/report`,{state:payload});
     } catch(err) {
       console.error(err);

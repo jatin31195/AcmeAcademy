@@ -18,6 +18,11 @@ import photo2 from "../assets/image2.jpg";
 import photo3 from "../assets/image3.jpg";
 import photo4 from "../assets/image4.jpg";
 
+// Course-promo images for the Advertisement Section (added from testing build).
+import ad1 from "../assets/ad_course1.png";
+import ad2 from "../assets/ad_course2.png";
+import ad3 from "../assets/ad_course3.png";
+
 const ReportPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -47,29 +52,27 @@ const ReportPage = () => {
   const rr = rankRecord ? { rankLow: rankRecord.rank_low, rankHigh: rankRecord.rank_high } : null;
   const rankStr = rr ? `${rr.rankLow} – ${rr.rankHigh}` : "N/A";
 
-  // Existing top/fallback computation — kept intact for the PDF.
-  const catList = [...(collegeCutoffs[data.category] || [])].sort((a, b) => a.low - b.low);
-  const topC = catList.find((c) => rr && c.low <= rr.rankLow && rr.rankLow <= c.high);
-  const fallbackC = catList.find((c) => rr && rr.rankLow < c.low);
-  const colleges = { top: topC?.college || "Not Eligible", fallback: fallbackC?.college || "None" };
+  // Updated top/fallback computation (from testing build).
+  // Sort the category's colleges by closing rank (high), then keep every college
+  // the student's optimistic predicted rank (rankLow) can still reach.
+  const catList          = [...(collegeCutoffs[data.category] || [])].sort((a, b) => a.high - b.high);
+  const eligibleColleges = catList.filter((c) => rr && rr.rankLow <= c.high);
+  const topC             = eligibleColleges.length > 0 ? eligibleColleges[0] : null;
+  const fallbackC        = eligibleColleges.length > 1 ? eligibleColleges[1] : null;
+  const colleges         = { top: topC?.college || "Not Eligible", fallback: fallbackC?.college || "None" };
   /* ───────────────────────────────────────────────────────────── */
 
-  // PRESENTATION-ONLY: pick the Top Eligible college + 1-2 Fallback options
-  // from the EXISTING cutoff bands. No prediction logic changed.
-  // Top Eligible = the band that contains the (optimistic) predicted rank;
-  // if the rank is better than every opening rank, the best college applies.
-  let topEligible = catList.find((c) => rr && c.low <= rr.rankLow && rr.rankLow <= c.high);
-  if (!topEligible && rr && catList.length && rr.rankLow < catList[0].low) topEligible = catList[0];
-
-  // Fallback = safer colleges whose opening rank is below the student's rank.
-  const fallbacks = rr ? catList.filter((c) => rr.rankLow < c.low).slice(0, 2) : [];
+  // PRESENTATION — derived from the SAME eligibleColleges list so the on-screen
+  // cards stay consistent with the PDF. Top Eligible = most competitive reachable
+  // college; Fallbacks = the next 1–2 safer eligible colleges.
+  const topEligible = topC;
+  const fallbacks = eligibleColleges.slice(1, 3);
 
   const topEligibleCard = topEligible ? { ...topEligible, tier: "Target", chance: chanceFor(topEligible, rr) } : null;
   const fallbackCards = fallbacks.map((c) => ({ ...c, tier: "Safe", chance: chanceFor(c, rr) }));
 
   // For the share card
-  const point = rr ? Math.round((rr.rankLow + rr.rankHigh) / 2) : null;
-  const eligibleCount = rr ? catList.filter((c) => point <= c.high).length : 0;
+  const eligibleCount = eligibleColleges.length;
   const previewColleges = [topEligible, ...fallbacks].filter(Boolean).slice(0, 3).map((c) => c.college);
   const topCollege = topEligible?.college || colleges.top;
 
@@ -199,6 +202,121 @@ const ReportPage = () => {
             previewColleges={previewColleges}
             topCollege={topCollege}
           />
+        </div>
+
+        {/* ── Advertisement Section (course promos) ── */}
+        <div style={{
+          ...card(),
+          padding: 28,
+          background: "linear-gradient(135deg, #ffffff, #f8fafc)",
+          border: "1px solid rgba(59,130,246,0.2)",
+          boxShadow: "0 10px 30px rgba(59,130,246,0.08)",
+        }}>
+          <div style={{ textAlign: "center", marginBottom: "24px" }}>
+            <div style={{ display: "inline-block", background: "#fee2e2", color: "#ef4444", padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "12px" }}>
+              Level Up Your Prep
+            </div>
+            <h3 style={{ fontSize: "clamp(18px, 3vw, 24px)", fontWeight: "800", color: "#0f172a", margin: "0 0 8px" }}>
+              Didn't make it to your dream college this year?
+            </h3>
+            <p style={{ fontSize: "15px", color: "#64748b", margin: 0, maxWidth: "600px", marginInline: "auto" }}>
+              Don't worry! You still have a chance to ace your exams with our premium courses designed specifically for NIMCET &amp; CUET 2027.
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
+            {/* Course 1 */}
+            <a href="https://acmea.courses.store/615002" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", display: "flex" }}>
+              <div style={{ flex: 1, borderRadius: "16px", background: "#f1f5f9", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", overflow: "hidden", transition: "transform 0.2s, box-shadow 0.2s" }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 12px 24px rgba(0,0,0,0.08)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
+                <img src={ad1} alt="Lakshya Dropper Batch" style={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderBottom: "1px solid #e2e8f0" }} />
+                <div style={{ padding: "20px", display: "flex", flexDirection: "column", flex: 1 }}>
+                  <div style={{ display: "flex", gap: "8px", marginBottom: "10px", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "10px", fontWeight: "800", background: "#fee2e2", color: "#dc2626", padding: "4px 8px", borderRadius: "6px", textTransform: "uppercase" }}>Dropper Batch</span>
+                    <span style={{ fontSize: "10px", fontWeight: "800", background: "#fef08a", color: "#854d0e", padding: "4px 8px", borderRadius: "6px", textTransform: "uppercase" }}>Extra ₹2,000 Off</span>
+                  </div>
+                  <h4 style={{ fontSize: "16px", fontWeight: "800", color: "#0f172a", margin: "0 0 8px", lineHeight: 1.4 }}>
+                    NIMCET 2027 Lakshya Dropper Batch | NIMCET-2027 &amp; CUET
+                  </h4>
+                  <div style={{ flex: 1 }}></div>
+                  <div style={{ marginTop: "16px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+                    <div>
+                      <span style={{ fontSize: "12px", color: "#64748b", textDecoration: "line-through", marginRight: "6px" }}>₹20,000</span>
+                      <span style={{ fontSize: "22px", fontWeight: "900", color: "#059669" }}>₹18,000</span>
+                    </div>
+                    <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+                      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </a>
+
+            {/* Course 2 */}
+            <a href="https://acmea.courses.store/380094" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", display: "flex" }}>
+              <div style={{ flex: 1, borderRadius: "16px", background: "#f1f5f9", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", overflow: "hidden", transition: "transform 0.2s, box-shadow 0.2s" }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 12px 24px rgba(0,0,0,0.08)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
+                <img src={ad2} alt="VOD Course" style={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderBottom: "1px solid #e2e8f0" }} />
+                <div style={{ padding: "20px", display: "flex", flexDirection: "column", flex: 1 }}>
+                  <div style={{ display: "flex", gap: "8px", marginBottom: "10px", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "10px", fontWeight: "800", background: "#f3e8ff", color: "#7e22ce", padding: "4px 8px", borderRadius: "6px", textTransform: "uppercase" }}>VOD Course</span>
+                    <span style={{ fontSize: "10px", fontWeight: "800", background: "#fef08a", color: "#854d0e", padding: "4px 8px", borderRadius: "6px", textTransform: "uppercase" }}>Extra ₹500 Off</span>
+                  </div>
+                  <h4 style={{ fontSize: "16px", fontWeight: "800", color: "#0f172a", margin: "0 0 8px", lineHeight: 1.4 }}>
+                    VOD COURSE | NIMCET 2027 | CUET 2027 (ASSC-ACME Self...)
+                  </h4>
+                  <div style={{ flex: 1 }}></div>
+                  <div style={{ marginTop: "16px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+                    <div>
+                      <span style={{ fontSize: "12px", color: "#64748b", textDecoration: "line-through", marginRight: "6px" }}>₹7,000</span>
+                      <span style={{ fontSize: "22px", fontWeight: "900", color: "#059669" }}>₹6,500</span>
+                    </div>
+                    <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+                      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </a>
+
+            {/* Course 3 */}
+            <a href="https://acmea.courses.store/290322" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", display: "flex" }}>
+              <div style={{ flex: 1, borderRadius: "16px", background: "#f1f5f9", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", overflow: "hidden", transition: "transform 0.2s, box-shadow 0.2s" }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 12px 24px rgba(0,0,0,0.08)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
+                <img src={ad3} alt="Test Series" style={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderBottom: "1px solid #e2e8f0" }} />
+                <div style={{ padding: "20px", display: "flex", flexDirection: "column", flex: 1 }}>
+                  <div style={{ display: "flex", gap: "8px", marginBottom: "10px", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "10px", fontWeight: "800", background: "#dbeafe", color: "#1d4ed8", padding: "4px 8px", borderRadius: "6px", textTransform: "uppercase" }}>Test Series</span>
+                    <span style={{ fontSize: "10px", fontWeight: "800", background: "#e0e7ff", color: "#4338ca", padding: "4px 8px", borderRadius: "6px", textTransform: "uppercase" }}>Best Seller</span>
+                  </div>
+                  <h4 style={{ fontSize: "16px", fontWeight: "800", color: "#0f172a", margin: "0 0 8px", lineHeight: 1.4 }}>
+                    ACME Premium Test Series<br /><span style={{ fontSize: "13px", fontWeight: "600", color: "#94a3b8" }}>Target: NIMCET, CUET &amp; MAH-CET</span>
+                  </h4>
+                  <div style={{ flex: 1 }}></div>
+                  <div style={{ marginTop: "16px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+                    <div>
+                      <span style={{ fontSize: "22px", fontWeight: "900", color: "#059669" }}>₹4,633</span>
+                    </div>
+                    <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+                      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <div style={{ textAlign: "center", marginTop: "24px", paddingTop: "20px", borderTop: "1px solid #e2e8f0" }}>
+            <a href="https://acmea.courses.store" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "15px", fontWeight: "700", color: "#2563eb", textDecoration: "none", padding: "8px 16px", borderRadius: "8px", transition: "background 0.2s" }}
+              onMouseEnter={(e) => e.currentTarget.style.background = "#eff6ff"}
+              onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
+              Also for more courses visit acmea.courses.store
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </a>
+          </div>
         </div>
 
         {/* Footer branding */}
