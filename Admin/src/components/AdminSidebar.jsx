@@ -12,6 +12,7 @@ import {
   Layers,
   FolderOpen,
   Mail,
+  Inbox,
   LogOut,
   GraduationCap,
 } from "lucide-react";
@@ -20,6 +21,7 @@ import { cn } from "@/lib/utils";
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
   { icon: Users, label: "Users", path: "/admin/users" },
+  { icon: Inbox, label: "Enquiries", path: "/admin/enquiries" },
   { icon: BookOpen, label: "Home Courses", path: "/admin/home-courses" },
   { icon: GraduationCap, label: "Home Page Result Images", path: "/admin/home-images" },
   { icon: GraduationCap, label: "Home Page Notices", path: "/admin/home-notices" },

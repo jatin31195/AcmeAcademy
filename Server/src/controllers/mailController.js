@@ -1,16 +1,24 @@
 import nodemailer from "nodemailer";
 import User from "../models/User.js";
+import Enquiry from "../models/Enquiry.js";
 import dotenv from "dotenv";
 dotenv.config();
 export const sendCounsellingMail = async (req, res) => {
   try {
-    const { name, email, phone, center, subject } = req.body;
+    const { name, email, phone, center, subject, message } = req.body;
 
     if (!name || !phone || !center || !subject) {
       return res.status(400).json({ error: "Please fill all required fields." });
     }
 
-  
+    // Persist the enquiry first so a lead is never lost if the email fails.
+    try {
+      await Enquiry.create({ name, email, phone, center, subject, message });
+    } catch (dbErr) {
+      console.error("Enquiry save error:", dbErr);
+    }
+
+
     const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {

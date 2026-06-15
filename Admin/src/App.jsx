@@ -21,6 +21,7 @@ const PracticeQuestionPage = lazy(() => import("./pages/PracticeQuestionPage"));
 const HomeResultImagesPage = lazy(() => import("./pages/HomeResultImagesPage"));
 const HomeNoticePage = lazy(() => import("./pages/HomeNoticePage"));
 const AdminSendMailPage = lazy(() => import("./pages/AdminSendMailPage"));
+const EnquiriesPage = lazy(() => import("./pages/EnquiriesPage"));
 
 function App() {
   return (
@@ -58,6 +59,7 @@ function App() {
             {/* Placeholder routes – add pages later */}
             <Route index element={<Dashboard />} />
             <Route path="users" element={<UsersPage />} />
+            <Route path="enquiries" element={<EnquiriesPage />} />
             <Route path="home-courses" element={<HomeCoursesPage />} />
             <Route
   path="/admin/home-images"
