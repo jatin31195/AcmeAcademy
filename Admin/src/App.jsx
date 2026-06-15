@@ -22,6 +22,7 @@ const HomeResultImagesPage = lazy(() => import("./pages/HomeResultImagesPage"));
 const HomeNoticePage = lazy(() => import("./pages/HomeNoticePage"));
 const AdminSendMailPage = lazy(() => import("./pages/AdminSendMailPage"));
 const EnquiriesPage = lazy(() => import("./pages/EnquiriesPage"));
+const RankPredictorUsersPage = lazy(() => import("./pages/RankPredictorUsersPage"));
 
 function App() {
   return (
@@ -60,6 +61,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="enquiries" element={<EnquiriesPage />} />
+            <Route path="rank-predictor-users" element={<RankPredictorUsersPage />} />
             <Route path="home-courses" element={<HomeCoursesPage />} />
             <Route
   path="/admin/home-images"

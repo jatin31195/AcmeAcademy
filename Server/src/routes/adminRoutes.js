@@ -18,9 +18,11 @@ import pyqRoute from "./admin/pyqRoute.js"
 import dashboardRoute from "./admin/dashboardRoute.js"
 import userRoute from "./admin/userRoute.js"
 import enquiryRoute from "./admin/enquiryRoute.js"
+import rankPredictorRoute from "./admin/rankPredictorRoute.js"
 const router = express.Router();
 router.use("/users", userRoute);
 router.use("/enquiries", enquiryRoute);
+router.use("/rank-predictor", rankPredictorRoute);
 router.use("/auth", authRoute);
 router.use("/selfstudy", selfStudyCourseRoute);
 router.use("/selfstudy/subjects", selfStudyCourseSubjectRoute);

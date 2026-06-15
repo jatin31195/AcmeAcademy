@@ -435,31 +435,41 @@ export const registerUser = async (req, res) => {
     const resolvedFullname = String(fullname || name || "").trim();
     const parsedTargetYear = targetYear === undefined || targetYear === "" ? null : toNumberOrNull(targetYear);
 
+    // Debug logs for registration input
+    console.log("[REGISTER] Input:", { fullname, name, email, password, phone, targetYear, otpToken });
+
     if (!resolvedFullname) {
+      console.log("[REGISTER] Missing name");
       return res.status(400).json({ message: "Name is required for signup" });
     }
     if (!email || !String(email).trim()) {
+      console.log("[REGISTER] Missing email");
       return res.status(400).json({ message: "Email is required for signup" });
     }
 
     if (!password || !String(password).trim()) {
+      console.log("[REGISTER] Missing password");
       return res.status(400).json({ message: "Password is required for signup" });
     }
 
     if (targetYear !== undefined && targetYear !== "" && !parsedTargetYear) {
+      console.log("[REGISTER] Invalid targetYear", targetYear);
       return res.status(400).json({ message: "Invalid targetYear" });
     }
 
     const normalizedPhone = getPhoneFromIndianInput(phone);
     if (!normalizedPhone) {
+      console.log("[REGISTER] Invalid phone", phone);
       return res.status(400).json({ message: "Valid 10-digit phone is required" });
     }
 
     const verifiedOtpEntry = verifiedOtpTokenStore.get(otpToken);
     if (!verifiedOtpEntry || verifiedOtpEntry.purpose !== "signup") {
+      console.log("[REGISTER] OTP not verified or wrong purpose", { otpToken, verifiedOtpEntry });
       return res.status(403).json({ message: "Please verify signup OTP before registration" });
     }
     if (verifiedOtpEntry.phone !== normalizedPhone) {
+      console.log("[REGISTER] OTP phone mismatch", { otpPhone: verifiedOtpEntry.phone, normalizedPhone });
       return res.status(403).json({ message: "OTP does not belong to this phone" });
     }
 
@@ -467,10 +477,12 @@ export const registerUser = async (req, res) => {
 
     const normalizedEmail = String(email).trim().toLowerCase();
     const existingEmail = await userService.getUserByEmail(normalizedEmail);
+    console.log("[REGISTER] Existing email:", existingEmail);
     if (existingEmail)
       return res.status(400).json({ message: "Email already registered" });
 
     const existingPhone = await userService.getUserByPhone(normalizedPhone);
+    console.log("[REGISTER] Existing phone:", existingPhone);
     if (existingPhone)
       return res.status(400).json({ message: "Phone already registered" });
 
@@ -482,6 +494,7 @@ export const registerUser = async (req, res) => {
       phone: normalizedPhone,
       targetYear: parsedTargetYear,
     });
+    console.log("[REGISTER] User created:", user?._id);
 
     let welcomeEmailSent = false;
 
@@ -574,6 +587,8 @@ export const registerUser = async (req, res) => {
             : duplicateField === "phone"
               ? "Phone"
               : "Field";
+
+      console.log("[REGISTER] Duplicate error", { duplicateField, duplicateValue, fieldLabel });
 
       return res.status(400).json({
         message: `${fieldLabel} already registered${duplicateValue ? `: ${duplicateValue}` : ""}`,
@@ -1231,15 +1246,17 @@ export const adminLogin = async (req, res) => {
       return res.status(401).json({ message: "Invalid admin credentials" });
     }
 
-    // 🔑 Generate tokens (same pattern as user)
+    // 🔑 Generate tokens. The `role: "admin"` claim is REQUIRED — it is what
+    // distinguishes an admin token from a regular user token (both are signed
+    // with the same JWT_SECRET), preventing privilege escalation.
     const accessToken = jwt.sign(
-      { email },
+      { email, role: "admin" },
       process.env.JWT_SECRET,
-      { expiresIn: "15m" }
+      { expiresIn: "24h" }
     );
 
     const refreshToken = jwt.sign(
-      { email },
+      { email, role: "admin" },
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
     );
@@ -1254,7 +1271,7 @@ export const adminLogin = async (req, res) => {
     res
       .cookie("adminAccessToken", accessToken, {
         ...cookieOptions,
-        maxAge: 15 * 60 * 1000,
+        maxAge: 24 * 60 * 60 * 1000,
       })
       .cookie("adminRefreshToken", refreshToken, {
         ...cookieOptions,
@@ -1283,6 +1300,11 @@ export const getAdminMe = (req, res) => {
 
   try {
     const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
+
+    // Reject non-admin tokens (same secret is used for user tokens).
+    if (decoded.role !== "admin" || decoded.email !== process.env.ADMIN_EMAIL) {
+      return res.status(401).json({ admin: null });
+    }
 
     res.status(200).json({
       admin: {
@@ -1327,17 +1349,22 @@ export const adminRefresh = (req, res) => {
       process.env.JWT_SECRET
     );
 
+    // Only a genuine admin refresh token may mint a new admin access token.
+    if (decoded.role !== "admin" || decoded.email !== process.env.ADMIN_EMAIL) {
+      return res.status(401).json({ message: "Invalid admin refresh token" });
+    }
+
     const newAccessToken = jwt.sign(
-      { email: decoded.email },
+      { email: decoded.email, role: "admin" },
       process.env.JWT_SECRET,
-      { expiresIn: "15m" }
+      { expiresIn: "24h" }
     );
 
     res.cookie("adminAccessToken", newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({ success: true });

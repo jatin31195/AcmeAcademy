@@ -13,6 +13,7 @@ import {
   FolderOpen,
   Mail,
   Inbox,
+  TrendingUp,
   LogOut,
   GraduationCap,
 } from "lucide-react";
@@ -22,6 +23,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
   { icon: Users, label: "Users", path: "/admin/users" },
   { icon: Inbox, label: "Enquiries", path: "/admin/enquiries" },
+  { icon: TrendingUp, label: "Rank Predictor Users", path: "/admin/rank-predictor-users" },
   { icon: BookOpen, label: "Home Courses", path: "/admin/home-courses" },
   { icon: GraduationCap, label: "Home Page Result Images", path: "/admin/home-images" },
   { icon: GraduationCap, label: "Home Page Notices", path: "/admin/home-notices" },

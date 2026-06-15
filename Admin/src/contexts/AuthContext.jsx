@@ -17,9 +17,13 @@ export const api = axios.create({
 
 const INACTIVITY_MS = 30 * 60 * 1000;
 const REVALIDATE_MS = 5 * 60 * 1000;
-// Access token lives 15 min — refresh well before that so it never lapses
-// mid-session (the cause of the random logouts).
-const PROACTIVE_REFRESH_MS = 12 * 60 * 1000;
+// Server access-token lifetime (keep in sync with authController.js).
+const ACCESS_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
+// Silently renew the access token well before it expires so the session never
+// lapses mid-use. Refreshing at half the TTL guarantees a fresh token even if
+// the tab sleeps for a while, and it's completely invisible to the admin
+// (no loading screen, no redirect — just a quiet background POST /refresh).
+const PROACTIVE_REFRESH_MS = ACCESS_TOKEN_TTL_MS / 2;
 
 export const AuthProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
@@ -69,7 +73,12 @@ export const AuthProvider = ({ children }) => {
             return api(originalRequest);
           } catch (refreshError) {
             processQueue(refreshError);
-            setAdmin(null);
+            // Only sign out when the refresh token is genuinely rejected.
+            // Transient failures (network / timeout / 5xx) must NOT end a
+            // session that still holds valid cookies.
+            if (refreshError?.response?.status === 401) {
+              setAdmin(null);
+            }
             return Promise.reject(refreshError);
           } finally {
             isRefreshing.current = false;
@@ -200,8 +209,13 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await api.get("/api/admin/auth/me");
       setAdmin(res.data.admin);
-    } catch {
-      setAdmin(null);
+    } catch (err) {
+      // Background revalidation: only log out on a definitive auth rejection.
+      // A transient error should leave the existing session untouched so the
+      // admin isn't bounced to /login on a momentary blip.
+      if (err?.response?.status === 401) {
+        setAdmin(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -209,9 +223,43 @@ export const AuthProvider = ({ children }) => {
 
   /* =======================
      RESTORE SESSION
+     On first load, keep the "Verifying secure session..." screen up while we
+     confirm auth. Distinguish a real 401 (→ login) from a transient error
+     (→ retry a few times) so a valid session never flashes the login page.
   ======================= */
   useEffect(() => {
-    checkAuth();
+    let cancelled = false;
+
+    const bootstrap = async (attempt = 0) => {
+      try {
+        const res = await api.get("/api/admin/auth/me");
+        if (cancelled) return;
+        setAdmin(res.data.admin);
+        setLoading(false);
+      } catch (err) {
+        if (cancelled) return;
+
+        const status = err?.response?.status;
+        const isTransient = !status || status >= 500; // network / timeout / 5xx
+
+        if (isTransient && attempt < 3) {
+          // Stay on the loading screen and retry with simple backoff.
+          await new Promise((resolve) => setTimeout(resolve, 800 * (attempt + 1)));
+          if (!cancelled) bootstrap(attempt + 1);
+          return;
+        }
+
+        // Definitive 401 (or exhausted retries) → treat as logged out.
+        setAdmin(null);
+        setLoading(false);
+      }
+    };
+
+    bootstrap();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
