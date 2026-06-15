@@ -18,16 +18,17 @@ import { BASE_URL } from "@/config";
 // The browser never talks to Firestore directly.
 const API = `${BASE_URL}/api/admin/rank-predictor`;
 
-// Editable fields shown as columns (order matters for the table + CSV).
+// Columns shown in the table + CSV (order matters).
+// `rank` is a derived value — display-only, never edited or saved.
 const FIELDS = [
-  { key: "name", label: "Name" },
-  { key: "phone", label: "Phone" },
-  { key: "marks", label: "Marks" },
-  { key: "category", label: "Category" },
-  { key: "regNo", label: "RegNo" },
-  { key: "city", label: "City" },
-  { key: "state", label: "State" },
-  { key: "rank", label: "Rank" },
+  { key: "name", label: "Name", editable: true },
+  { key: "phone", label: "Phone", editable: true },
+  { key: "marks", label: "Marks", editable: true },
+  { key: "category", label: "Category", editable: true },
+  { key: "regNo", label: "RegNo", editable: true },
+  { key: "city", label: "City", editable: true },
+  { key: "state", label: "State", editable: true },
+  { key: "rank", label: "Rank", editable: false },
 ];
 
 const csvCell = (value) => {
@@ -101,7 +102,10 @@ const RankPredictorUsersPage = () => {
     try {
       setSavingId(id);
       const payload = Object.fromEntries(
-        FIELDS.map((f) => [f.key, String(user[f.key] ?? "").trim()])
+        FIELDS.filter((f) => f.editable).map((f) => [
+          f.key,
+          String(user[f.key] ?? "").trim(),
+        ])
       );
       const res = await fetch(`${API}/${id}`, {
         method: "PUT",
@@ -245,15 +249,23 @@ const RankPredictorUsersPage = () => {
               {filtered.map((u, index) => (
                 <tr key={u.id} className="border-t" style={{ borderColor: "hsl(var(--border))" }}>
                   <td className="p-2 text-sm text-muted-foreground">{index + 1}</td>
-                  {FIELDS.map((f) => (
-                    <td key={f.key} className="p-2">
-                      <Input
-                        value={u[f.key] ?? ""}
-                        onChange={(e) => updateField(u.id, f.key, e.target.value)}
-                        className="h-9 min-w-[110px] bg-secondary border-border"
-                      />
-                    </td>
-                  ))}
+                  {FIELDS.map((f) =>
+                    f.editable ? (
+                      <td key={f.key} className="p-2">
+                        <Input
+                          value={u[f.key] ?? ""}
+                          onChange={(e) => updateField(u.id, f.key, e.target.value)}
+                          className="h-9 min-w-[110px] bg-secondary border-border"
+                        />
+                      </td>
+                    ) : (
+                      <td key={f.key} className="p-2">
+                        <span className="block min-w-[70px] px-1 text-sm font-medium text-foreground">
+                          {u[f.key] ?? "-"}
+                        </span>
+                      </td>
+                    )
+                  )}
                   <td className="p-2">
                     <div className="flex items-center gap-2">
                       <Button

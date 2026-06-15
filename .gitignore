@@ -17,6 +17,8 @@ Server/.env
 Admin/.env
 Server/flask_app/.env
 Server/flask_app/service_account.json
+Server/serviceAccount.json
+Server/serviceAccount*.json
 # Build outputs
 client/dist/
 client/build/

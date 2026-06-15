@@ -2,7 +2,9 @@ import { getFirestore } from "../config/firebaseAdmin.js";
 
 const COLLECTION = "nimcet_users";
 
-// Only these fields may be read back / written — never trust arbitrary keys.
+// Only these fields may be written — never trust arbitrary keys.
+// `rank` is intentionally excluded: it is a derived value and must not be
+// editable via the admin panel (matches the original tool's behaviour).
 const EDITABLE_FIELDS = [
   "name",
   "phone",
@@ -11,7 +13,6 @@ const EDITABLE_FIELDS = [
   "regNo",
   "city",
   "state",
-  "rank",
 ];
 
 /**
