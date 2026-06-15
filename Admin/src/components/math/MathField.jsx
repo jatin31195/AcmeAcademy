@@ -19,7 +19,7 @@ if (typeof window !== "undefined") {
   MathfieldElement.soundsDirectory = null;
 }
 
-const MathField = ({ value = "", onChange, apiRef, placeholder = "" }) => {
+const MathField = ({ value = "", onChange, apiRef, placeholder = "", minHeight = 56 }) => {
   const ref = useRef(null);
 
   // Expose a minimal imperative API to the parent (toolbar).
@@ -73,11 +73,11 @@ const MathField = ({ value = "", onChange, apiRef, placeholder = "" }) => {
       style={{
         display: "block",
         width: "100%",
-        minHeight: "56px",
-        padding: "12px 14px",
-        fontSize: "20px",
+        minHeight: `${minHeight}px`,
+        padding: "14px 16px",
+        fontSize: "22px",
         border: "1px solid hsl(var(--border))",
-        borderRadius: "10px",
+        borderRadius: "12px",
         background: "hsl(var(--background))",
         color: "hsl(var(--foreground))",
       }}

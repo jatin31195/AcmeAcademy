@@ -118,7 +118,7 @@ const KatexQuestionDialog = ({
         onOpenChange(v);
       }}
     >
-      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto bg-[hsl(var(--card))] text-foreground border border-border">
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto rounded-[24px] border-border/70 bg-card text-foreground shadow-2xl lg:max-w-5xl">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">
             {isEdit ? "Edit Question — Equation Editor" : "Add Question — Equation Editor"}

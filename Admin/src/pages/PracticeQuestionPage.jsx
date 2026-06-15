@@ -405,17 +405,19 @@ const PracticeQuestionPage = () => {
 
       {/* ---------------- MODAL ---------------- */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto rounded-2xl border-border/70 bg-card text-foreground shadow-lg">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-foreground">
+        <DialogContent className="flex max-h-[92vh] w-[calc(100%-1rem)] max-w-3xl flex-col gap-0 overflow-hidden rounded-[24px] border-border/70 bg-card p-0 text-foreground shadow-2xl lg:max-w-5xl">
+          {/* Sticky header */}
+          <DialogHeader className="shrink-0 space-y-1.5 border-b border-border/70 py-5 pl-6 pr-12">
+            <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
               {mode === "create" ? "Add Practice Question" : "Edit Practice Question"}
             </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
+            <DialogDescription className="text-sm text-muted-foreground">
               Type plain text, or use “Insert equation” for math. Toggle each field’s preview to verify the rendering.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4">
+          {/* Scrollable body */}
+          <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
             <QuestionMathField
               label="Question"
               name="question"
@@ -533,7 +535,8 @@ const PracticeQuestionPage = () => {
 
           </div>
 
-          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          {/* Sticky footer */}
+          <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-border/70 px-6 py-4 sm:flex-row sm:justify-end">
             <Button className="w-full sm:w-auto" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
