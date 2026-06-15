@@ -13,10 +13,10 @@ import ResultHero from "../components/ResultHero.jsx";
 import CollegeCard from "../components/CollegeCard.jsx";
 import ShareResult from "../components/ShareResult.jsx";
 
-import photo1 from "../assets/image1.jpg";
-import photo2 from "../assets/image2.jpg";
-import photo3 from "../assets/image3.jpg";
-import photo4 from "../assets/image4.jpg";
+import photo1 from "../assets/topper1.jpg";
+import photo2 from "../assets/topper2.jpg";
+import photo3 from "../assets/batch1.png";
+import photo4 from "../assets/batch2.png";
 
 // Course-promo images for the Advertisement Section (added from testing build).
 import ad1 from "../assets/ad_course1.png";
