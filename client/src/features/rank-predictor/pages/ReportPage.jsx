@@ -177,7 +177,7 @@ const ReportPage = () => {
                   {photos.map((p) => (
                     <div key={p.id} style={{ width: "100%", height: "100%", flexShrink: 0 }}>
                       <a href={p.link} target="_blank" rel="noopener noreferrer" style={{ display: "block", width: "100%", height: "100%" }}>
-                        <img src={p.url} alt={p.alt} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={p.url} alt={p.alt} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                       </a>
                     </div>
                   ))}
