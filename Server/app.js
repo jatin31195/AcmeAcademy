@@ -119,7 +119,9 @@ app.use((req, res, next) => {
 });
 
 // Sensitive student endpoints should never be cached by browsers/proxies.
-app.use(["/api/users", "/api/results", "/api/tests"], (req, res, next) => {
+// FIX 3 — "/api/otp" added so OTP send/verify responses are never served from
+// a browser, proxy or CDN cache (a stale verify verdict must never be replayed).
+app.use(["/api/users", "/api/results", "/api/tests", "/api/otp"], (req, res, next) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");

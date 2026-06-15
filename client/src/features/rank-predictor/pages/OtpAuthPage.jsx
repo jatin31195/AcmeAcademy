@@ -72,12 +72,34 @@ const OtpAuthPage = () => {
     if (!otp || otp.length < 4) { setError("Enter the OTP you received."); return; }
     setIsLoading(true);
     try {
-      const res  = await fetch(`${BACKEND_URL}/api/otp/verify?sessionId=${sessionId}&otp=${otp}`);
-      const data = await res.json();
+      // FIX 4 — verify is now a POST with a JSON body (sessionId/otp no longer
+      // travel in the URL where they could be logged or cached).
+      const res  = await fetch(`${BACKEND_URL}/api/otp/verify`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, otp }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      // FIX 2 — surface the REAL reason for failure instead of blanket "Invalid OTP".
+      // Rate limiting, backend errors and provider outages each get their own
+      // message; "Invalid OTP" is shown ONLY when 2Factor actually rejects the code.
+      if (res.status === 429) {
+        // Shared-bucket throttle / too many attempts on this OTP session.
+        setError(data.message || "Too many attempts right now. Please wait a moment and try again.");
+        return;
+      }
+      if (!res.ok) {
+        // 4xx/5xx from our backend (validation, 2Factor unreachable, etc.).
+        setError(data.message || data.Details || "Could not verify OTP. Please try again.");
+        return;
+      }
       if (data.Status === "Success") {
         sessionStorage.setItem(RP_AUTH_KEY, JSON.stringify({ phone, expiry: Date.now() + 3600000 }));
         navigate(`${RP_BASE}/form`, { state: { phone } });
-      } else setError(data.Details || "Invalid OTP.");
+        return;
+      }
+      // Genuine 2Factor rejection (e.g. "OTP Mismatch" / "OTP Expired").
+      setError(data.Details || "Invalid OTP. Please check and try again.");
     } catch { setError("Network error — is the backend running?"); }
     finally { setIsLoading(false); }
   };

@@ -2,6 +2,12 @@
  * routes/rankpredictorOtp.js
  * NIMCET Rank Predictor — phone OTP routes (send & verify) via 2factor.in.
  * Mounted at /api/otp.
+ *
+ * FIX 4 — /verify is now a POST with a JSON body { sessionId, otp } instead of
+ *         a GET with query params. This keeps the OTP/sessionId out of URLs,
+ *         server logs and any intermediary cache keys.
+ * FIX 5 — structured JSON logs (OTP_SEND / OTP_VERIFY) for production
+ *         diagnostics during high-traffic counselling periods.
  */
 
 import express from "express";
@@ -42,6 +48,17 @@ router.post("/send", otpSendLimiter, async (req, res, next) => {
     const response = await fetch(url);
     const data = await response.json();
 
+    // FIX 5 — structured diagnostics. Details holds the 2Factor sessionId on success.
+    console.log(
+      JSON.stringify({
+        tag: "OTP_SEND",
+        phone: phone.trim(),
+        sessionId: data?.Status === "Success" ? data?.Details : null,
+        status: data?.Status ?? null,
+        timestamp: new Date().toISOString(),
+      })
+    );
+
     // Pass through 2factor.in response unchanged so the client can use data.Details (sessionId)
     return res.json(data);
   } catch (err) {
@@ -50,11 +67,13 @@ router.post("/send", otpSendLimiter, async (req, res, next) => {
 });
 
 /* ─────────────────────────────────────────
-   GET /api/otp/verify?sessionId=&otp=
+   POST /api/otp/verify
+   Body: { sessionId: "...", otp: "123456" }
+   (FIX 4 — converted from GET query params to POST body)
    ───────────────────────────────────────── */
-router.get("/verify", otpVerifyLimiter, async (req, res, next) => {
+router.post("/verify", otpVerifyLimiter, async (req, res, next) => {
   try {
-    const { sessionId, otp } = req.query;
+    const { sessionId, otp } = req.body;
 
     if (!isValidSessionId(sessionId)) {
       return res.status(400).json({ status: "Error", message: "Missing or invalid sessionId." });
@@ -66,6 +85,19 @@ router.get("/verify", otpVerifyLimiter, async (req, res, next) => {
     const url = `https://2factor.in/API/V1/${TWO_FACTOR_API_KEY}/SMS/VERIFY/${sessionId.trim()}/${otp.trim()}`;
     const response = await fetch(url);
     const data = await response.json();
+
+    // FIX 5 — structured diagnostics distinguishing a real 2Factor rejection
+    // (status "Error", details "OTP Mismatch/Expired") from infra/throttle issues.
+    console.log(
+      JSON.stringify({
+        tag: "OTP_VERIFY",
+        sessionId: sessionId.trim(),
+        status: data?.Status ?? null,
+        details: data?.Details ?? null,
+        ip: req.ip,
+        timestamp: new Date().toISOString(),
+      })
+    );
 
     return res.json(data);
   } catch (err) {
