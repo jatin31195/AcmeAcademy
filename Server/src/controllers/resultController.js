@@ -330,8 +330,8 @@ export const getAvailableExams = async (req, res) => {
 export const getHomeResultImages = async (req, res) => {
   try {
     const results = await Result.find({ photoType: { $regex: /^home$/i } })
-      .sort({ _id: 1 }) 
-      .select("name exam year rank score photoUrl slug photoType");
+      .sort({ order: 1, _id: 1 })
+      .select("name exam year rank score photoUrl slug photoType order");
 
     if (!results.length)
       return res.status(404).json({ message: "No home result images found" });
@@ -361,11 +361,16 @@ export const addHomeResultImage = async (req, res) => {
       { lower: true, strict: true }
     );
 
+    const existingCount = await Result.countDocuments({
+      photoType: { $regex: /^home$/i },
+    });
+
     const homeResult = new Result({
       exam: exam.toLowerCase(),
       photoUrl: cloudUrl,
       photoType: "home",
       slug,
+      order: existingCount,
     });
 
     await homeResult.save();
@@ -377,6 +382,44 @@ export const addHomeResultImage = async (req, res) => {
   } catch (err) {
     console.error("Error adding home image:", err);
     res.status(500).json({ error: "Failed to add home image" });
+  }
+};
+
+// REORDER HOME IMAGE (ADMIN) — move image to a new 0-based position
+export const reorderHomeImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { order } = req.body;
+    const newPosition = Number(order);
+
+    if (Number.isNaN(newPosition) || newPosition < 0) {
+      return res.status(400).json({ error: "A valid target position is required" });
+    }
+
+    const homeImages = await Result.find({
+      photoType: { $regex: /^home$/i },
+    }).sort({ order: 1, _id: 1 });
+
+    const currentIndex = homeImages.findIndex((img) => img._id.toString() === id);
+    if (currentIndex === -1) {
+      return res.status(404).json({ message: "Home image not found" });
+    }
+
+    const clampedPosition = Math.min(newPosition, homeImages.length - 1);
+
+    const [moved] = homeImages.splice(currentIndex, 1);
+    homeImages.splice(clampedPosition, 0, moved);
+
+    await Promise.all(
+      homeImages.map((img, index) =>
+        Result.updateOne({ _id: img._id }, { $set: { order: index } })
+      )
+    );
+
+    res.status(200).json({ message: "Home image order updated successfully" });
+  } catch (err) {
+    console.error("Error reordering home image:", err);
+    res.status(500).json({ error: "Failed to reorder home image" });
   }
 };
 

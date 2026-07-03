@@ -80,6 +80,18 @@ const HomeResultImagesPage = () => {
     fetchImages();
   };
 
+  /* ---------------- REORDER ---------------- */
+  const handleReorder = async (id, newPosition) => {
+    await fetch(`${API}/reorder/${id}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order: Number(newPosition) }),
+    });
+
+    fetchImages();
+  };
+
   return (
     <div className="animate-fade-in">
       <PageHeader
@@ -112,6 +124,21 @@ const HomeResultImagesPage = () => {
               <p className="font-semibold text-foreground">
                 {img.exam?.toUpperCase()}
               </p>
+
+              <label className="text-sm text-muted-foreground block">
+                Position
+                <select
+                  className="mt-1 w-full rounded-md border border-border bg-background px-2 py-1 text-foreground"
+                  value={images.findIndex((i) => i._id === img._id)}
+                  onChange={(e) => handleReorder(img._id, e.target.value)}
+                >
+                  {images.map((_, index) => (
+                    <option key={index} value={index}>
+                      {index + 1}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
               <Button
                 size="sm"

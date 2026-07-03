@@ -11,7 +11,8 @@ const resultSchema = new mongoose.Schema(
     score: { type: Number },
     photoUrl: { type: String },
     slug: { type: String, unique: true, index: true },
-    photoType:{type:String}
+    photoType:{type:String},
+    order: { type: Number, default: 0 }
   },
   { timestamps: true }
 );
