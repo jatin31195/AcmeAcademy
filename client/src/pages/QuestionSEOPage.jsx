@@ -33,7 +33,7 @@ const QuestionSEOPage = () => {
   const keywords = question.tags?.join(", ") || question.topic || "MCA Preparation";
   const url = `https://www.acmeacademy.in/questions/${slug}`;
   const image =
-    question.image || "https://www.acmeacademy.in/assets/og-image.png";
+    question.image || "https://www.acmeacademy.in/logo.png";
 
 
   const jsonLd = {

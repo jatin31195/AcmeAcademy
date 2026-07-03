@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
@@ -19,11 +20,30 @@ const FAQSection = () => {
     q: "What is the batch strength?",
     a: "We proudly train over 700+ students every year while ensuring dedicated mentorship and consistent performance tracking.",
   },
+  {
+    q: "Did any ACME Academy student get AIR 1 in NIMCET 2026?",
+    a: "Yes — ACME Academy student Kartik Sharma secured All India Rank 1 in NIMCET 2026, alongside AIR 39 and 100+ selections across NIT MCA programs this year.",
+  },
 ];
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.a,
+      },
+    })),
+  };
 
   return (
     <section className="py-24 bg-muted/20">
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
+      </Helmet>
       <div className="max-w-4xl mx-auto px-6">
         <motion.h2
           className="text-4xl font-heading font-bold text-center mb-12"

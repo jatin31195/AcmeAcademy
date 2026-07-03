@@ -24,8 +24,8 @@ const ExamPattern = () => {
     <SEO
   title="MCA Exam Patterns 2025 | NIMCET, CUET-PG, MAH-CET, JMI & VIT MCA"
   description="Explore detailed MCA exam patterns for NIMCET, CUET-PG, MAH-CET, JMI, and VIT MCA. Know the syllabus, marking scheme, duration, and question structure for 2025 entrance exams."
-  url="https://www.acmeacademy.in/mca-exam-patterns"
-  image="https://www.acmeacademy.in/assets/og-exam-patterns.jpg"
+  url="https://www.acmeacademy.in/exam-pattern"
+  image="https://www.acmeacademy.in/logo.png"
   keywords="MCA exam pattern 2025, NIMCET syllabus, CUET PG MCA, MAH CET MCA paper pattern, JMI MCA entrance, VIT MCA exam structure, ACME Academy"
   jsonLd={{
     "@context": "https://schema.org",

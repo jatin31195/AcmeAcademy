@@ -13,7 +13,11 @@
     />
     <meta name="keywords" content="best MCA coaching in India, NIMCET coaching, online MCA classes, offline MCA coaching, CUET-PG MCA preparation, MAH-CET MCA, JMI MCA, BIT MCA, VIT MCA, DU MCA" />
     <meta name="author" content="ACME Academy" />
-    <link rel="canonical" href="https://www.acmeacademy.in/" />
+    <!-- The SPA has no working route for bare "/" (it falls through to the catch-all
+         redirect to /home); /home is the app's actual established canonical page
+         (see Home.jsx's own <SEO> canonical), so the static fallback tags below must
+         match that, not the unreachable root path. -->
+    <link rel="canonical" href="https://www.acmeacademy.in/home" />
 
   
     <link rel="icon" href="/logo.png" type="image/png" />
@@ -23,15 +27,18 @@
     <meta property="og:locale" content="en_IN" />
     <meta property="og:title" content="ACME Academy - Best MCA Coaching in India (Online & Offline)" />
     <meta property="og:description" content="Join ACME Academy, India’s top-rated MCA coaching for NIMCET, CUET-PG & MAH-CET. 10+ years of excellence, 2000+ selections, and nationwide trust." />
-    <meta property="og:url" content="https://www.acmeacademy.in/" />
+    <meta property="og:url" content="https://www.acmeacademy.in/home" />
     <meta property="og:site_name" content="ACME Academy" />
-    <meta property="og:image" content="https://www.acmeacademy.in/assets/og-acme-home.jpg" />
+    <!-- /assets/og-acme-home.jpg does not exist in client/public — pointed at the
+         real logo asset as an interim fix; a proper 1200x630 banner should replace
+         this the next time design produces one. -->
+    <meta property="og:image" content="https://www.acmeacademy.in/logo.png" />
 
-  
+
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="ACME Academy - India's #1 MCA Entrance Coaching" />
     <meta name="twitter:description" content="Learn from expert mentors for NIMCET, CUET-PG, MAH-CET & more. Join 2000+ successful MCA aspirants." />
-    <meta name="twitter:image" content="https://www.acmeacademy.in/assets/og-acme-home.jpg" />
+    <meta name="twitter:image" content="https://www.acmeacademy.in/logo.png" />
     <meta name="twitter:creator" content="@acmeacademy" />
 
    
@@ -94,17 +101,16 @@
       }
     </script>
 
+    <!-- No /search route exists in the app, so the SearchAction that used to be
+         declared here was advertising a capability Google could never actually use.
+         Removed rather than pointed at a fake destination; re-add only once a real
+         site search page exists. -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "ACME Academy",
-        "url": "https://www.acmeacademy.in",
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": "https://www.acmeacademy.in/search?q={search_term_string}",
-          "query-input": "required name=search_term_string"
-        }
+        "url": "https://www.acmeacademy.in"
       }
     </script>
 

@@ -6,6 +6,7 @@ import {
   addGalleryImage,
   getGalleryImages,
   getTopResults,
+  getTopResultsByExam,
   getCombinedResultImages,
   getAvailableYearsByExam,
   getAvailableExams,
@@ -17,6 +18,7 @@ import {
 import { upload } from "../utils/multerCloudinary.js";
 const router = express.Router();
 router.get("/top/all", getTopResults);
+router.get("/top/:exam", getTopResultsByExam);
 router.get("/gallery/all", getGalleryImages);
 router.get("/home/result", getHomeResultImages);
 router.post("/home/add-result",upload.single("photo"),addHomeResultImage

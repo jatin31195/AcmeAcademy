@@ -83,7 +83,7 @@ const PYQ = () => {
   title="Previous Year MCA Entrance Question Papers | ACME Academy"
   description="Download and practice Previous Year Question Papers (PYQs) for NIMCET, CUET-PG, MAH-CET, JMI, BIT, and other MCA entrance exams. Prepare effectively with ACME Academy."
   url="https://www.acmeacademy.in/pyq"
-  image="https://www.acmeacademy.in/assets/og-pyq.jpg"
+  image="https://www.acmeacademy.in/logo.png"
   keywords="NIMCET PYQ, CUET-PG question papers, MAH-CET MCA papers, JMI MCA PYQs, BIT MCA papers, ACME Academy PYQs, previous year MCA papers"
   jsonLd={{
     "@context": "https://schema.org",

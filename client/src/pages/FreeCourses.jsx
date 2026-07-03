@@ -45,7 +45,7 @@ const FreeCourses = () => {
   title="Free MCA Self-Study Courses | NIMCET & CUET-PG Preparation | ACME Academy"
   description="Access 100% free MCA self-study courses from ACME Academy — including notes, guides, and video lectures for NIMCET, CUET-PG, and MAH-CET. Learn at your own pace!"
   url="https://www.acmeacademy.in/acme-free-courses"
-  image="https://www.acmeacademy.in/assets/og-free-courses.jpg"
+  image="https://www.acmeacademy.in/logo.png"
   keywords="Free MCA courses, MCA online study, NIMCET free course, CUET PG MCA course, ACME Academy, MCA entrance coaching"
   jsonLd={{
     "@context": "https://schema.org",

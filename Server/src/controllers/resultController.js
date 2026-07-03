@@ -206,6 +206,24 @@ export const getTopResults = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch top results" });
   }
 };
+export const getTopResultsByExam = async (req, res) => {
+  try {
+    const { exam } = req.params;
+    const results = await Result.find({
+      exam: exam?.toLowerCase(),
+      rank: { $exists: true },
+    })
+      .sort({ rank: 1 })
+      .limit(20)
+      .select("name exam year rank score photoUrl slug");
+
+    res.status(200).json(results);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch top results for exam" });
+  }
+};
+
 export const getCombinedResultImages = async (req, res) => {
   try {
     const results = await Result.find({ photoType: "combined" })

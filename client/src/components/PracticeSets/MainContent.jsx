@@ -11,6 +11,8 @@ const MainContent = ({
   expandedQuestions = [],
   selectedSubject,
   selectedTopic,
+  currentPage,
+  setCurrentPage,
   handleOptionClick,
   getOptionStyle,
   showSolution,
@@ -29,7 +31,10 @@ const MainContent = ({
   const hasTags = allTags.length > 0;
 
   const [selectedTag, setSelectedTag] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  // currentPage/setCurrentPage now come from the parent (PracticeSets.jsx), which is
+  // also the component syncing it to the ?page= URL param — previously this component
+  // kept its own separate currentPage state, so the URL's page number never actually
+  // matched what was rendered here.
 
   /* ---------------- AUTO SELECT FIRST TAG ---------------- */
 

@@ -1,13 +1,78 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Trophy, Loader2, Filter } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import { Trophy, Loader2, Filter, Award, Users, BookOpen } from "lucide-react";
 import PastGallery from "@/components/Results/PastGallery";
 import logo from "/logo.png";
 import { BASE_URL } from "../config";
+import SEO from "../components/SEO";
+
+// Canonical URL segment for the past-gallery view. Kept as a single constant so the
+// route literal (used in navigate()/canonicalUrl) and the internal state token below
+// can never drift out of sync with each other again.
+const PAST_GALLERY_SLUG = "past-gallery";
+
+/* ------------------------------------------------------------------------
+ * SEO / Google Images helpers
+ * Everything below is derived purely from fields already on a Result doc
+ * (name, rank, exam, year, photoUrl, slug, score) — no new DB fields, no
+ * backend changes, nothing that requires editing historical records.
+ * ---------------------------------------------------------------------- */
+
+// Cloudinary lets us request resized/format-optimized variants by editing the
+// URL itself, so we can get responsive images and Google-Images-friendly
+// fixed widths without touching how images are uploaded or stored.
+const optimizeCloudinaryUrl = (url, width) => {
+  if (!url || typeof url !== "string") return url;
+  if (!url.includes("res.cloudinary.com/") || !url.includes("/upload/")) return url;
+  if (url.includes("f_auto") || url.includes("q_auto")) return url; // already optimized upstream
+  return url.replace("/upload/", `/upload/f_auto,q_auto,w_${width}/`);
+};
+
+const buildResultSrcSet = (url) => {
+  if (!url || !url.includes("res.cloudinary.com/") || !url.includes("/upload/")) return undefined;
+  if (url.includes("f_auto") || url.includes("q_auto")) return undefined;
+  return [400, 800, 1200]
+    .map((w) => `${optimizeCloudinaryUrl(url, w)} ${w}w`)
+    .join(", ");
+};
+
+// One consistent, descriptive alt/caption template used everywhere a result
+// photo renders — previously the sidebar used a much weaker alt than the
+// main grid; both now go through this single function.
+const getResultLabel = (r, fallbackExam) => {
+  if (r.rank) return `AIR ${r.rank}`;
+  if (r.score) return `Score ${r.score}`;
+  return `${(r.exam || fallbackExam || "").toString().toUpperCase()} Selection`;
+};
+
+const getResultAltText = (r, fallbackExam) => {
+  const label = getResultLabel(r, fallbackExam);
+  const examName = (r.exam || fallbackExam || "").toString().toUpperCase();
+  return `${r.name || r.eventName || "ACME Academy student"} — ${label}, ${examName} ${
+    r.year || ""
+  } topper photo, ACME Academy`
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
+// Deterministic anchor id for every card, generated only from fields already
+// on the document — this is what lets an individual result be deep-linked
+// and referenced from structured data without giving it a separate page.
+const localSlugify = (str) =>
+  String(str)
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+const getAnchorId = (r) =>
+  r.slug ||
+  r._id ||
+  localSlugify(`${r.exam || "result"}-${r.year || ""}-${r.rank || r.score || r.name || "topper"}`);
+
 const Results = () => {
   const navigate = useNavigate();
   const { exam, year } = useParams();
@@ -17,29 +82,40 @@ const Results = () => {
   const [combined, setCombined] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedExam, setSelectedExam] = useState(exam?.toUpperCase() || "NIMCET");
-  const [selectedYear, setSelectedYear] = useState(year || "2025");
+  const [selectedYear, setSelectedYear] = useState(
+    year === PAST_GALLERY_SLUG ? "PastGallery" : year || "2025"
+  );
 
   const text = [
     "At ACME Academy, we don’t just teach — we mentor, inspire, and transform.",
     "Our structured NIMCET programs, expert faculty, and proven strategies empower students to unlock their full potential.",
-    
+
   ];
 
   useEffect(() => {
     if (selectedYear === "All") navigate(`/acme-academy-results`);
-    else if (selectedYear === "PastGallery") navigate(`/acme-academy-results/past-gallery`);
+    else if (selectedYear === "PastGallery") navigate(`/acme-academy-results/${PAST_GALLERY_SLUG}`);
     else navigate(`/acme-academy-results/${selectedExam.toLowerCase()}/${selectedYear}`);
   }, [selectedExam, selectedYear]);
+
+  // Keeps state in sync when the URL param itself is the source of truth (direct load,
+  // back/forward navigation) — previously only the initial useState() read this, so
+  // landing directly on /acme-academy-results/past-gallery never actually showed the gallery.
+  useEffect(() => {
+    if (year === PAST_GALLERY_SLUG && selectedYear !== "PastGallery") {
+      setSelectedYear("PastGallery");
+    }
+  }, [year]);
 
   useEffect(() => {
     const fetchExams = async () => {
       try {
         const { data } = await axios.get(`${BASE_URL}/api/results/exams`);
-        
+
         setAvailableExams(["MIXED", ...data]);
       } catch (err) {
         console.error("Error fetching exams:", err);
-        setAvailableExams(["MIXED", "NIMCET"]); 
+        setAvailableExams(["MIXED", "NIMCET"]);
       }
     };
     fetchExams();
@@ -220,117 +296,262 @@ const fetchResults = async () => {
   return { mainResults: main };
 }, [results, selectedExam]);
 
+  // Featured vs. remaining split for the "Top Performers" spotlight — purely a
+  // presentation decision over data we already have, no extra fetch needed.
+  const topPerformers = mainResults.slice(0, 4);
+  const remainingResults = mainResults.slice(4);
+
+  const isFilteredView =
+    selectedYear !== "All" && selectedYear !== "PastGallery" && selectedExam !== "MIXED";
+
+  // Stats strip — computed only from what's actually rendered on the page right
+  // now, so it never claims a number the page can't back up.
+  const stats = useMemo(() => {
+    const ranked = mainResults.filter((r) => r.rank);
+    const scored = mainResults.filter((r) => !r.rank && r.score);
+    return {
+      total: mainResults.length,
+      topRank: ranked.length ? Math.min(...ranked.map((r) => r.rank)) : null,
+      topScore: scored.length ? Math.max(...scored.map((r) => r.score)) : null,
+    };
+  }, [mainResults]);
+
+  // FAQ content generated entirely from the currently loaded results — empty
+  // (and therefore not rendered, and not added to structured data) whenever
+  // there isn't enough real data to answer a question honestly.
+  const faqItems = useMemo(() => {
+    if (!isFilteredView || mainResults.length === 0) return [];
+    const top = mainResults[0];
+    const topLabel = getResultLabel(top, selectedExam);
+    const items = [
+      {
+        q: `Who secured the top rank in ${selectedExam} ${selectedYear} from ACME Academy?`,
+        a: `${top.name || "An ACME Academy student"} secured ${topLabel} in ${selectedExam} ${selectedYear} — one of ${mainResults.length} ACME Academy ${selectedExam} ${selectedYear} selections featured on this page.`,
+      },
+      {
+        q: `How many ACME Academy students cleared ${selectedExam} ${selectedYear}?`,
+        a: `This page currently showcases ${mainResults.length} ACME Academy ${selectedExam} ${selectedYear} results, including All India Ranks and scores achieved by our students.`,
+      },
+    ];
+    if (mainResults.length > 1) {
+      const last = mainResults[mainResults.length - 1];
+      items.push({
+        q: `What rank range have ACME Academy toppers achieved in ${selectedExam} ${selectedYear}?`,
+        a: `ACME Academy ${selectedExam} ${selectedYear} results shown here range from ${topLabel} up to ${getResultLabel(
+          last,
+          selectedExam
+        )}.`,
+      });
+    }
+    return items;
+  }, [mainResults, isFilteredView, selectedExam, selectedYear]);
+
+  // Mirrors the redirect logic above so the canonical always matches the URL the router settles on.
+  const canonicalUrl =
+    selectedYear === "All"
+      ? "https://www.acmeacademy.in/acme-academy-results"
+      : selectedYear === "PastGallery"
+      ? `https://www.acmeacademy.in/acme-academy-results/${PAST_GALLERY_SLUG}`
+      : `https://www.acmeacademy.in/acme-academy-results/${selectedExam.toLowerCase()}/${selectedYear}`;
 
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "EducationalOrganization",
-    name: "ACME Academy",
-    url: "https://your-website-domain.com",
-    logo: "https://your-website-domain.com/logo.png",
-    description:
-      "ACME Academy is India’s leading institute for NIMCET preparation, producing top ranks every year.",
-    department: {
-      "@type": "EducationalOccupationalProgram",
-      educationalCredentialAwarded: "MCA Entrance Coaching",
-    },
-    alumni: results.map((r) => ({
-      "@type": "Person",
-      name: r.name,
-      award: `AIR ${r.rank} in ${r.exam?.toUpperCase() || "NIMCET"} ${r.year}`,
-      image:
-        r.photoUrl ||
-        r.url ||
-        "https://your-website-domain.com/assets/seo/profile-placeholder.jpg",
-    })),
+    "@graph": [
+      {
+        "@type": "EducationalOrganization",
+        name: "ACME Academy",
+        url: "https://www.acmeacademy.in",
+        logo: "https://www.acmeacademy.in/logo.png",
+        description:
+          "ACME Academy is India’s leading institute for NIMCET preparation, producing top ranks every year.",
+        department: {
+          "@type": "EducationalOccupationalProgram",
+          educationalCredentialAwarded: "MCA Entrance Coaching",
+        },
+        // One Person + ImageObject node per result actually rendered on the page —
+        // each addressable via its own #anchor, without giving it a separate URL.
+        alumni: mainResults.map((r) => {
+          const anchorUrl = `${canonicalUrl}#${getAnchorId(r)}`;
+          const rawImage = r.photoUrl || r.url;
+          const optimizedImage = optimizeCloudinaryUrl(rawImage, 800) || rawImage;
+          return {
+            "@type": "Person",
+            "@id": anchorUrl,
+            mainEntityOfPage: anchorUrl,
+            name: r.name || r.eventName,
+            award: `${getResultLabel(r, selectedExam)} in ${(r.exam || selectedExam).toUpperCase()} ${r.year}`,
+            alumniOf: { "@type": "EducationalOrganization", name: "ACME Academy" },
+            image: {
+              "@type": "ImageObject",
+              contentUrl: optimizedImage || "https://www.acmeacademy.in/logo.png",
+              url: optimizedImage || "https://www.acmeacademy.in/logo.png",
+              caption: getResultAltText(r, selectedExam),
+            },
+          };
+        }),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: "https://www.acmeacademy.in/home",
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Results",
+            item: canonicalUrl,
+          },
+        ],
+      },
+      ...(faqItems.length
+        ? [
+            {
+              "@type": "FAQPage",
+              mainEntity: faqItems.map((f) => ({
+                "@type": "Question",
+                name: f.q,
+                acceptedAnswer: { "@type": "Answer", text: f.a },
+              })),
+            },
+          ]
+        : []),
+    ],
   };
 
- 
-const renderCard = (r) => (
-  <motion.div
+
+const renderCard = (r, { featured = false, idPrefix = "" } = {}) => {
+  const isAir1Nimcet2026 =
+    r.rank === 1 &&
+    String(r.year) === "2026" &&
+    r.exam?.toUpperCase() === "NIMCET";
+
+  const anchorId = `${idPrefix}${getAnchorId(r)}`;
+  const rawImage = r.photoUrl || r.url;
+  const imgSrc = optimizeCloudinaryUrl(rawImage, featured ? 800 : 600) || rawImage;
+  const srcSet = buildResultSrcSet(rawImage);
+  const altText = getResultAltText(r, selectedExam);
+  const label = getResultLabel(r, selectedExam);
+
+  const card = (
+  <motion.article
     key={r._id || r.url}
+    id={anchorId}
+    aria-label={`${r.name || r.eventName} — ${label}, ${(r.exam || selectedExam).toUpperCase()} ${r.year}`}
     variants={{
       hidden: { opacity: 0, y: 30 },
       visible: { opacity: 1, y: 0 },
     }}
     whileHover={{ y: -6, scale: 1.03 }}
-    className="relative rounded-md shadow-md hover:shadow-2xl bg-white border border-gray-200 transition-all duration-500 overflow-hidden group"
+    className={`relative rounded-md shadow-md hover:shadow-2xl bg-white border transition-all duration-500 overflow-hidden group scroll-mt-24 ${
+      featured ? "border-indigo-300 ring-1 ring-indigo-200" : "border-gray-200"
+    }`}
   >
-    <div className="relative h-44 sm:h-52 overflow-hidden">
-      <img
-        src={r.photoUrl || r.url}
-        alt={`${r.name || r.eventName} ${r.exam || selectedExam} ${r.year} ${
-          r.rank ? `Rank ${r.rank}` : r.score ? `Score ${r.score}` : ""
-        } - ACME Academy Topper`}
-        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-    </div>
+    {featured && (
+      <span className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 rounded-full bg-indigo-600 text-white text-[11px] font-semibold px-2 py-1 shadow">
+        <Award className="h-3 w-3" aria-hidden="true" /> Top Performer
+      </span>
+    )}
+    <figure className="m-0">
+      <div className={`relative overflow-hidden ${featured ? "h-56 sm:h-64" : "h-44 sm:h-52"}`}>
+        <img
+          src={imgSrc}
+          srcSet={srcSet}
+          sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 320px"
+          alt={altText}
+          loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      </div>
 
-    <div className="p-4 text-center">
-      <h3 className="text-base font-semibold text-purple-600 group-hover:text-indigo-700 transition">
-        {r.name || r.eventName}
-      </h3>
+      <figcaption className="p-4 text-center">
+        <h3 className="text-base font-semibold text-purple-600 group-hover:text-indigo-700 transition">
+          {r.name || r.eventName}
+        </h3>
 
-      {r.rank ? (
         <p className="font-semibold text-sm text-gray-600 mt-1">
-          <span className="font-medium text-indigo-600">AIR {r.rank}</span> |{" "}
-          {r.exam?.toUpperCase()} {r.year}
+          <span
+            className={`font-medium ${
+              r.rank ? "text-indigo-600" : r.score ? "text-green-600" : "text-gray-600"
+            }`}
+          >
+            {label}
+          </span>{" "}
+          | {(r.exam || selectedExam)?.toString().toUpperCase()} {r.year}
         </p>
-      ) : r.score ? (
-        <p className="font-semibold text-sm text-gray-600 mt-1">
-          <span className="font-medium text-green-600">Score: {r.score}</span> |{" "}
-          {r.exam?.toUpperCase()} {r.year}
-        </p>
-      ) : (
-        <p className="font-semibold text-sm text-gray-600 mt-1">
-          {r.exam?.toUpperCase()} {r.year}
-        </p>
-      )}
-    </div>
-  </motion.div>
-);
+      </figcaption>
+    </figure>
+  </motion.article>
+  );
+
+  return isAir1Nimcet2026 ? (
+    <Link
+      key={r._id || r.url}
+      to="/nimcet-2026-air-1-kartik-sharma"
+      aria-label="Read Kartik Sharma's full AIR 1 story"
+    >
+      {card}
+    </Link>
+  ) : (
+    card
+  );
+};
 
 
 
-const renderSidebarCard = (r) => (
-  <motion.div
-    key={r._id || r.url}
-    variants={{
-      hidden: { opacity: 0, y: 20 },
-      visible: { opacity: 1, y: 0 },
-    }}
-    whileHover={{ scale: 1.02 }}
-    className="relative rounded-md shadow-md bg-white border border-gray-200 overflow-hidden group
-               max-w-[260px] sm:max-w-[300px] lg:max-w-full mx-auto"
-  >
-    <div className="relative overflow-hidden">
-      <img
-        src={r.photoUrl || r.url}
-        alt={r.name || r.eventName}
-        className="w-full h-auto transition-transform duration-700 group-hover:scale-105"
-        style={{
-          objectFit: "contain",
-          display: "block",
-          backgroundColor: "#fff",
-        }}
-      />
-    </div>
-  </motion.div>
-);
+const renderSidebarCard = (r) => {
+  const anchorId = `side-${getAnchorId(r)}`;
+  const rawImage = r.photoUrl || r.url;
+  const imgSrc = optimizeCloudinaryUrl(rawImage, 400) || rawImage;
+  const altText = getResultAltText(r, selectedExam);
+
+  return (
+    <motion.article
+      key={r._id || r.url}
+      id={anchorId}
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 },
+      }}
+      whileHover={{ scale: 1.02 }}
+      className="relative rounded-md shadow-md bg-white border border-gray-200 overflow-hidden group
+                 max-w-[260px] sm:max-w-[300px] lg:max-w-full mx-auto scroll-mt-24"
+    >
+      <figure className="m-0">
+        <div className="relative overflow-hidden">
+          <img
+            src={imgSrc}
+            alt={altText}
+            loading="lazy"
+            className="w-full h-auto transition-transform duration-700 group-hover:scale-105"
+            style={{
+              objectFit: "contain",
+              display: "block",
+              backgroundColor: "#fff",
+            }}
+          />
+        </div>
+        <figcaption className="sr-only">{altText}</figcaption>
+      </figure>
+    </motion.article>
+  );
+};
 
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
-      <Helmet>
-        <title>
-          {`${selectedExam || "NIMCET"} ${selectedYear} Top Results | ACME Academy – Best MCA Coaching`}
-        </title>
-        <meta
-          name="description"
-          content={`See ACME Academy's top ${selectedExam} ${selectedYear} results and AIR ranks. India’s most trusted NIMCET coaching with proven selections every year.`}
-        />
-        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
-      </Helmet>
+      <SEO
+        title={`${selectedExam || "NIMCET"} ${selectedYear} Top Results | ACME Academy – Best MCA Coaching`}
+        description={`See ACME Academy's top ${selectedExam} ${selectedYear} results and AIR ranks. India’s most trusted NIMCET coaching with proven selections every year.`}
+        url={canonicalUrl}
+        image="https://www.acmeacademy.in/logo.png"
+        keywords="NIMCET results, NIMCET AIR, ACME Academy results, MCA entrance results"
+        jsonLd={structuredData}
+      />
 
       {/* Hero Section */}
       <section className="relative py-12 sm:py-20 md:py-22 overflow-hidden hero-gradient">
@@ -379,11 +600,11 @@ const renderSidebarCard = (r) => (
       <section className="py-10 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <motion.h2
-            className="text-[clamp(1.8rem,4vw,2.8rem)] font-bold text-center text-gray-900 mb-10 relative"
+            className="text-[clamp(1.8rem,4vw,2.8rem)] font-bold text-center text-gray-900 mb-6 relative"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <Trophy className="inline-block w-8 h-8 text-yellow-500 mb-1 mr-2" />
+            <Trophy className="inline-block w-8 h-8 text-yellow-500 mb-1 mr-2" aria-hidden="true" />
             Our Top Performers
             <img
               src={logo}
@@ -391,6 +612,36 @@ const renderSidebarCard = (r) => (
               className="absolute top-0 right-0 w-24 opacity-10 pointer-events-none"
             />
           </motion.h2>
+
+          {/* Stats strip — generated only from results currently on the page */}
+          {!loading && isFilteredView && stats.total > 0 && (
+            <div
+              className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto mb-10 text-center"
+              aria-label={`${selectedExam} ${selectedYear} results at a glance`}
+            >
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm py-4 px-3">
+                <Users className="mx-auto h-5 w-5 text-indigo-600 mb-1" aria-hidden="true" />
+                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                <p className="text-xs text-gray-500">
+                  {selectedExam} {selectedYear} selections shown
+                </p>
+              </div>
+              {stats.topRank !== null && (
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm py-4 px-3">
+                  <Trophy className="mx-auto h-5 w-5 text-yellow-500 mb-1" aria-hidden="true" />
+                  <p className="text-2xl font-bold text-gray-900">AIR {stats.topRank}</p>
+                  <p className="text-xs text-gray-500">Best rank this year</p>
+                </div>
+              )}
+              {stats.topScore !== null && (
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm py-4 px-3">
+                  <Award className="mx-auto h-5 w-5 text-green-600 mb-1" aria-hidden="true" />
+                  <p className="text-2xl font-bold text-gray-900">{stats.topScore}</p>
+                  <p className="text-xs text-gray-500">Highest score this year</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Filters */}
           <motion.div
@@ -436,7 +687,7 @@ const renderSidebarCard = (r) => (
             </div>
           </motion.div>
 
-         
+
          {loading ? (
   <div className="flex justify-center items-center py-16">
     <Loader2 className="animate-spin text-indigo-500 w-8 h-8" />
@@ -446,35 +697,60 @@ const renderSidebarCard = (r) => (
   <PastGallery galleryData={results} />
 ) : (
   <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.2fr] gap-8">
-   
+
     <div>
-      {/* 1️⃣ MAIN RESULTS FIRST */}
-      {mainResults.length > 0 ? (
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-12"
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: {},
-            visible: { transition: { staggerChildren: 0.05 } },
-          }}
-        >
-          {mainResults.map(renderCard)}
-        </motion.div>
+      {/* 1️⃣ TOP PERFORMERS SPOTLIGHT */}
+      {topPerformers.length > 0 ? (
+        <>
+          <h3 className="text-xl font-bold text-gray-900 mb-4">
+            Top {selectedExam} {selectedYear} Ranks
+          </h3>
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-10"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.05 } },
+            }}
+          >
+            {topPerformers.map((r) => renderCard(r, { featured: true }))}
+          </motion.div>
+        </>
       ) : (
         <p className="text-center text-gray-500 italic py-10">
-          
+
         </p>
       )}
 
-   
+      {/* 2️⃣ ALL REMAINING RESULTS */}
+      {remainingResults.length > 0 && (
+        <>
+          <h3 className="text-xl font-bold text-gray-900 mb-4">
+            All {selectedExam} {selectedYear} Selections
+          </h3>
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-12"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.05 } },
+            }}
+          >
+            {remainingResults.map((r) => renderCard(r))}
+          </motion.div>
+        </>
+      )}
+
+
       {(() => {
-       
+
        const combinedFiltered = Array.from(
   new Map(
     combined
       .filter((r) => r && r.photoUrl)
-      .map((r) => [r.photoUrl, r]) 
+      .map((r) => [r.photoUrl, r])
   ).values()
 ).filter((r) => r.exam?.toLowerCase() !== selectedExam.toLowerCase());
 
@@ -498,7 +774,7 @@ const renderSidebarCard = (r) => (
                 visible: { transition: { staggerChildren: 0.05 } },
               }}
             >
-              {combinedMain.map(renderCard)}
+              {combinedMain.map((r) => renderCard(r, { idPrefix: "combined-" }))}
             </motion.div>
           </>
         );
@@ -506,7 +782,10 @@ const renderSidebarCard = (r) => (
     </div>
 
     {/* 🟣 SIDEBAR */}
-    <aside className="space-y-5 lg:w-auto w-[85%] sm:w-[60%] mx-auto lg:mx-0 lg:sticky lg:top-20 self-start h-fit">
+    <aside
+      className="space-y-5 lg:w-auto w-[85%] sm:w-[60%] mx-auto lg:mx-0 lg:sticky lg:top-20 self-start h-fit"
+      aria-label="Results from other exams and combined selections"
+    >
       {(() => {
         const combinedFiltered = combined
           .filter(
@@ -556,7 +835,84 @@ const renderSidebarCard = (r) => (
         </div>
       </section>
 
-     
+      {/* FAQ Section — generated entirely from the results currently loaded above;
+          simply doesn't render when there isn't a specific exam+year in view. */}
+      {faqItems.length > 0 && (
+        <section className="py-16 bg-gray-50 border-t border-gray-200">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6">
+            <h2 className="text-[clamp(1.6rem,3.5vw,2.2rem)] font-bold text-center text-gray-900 mb-8">
+              Frequently Asked Questions
+            </h2>
+            <div className="space-y-4">
+              {faqItems.map((item, i) => (
+                <details
+                  key={i}
+                  className="bg-white border border-gray-200 rounded-lg p-4 group"
+                >
+                  <summary className="font-semibold text-gray-800 cursor-pointer list-none flex justify-between items-center">
+                    {item.q}
+                    <span className="text-indigo-600 group-open:rotate-180 transition-transform">▾</span>
+                  </summary>
+                  <p className="mt-3 text-gray-600 text-sm leading-relaxed">{item.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Internal links — connects Results to the rest of the content cluster
+          (Practice Sets, Courses, Exam Pattern, PYQ, Library) using only
+          existing routes; no new pages introduced. */}
+      <section className="py-16 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-[clamp(1.6rem,3.5vw,2.2rem)] font-bold text-gray-900 mb-3">
+            Continue Your MCA Entrance Preparation
+          </h2>
+          <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+            Explore the same resources our toppers used to prepare for {selectedExam}{" "}
+            {selectedYear !== "All" && selectedYear !== "PastGallery" ? selectedYear : ""}.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <Link
+              to="/acme-practice-sets"
+              className="flex flex-col items-center gap-2 p-5 rounded-lg border border-gray-200 hover:border-indigo-400 hover:shadow-md transition bg-gray-50"
+            >
+              <BookOpen className="h-6 w-6 text-indigo-600" aria-hidden="true" />
+              <span className="font-medium text-gray-800">Practice Sets</span>
+            </Link>
+            <Link
+              to="/acme-free-courses"
+              className="flex flex-col items-center gap-2 p-5 rounded-lg border border-gray-200 hover:border-indigo-400 hover:shadow-md transition bg-gray-50"
+            >
+              <BookOpen className="h-6 w-6 text-indigo-600" aria-hidden="true" />
+              <span className="font-medium text-gray-800">Free Courses</span>
+            </Link>
+            <Link
+              to="/exam-pattern"
+              className="flex flex-col items-center gap-2 p-5 rounded-lg border border-gray-200 hover:border-indigo-400 hover:shadow-md transition bg-gray-50"
+            >
+              <BookOpen className="h-6 w-6 text-indigo-600" aria-hidden="true" />
+              <span className="font-medium text-gray-800">Exam Pattern</span>
+            </Link>
+            <Link
+              to="/pyq"
+              className="flex flex-col items-center gap-2 p-5 rounded-lg border border-gray-200 hover:border-indigo-400 hover:shadow-md transition bg-gray-50"
+            >
+              <BookOpen className="h-6 w-6 text-indigo-600" aria-hidden="true" />
+              <span className="font-medium text-gray-800">Previous Year Papers</span>
+            </Link>
+          </div>
+          <p className="mt-8 text-sm text-gray-500">
+            Read the full story behind{" "}
+            <Link to="/nimcet-2026-air-1-kartik-sharma" className="text-indigo-600 font-medium hover:underline">
+              Kartik Sharma’s AIR 1 in NIMCET 2026
+            </Link>
+            .
+          </p>
+        </div>
+      </section>
+
       <section className="py-20 bg-white border-t border-gray-200 text-center">
         <motion.div
           className="max-w-3xl mx-auto px-6 space-y-6"

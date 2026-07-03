@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, Clock, Laptop, Video } from "lucide-react";
@@ -36,8 +37,42 @@ const CoursesSection = () => {
     fetchCourses();
   }, []);
 
+  const coursesJsonLd =
+    courses.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          itemListElement: courses.map((course, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            item: {
+              "@type": "Course",
+              name: course.title,
+              description: course.description,
+              provider: {
+                "@type": "EducationalOrganization",
+                name: "ACME Academy",
+                url: "https://www.acmeacademy.in",
+              },
+              ...(course.mode && {
+                hasCourseInstance: {
+                  "@type": "CourseInstance",
+                  courseMode: course.mode,
+                  ...(course.duration && { courseWorkload: course.duration }),
+                },
+              }),
+            },
+          })),
+        }
+      : null;
+
   return (
     <section className="py-24 bg-gradient-to-b from-blue-50/40 to-white relative overflow-hidden">
+      {coursesJsonLd && (
+        <Helmet>
+          <script type="application/ld+json">{JSON.stringify(coursesJsonLd)}</script>
+        </Helmet>
+      )}
       <div className="max-w-7xl mx-auto px-6">
         {/* ---------------- TITLE ---------------- */}
         <motion.h2

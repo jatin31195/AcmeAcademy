@@ -6,7 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
-import { ProtectedRoute } from "./routes/routes";
+import { ProtectedRoute } from "./routes/ProtectedRoute";
 import Navbar from "./components/layout/Navbar";
 import About from "./pages/About";
 import Footer from "./components/layout/Footer";
@@ -17,6 +17,7 @@ import Nimcet2025 from "./components/ExamPattern/Nimcet2025";
 import Courses from "./pages/Courses";
 import Contact from "./pages/Contact";
 import Results from "./pages/Results";
+import Air1Story from "./pages/Air1Story";
 import Dashboard from "./pages/Dashboard";
 import OpenLibrary from "./pages/OpenLibrary";
 import LibraryContent from "./pages/LibraryContent";
@@ -107,6 +108,7 @@ function App() {
         <Route path="/acme-academy-results" element={<Results />} />
         <Route path="/acme-academy-results/:exam/:year" element={<Results />} />
         <Route path="/acme-academy-results/:year" element={<Results />} />
+        <Route path="/nimcet-2026-air-1-kartik-sharma" element={<Air1Story />} />
         <Route path="/acme-academy-open-library" element={<OpenLibrary />} />
         <Route path="/acme-academy-open-library/:id" element={<LibraryContent />} />
         <Route path="/acme-player" element={<AcmePlayer />} />

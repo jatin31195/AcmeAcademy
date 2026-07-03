@@ -322,8 +322,9 @@ const HeroSection = () => {
 
           <div className="flex justify-center">
             <img
-              src="https://res.cloudinary.com/dwqvrtvu1/image/upload/v1762278134/mobileapp01.jpg_g3lhyt.webp"
-              alt="Acme Academy"
+              src="https://res.cloudinary.com/dwqvrtvu1/image/upload/f_auto,q_auto/v1762278134/mobileapp01.jpg_g3lhyt.webp"
+              alt="ACME Academy student dashboard — NIMCET & MCA entrance exam prep app"
+              fetchpriority="high"
               className="w-[90%] max-w-md rounded-2xl shadow-lg hover:scale-105 transition-transform duration-500"
             />
           </div>

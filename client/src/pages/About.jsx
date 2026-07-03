@@ -168,7 +168,7 @@ const milestones = [
   title="About ACME Academy | Best MCA Coaching in India (Online & Offline)"
   description="ACME Academy is India's most trusted MCA entrance coaching institute for NIMCET, CUET-PG, and MAH-CET. With 2000+ selections, 10+ years of experience, and nationwide students, ACME leads MCA preparation both online and offline."
   url="https://www.acmeacademy.in/about"
-  image="https://www.acmeacademy.in/assets/og-about-acme.jpg"
+  image="https://www.acmeacademy.in/logo.png"
   keywords="about ACME Academy, best MCA coaching in India, top NIMCET coaching, MCA entrance preparation, best online MCA coaching, best offline MCA institute, ACME Academy India"
   jsonLd={{
     "@context": "https://schema.org",

@@ -17,11 +17,11 @@ const Footer = () => {
 
   const quickLinks = [
     { label: "About Us", path: "/about" },
-    { label: "Acme Library", path: "/library" },
+    { label: "Acme Library", path: "/acme-academy-open-library" },
     { label: "PYQ Papers", path: "/pyq" },
     { label: "Exam Pattern", path: "/exam-pattern" },
-    { label: "Results", path: "/results" },
-    { label: "Contact Us", path: "/contact" },
+    { label: "Results", path: "/acme-academy-results" },
+    { label: "Contact Us", path: "/contact-acme-academy" },
   ];
 
   return (
@@ -117,8 +117,11 @@ const Footer = () => {
             <ul className="space-y-3">
               {examLinks.map((exam) => (
                 <li key={exam}>
+                  {/* No dedicated per-exam page exists yet — point at the real
+                      Exam Pattern page (covers NIMCET/CUET-PG/MAH-CET/JMI/VIT)
+                      instead of the previously dead /exams/:slug route. */}
                   <Link
-                    to={`/exams/${exam.toLowerCase().replace(/\s+/g, "-")}`}
+                    to="/exam-pattern"
                     className="text-base text-muted-foreground hover:text-primary transition-colors duration-200"
                   >
                     {exam}

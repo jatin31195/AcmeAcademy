@@ -2,15 +2,19 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const TestimonialsSection = () => {
+  // PLACEHOLDER: `photo` is null for every entry below — drop the real student photo
+  // path in (e.g. `/src/assets/images/tanmay-mandal.jpg`) to replace the initials
+  // fallback with an actual image. Each is a missed Google Images placement until then.
   const testimonials = [
   {
     name: "Tanmay Mandal",
     exam: "NIMCET 2022",
     rank: "AIR 5",
     image: "TM",
+    photo: null,
     rating: 5,
     testimonial:
       "ACME Academy’s test series were a game-changer! I improved consistently with daily practice and guidance from the best mentors.",
@@ -21,6 +25,7 @@ const TestimonialsSection = () => {
     exam: "NIMCET 2024",
     rank: "AIR 35",
     image: "AW",
+    photo: null,
     rating: 5,
     testimonial:
       "Kartikey Sir and the entire ACME team are incredibly helpful. They helped me strengthen my concepts, clear all doubts, and boost my problem-solving skills. Their mentorship was the key to my success.",
@@ -31,20 +36,22 @@ const TestimonialsSection = () => {
     exam: "NIMCET 2025",
     rank: "AIR 10",
     image: "MF",
+    photo: null,
     rating: 5,
     testimonial:
       "Thanks to Kartikey Sir and ACME Academy — they took my preparation for both NIMCET and CUET to the next level. The crash course, live tests, and constant motivation were the best part of my journey!",
-    
+
   },
   {
     name: "Mujeeb Khan",
     exam: "NIMCET 2024",
     rank: "AIR 22",
     image: "MK",
+    photo: null,
     rating: 5,
     testimonial:
       "Joining ACME Academy was the best decision of my MCA preparation. The mentorship, mock tests, and personalized guidance by Kartikey Sir helped me stay confident and achieve my dream rank.",
-    
+
   },
 ];
 
@@ -110,6 +117,13 @@ const TestimonialsSection = () => {
                 >
                   <CardContent className="p-6 text-center">
                     <Avatar className="h-14 w-14 mx-auto mb-4 ring-4 ring-indigo-100">
+                      {t.photo && (
+                        <AvatarImage
+                          src={t.photo}
+                          alt={`${t.name} — ${t.rank}, ${t.exam} | ACME Academy`}
+                          loading="lazy"
+                        />
+                      )}
                       <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-semibold">
                         {t.image}
                       </AvatarFallback>

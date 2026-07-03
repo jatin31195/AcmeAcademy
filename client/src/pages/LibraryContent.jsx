@@ -122,7 +122,7 @@ export default function LibraryContent() {
     `Access free MCA entrance course materials, video lectures, notes, and assignments for ${courseMeta.title} by ACME Academy.`
   }
   url={`https://www.acmeacademy.in/acme-academy-open-library/${id}`}
-  image="https://www.acmeacademy.in/assets/og-course.jpg"
+  image="https://www.acmeacademy.in/logo.png"
   keywords={`${courseMeta.title}, MCA notes, MCA lectures, NIMCET preparation, CUET PG MCA materials, ACME Academy`}
   jsonLd={{
     "@context": "https://schema.org",

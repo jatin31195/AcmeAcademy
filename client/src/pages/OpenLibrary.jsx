@@ -10,7 +10,7 @@ const OpenLibrary = () => {
   title="Open Library | Free MCA Study Materials & Notes | ACME Academy"
   description="Access ACME Academy's free Open Library — get MCA entrance notes, free courses, and practice sets for NIMCET, CUET-PG, and other MCA exams. 100% free learning resources."
   url="https://www.acmeacademy.in/acme-academy-open-library"
-  image="https://www.acmeacademy.in/assets/og-open-library.jpg"
+  image="https://www.acmeacademy.in/logo.png"
   keywords="MCA free study materials, NIMCET notes, CUET-PG MCA free courses, MCA entrance preparation, ACME Open Library"
   jsonLd={{
     "@context": "https://schema.org",

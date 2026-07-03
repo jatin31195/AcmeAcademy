@@ -15,7 +15,7 @@ router.get("/sitemap.xml", async (req, res) => {
     
     const [questions = [], pyqs = [], courses = [], practiceSets = []] = await Promise.all([
       (async () => { try { return await Question.find({}, "slug updatedAt").lean(); } catch { return []; } })(),
-      (async () => { try { return await Pyq.find({}, "_id updatedAt").lean(); } catch { return []; } })(),
+      (async () => { try { return await PYQ.find({}, "_id updatedAt").lean(); } catch { return []; } })(),
       (async () => { try { return await Course.find({}, "_id updatedAt").lean(); } catch { return []; } })(),
       (async () => { try { return await PracticeSet.find({}, "_id updatedAt").lean(); } catch { return []; } })(),
     ]);
@@ -31,6 +31,7 @@ router.get("/sitemap.xml", async (req, res) => {
       { loc: `${BASE_URL}/acme-academy-open-library`, changefreq: "weekly", priority: "0.7" },
       { loc: `${BASE_URL}/acme-academy-results`, changefreq: "daily", priority: "0.9" },
       { loc: `${BASE_URL}/pyq`, changefreq: "weekly", priority: "0.7" },
+      { loc: `${BASE_URL}/nimcet-2026-air-1-kartik-sharma`, changefreq: "monthly", priority: "0.9", lastmod: new Date("2026-07-03").toISOString() },
     ];
 
    
@@ -65,7 +66,7 @@ router.get("/sitemap.xml", async (req, res) => {
 
     const practiceUrls = (practiceSets || []).map(p => `
       <url>
-        <loc>${BASE_URL}/acme-practice-sets#${p._id}</loc>
+        <loc>${BASE_URL}/acme-practice-sets/${p._id}</loc>
         ${p.updatedAt ? `<lastmod>${new Date(p.updatedAt).toISOString()}</lastmod>` : ""}
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>

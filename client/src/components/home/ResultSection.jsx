@@ -4,6 +4,11 @@ import { ChevronLeft, ChevronRight, Bell } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import axios from "axios";
 import { BASE_URL } from "@/config";
+
+// ACME's official AIR-1 congratulatory poster, optimized via Cloudinary.
+const AIR1_POSTER =
+  "https://res.cloudinary.com/dv69cqfru/image/upload/f_auto,q_auto,w_800/v1783062384/WhatsApp_Image_2026-07-03_at_12.08.09_AM_zglzkd.jpg";
+
 const ResultsSection = () => {
   const [resultImages, setResultImages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -80,6 +85,47 @@ const ResultsSection = () => {
           </p>
         </div>
 
+        {/* AIR-1 highlight, static so it's present on first paint, not gated behind the API fetch below */}
+        <div className="mb-8 grid md:grid-cols-[0.8fr_1.2fr] gap-6 items-center bg-white/70 backdrop-blur-md border border-gray-200/60 rounded-3xl shadow-lg p-5 sm:p-7">
+          <figure className="order-1 max-w-[300px] sm:max-w-[340px] md:max-w-full mx-auto md:mx-0">
+            <img
+              src={AIR1_POSTER}
+              alt="ACME Academy NIMCET 2026 AIR 1 achievement poster featuring Kartik Sharma"
+              loading="lazy"
+              className="rounded-xl shadow-lg w-full aspect-square object-cover"
+            />
+            <figcaption className="text-sm text-muted-foreground mt-3 text-center md:text-left">
+              Kartik Sharma topping the NIMCET 2026 merit list with All India Rank 1, mentored at ACME Academy.
+            </figcaption>
+          </figure>
+
+          <div className="order-2 text-center md:text-left bg-white/50 backdrop-blur-lg border border-white shadow-xl rounded-2xl p-5 sm:p-6">
+            <p className="inline-block text-xs font-semibold tracking-wide uppercase text-primary bg-primary/10 px-3 py-1 rounded-full mb-3">
+              NIMCET 2026 Result
+            </p>
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
+              Kartik Sharma, <span className="text-primary gradient-text">AIR 1</span> in{" "}
+              <span className="text-primary gradient-text">NIMCET 2026</span>
+            </h3>
+            <p className="text-muted-foreground mt-2">
+              ACME Academy student Kartik Sharma topped the national merit list in NIMCET 2026,
+              after preparing since November 2024 and giving over 250 tests through ACME's test
+              series.
+            </p>
+            <p className="text-gray-700 italic mt-3 text-sm border-l-2 border-primary/30 pl-3">
+              "By the time I sat in the actual exam, that kind of pressure wasn't new to me
+              anymore," says Kartik, who also thanks mentors Kartik sir and Sohail sir for
+              clearing his doubts along the way.
+            </p>
+            <a
+              href="/nimcet-2026-air-1-kartik-sharma"
+              className="inline-block mt-4 text-amber-600 font-semibold hover:text-amber-700 hover:underline"
+            >
+              Read Kartik Sharma's full AIR 1 story →
+            </a>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-[1.7fr_0.7fr] gap-10 items-start">
           {/* 🖼️ Results Slider */}
           <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl bg-black aspect-[16/9]">
@@ -93,7 +139,15 @@ const ResultsSection = () => {
                   <motion.img
                     key={current}
                     src={resultImages[current]?.photoUrl}
-                    alt={resultImages[current]?.exam || "Result"}
+                    alt={
+                      resultImages[current]
+                        ? `${resultImages[current]?.name || "ACME Academy topper"} — AIR ${
+                            resultImages[current]?.rank ?? "N/A"
+                          }, ${resultImages[current]?.exam || "NIMCET"} ${
+                            resultImages[current]?.year || ""
+                          } | ACME Academy`
+                        : "ACME Academy result"
+                    }
                     initial={{ opacity: 0, scale: 1.05 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
@@ -210,10 +264,10 @@ const ResultsSection = () => {
         </div>
 <div className="w-full text-center mt-6">
   <a
-    href="/acme-academy-results/nimcet/2025"
+    href="/acme-academy-results"
     className="inline-block bg-gradient-to-r from-blue-600 via-pink-400 to-red-400 text-white font-semibold px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
   >
-    View Complete Results →
+    View all NIMCET, CUET-PG &amp; MAH-CET results →
   </a>
 </div>
 

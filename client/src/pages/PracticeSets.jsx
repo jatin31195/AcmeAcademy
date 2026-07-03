@@ -170,20 +170,20 @@ const PracticeSets = () => {
       <SEO
       title="MCA Entrance Practice Sets | ACME Academy"
       description="Boost your MCA entrance exam preparation with interactive practice sets from ACME Academy. Includes Mathematics, Logical Reasoning, Computer Concepts, and more."
-      url="https://www.acmeacademy.in/practice-sets"
-      image="https://www.acmeacademy.in/assets/og-practice-sets.jpg"
+      url="https://www.acmeacademy.in/acme-practice-sets"
+      image="https://www.acmeacademy.in/logo.png"
       keywords="MCA Practice Sets, NIMCET Practice, CUET-PG Practice Questions, MCA Mock Tests, ACME Academy Practice, MCA Entrance Preparation"
       jsonLd={{
         "@context": "https://schema.org",
         "@type": "ItemList",
         "name": "MCA Entrance Practice Sets",
         "description": "Interactive practice sets for MCA entrance preparation including Mathematics, Logical Reasoning, Computer Awareness, and English.",
-        "url": "https://www.acmeacademy.in/practice-sets",
+        "url": "https://www.acmeacademy.in/acme-practice-sets",
         "numberOfItems": practiceSets?.length || 0,
         "itemListElement": practiceSets?.slice(0, 10).map((set, index) => ({
           "@type": "ListItem",
           "position": index + 1,
-          "url": `https://www.acmeacademy.in/practice-set/${set._id}`,
+          "url": `https://www.acmeacademy.in/acme-practice-sets/${set._id}`,
           "name": set.title,
           "description": set.description || `${set.title} - MCA Practice Set by ACME Academy`,
           "publisher": {

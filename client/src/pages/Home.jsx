@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import HeroSection from "@/components/home/HeroSection";
 import ResultSection from "@/components/home/ResultSection";
+import ExploreMoreSection from "@/components/home/ExploreMoreSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import CoursesSection from "@/components/home/CoursesSection";
 import WhyChooseUs from "@/components/home/WhyChooseUs";
@@ -56,7 +57,19 @@ const jsonLd = {
     "addressRegion": "Chhattisgarh",
     "postalCode": "492010",
     "addressCountry": "IN"
-  }
+  },
+  "mentions": [
+    {
+      "@type": "Article",
+      "headline": "Kartik Sharma Secures AIR 1 in NIMCET 2026",
+      "url": "https://www.acmeacademy.in/nimcet-2026-air-1-kartik-sharma",
+      "about": {
+        "@type": "Person",
+        "name": "Kartik Sharma",
+        "award": "AIR 1, NIMCET 2026"
+      }
+    }
+  ]
 };
 
 
@@ -87,16 +100,17 @@ function Home() {
   title="ACME Academy – India’s Best MCA Coaching | NIMCET, CUET, MAH-CET, JMI"
   description="Join ACME Academy – India’s best and most trusted MCA entrance coaching platform for NIMCET, CUET, MAH-CET, and JAMIA. Explore test series, live classes, results, and free resources to ace your MCA entrance exams."
   url="https://www.acmeacademy.in/home"
-  image="https://www.acmeacademy.in/assets/og-image.png"
+  image="https://www.acmeacademy.in/logo.png"
   keywords="India’s best MCA coaching, NIMCET coaching, MCA entrance, CUET PG MCA, MAH-CET MCA, JMI MCA, ACME Academy, test series, online classes, MCA preparation"
   jsonLd={jsonLd}
 />
 
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50/40">
       <HeroSection />
-       
-      <TrustSection />
+
       <ResultSection />
+      <ExploreMoreSection />
+      <TrustSection />
 
     
           <TestimonialsSection />
