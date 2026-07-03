@@ -242,8 +242,8 @@ const Air1Story = () => {
             "ACME Academy student Kartik Sharma secured All India Rank 1 in NIMCET 2026, topping the national merit list.",
           "keywords":
             "NIMCET 2026 AIR 1, NIMCET AIR 1, NIMCET topper, NIMCET rank 1, Kartik Sharma NIMCET, NIMCET success story, ACME Academy AIR 1",
-          "datePublished": "2026-07-02",
-          "dateModified": "2026-07-03",
+          "datePublished": "2026-07-02T00:00:00+05:30",
+          "dateModified": "2026-07-03T00:00:00+05:30",
           "about": { "@id": `${url}#person` },
           "image": { "@id": `${url}#image-poster` },
           "video": [{ "@id": `${url}#video-interview` }, { "@id": `${url}#video-story` }],
@@ -278,12 +278,14 @@ const Air1Story = () => {
           },
         },
         {
+          // uploadDate is the video's actual YouTube upload date, not invented.
           "@id": `${url}#video-interview`,
           "@type": "VideoObject",
           "name": "Kartik Sharma NIMCET 2026 AIR 1 — Interview Coverage",
           "description":
             "Video coverage discussing ACME Academy's NIMCET 2026 AIR 1 result, Kartik Sharma.",
           "thumbnailUrl": [youtubeThumbnail],
+          "uploadDate": "2026-06-30T00:00:00+05:30",
           "embedUrl": `https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?start=${YOUTUBE_START_SECONDS}`,
         },
         {
@@ -302,6 +304,7 @@ const Air1Story = () => {
           "@id": `${url}#image-poster`,
           "@type": "ImageObject",
           "contentUrl": cldOptimize(HERO_IMAGE),
+          "url": cldOptimize(HERO_IMAGE),
           "description": "ACME Academy NIMCET 2026 AIR 1 achievement poster — Kartik Sharma",
           "name": "NIMCET 2026 AIR 1 — Kartik Sharma",
         },
@@ -309,6 +312,7 @@ const Air1Story = () => {
           "@id": `${url}#image-portrait`,
           "@type": "ImageObject",
           "contentUrl": cldOptimize(PORTRAIT_IMAGE),
+          "url": cldOptimize(PORTRAIT_IMAGE),
           "description": "Kartik Sharma, ACME Academy student, AIR 1 in NIMCET 2026 entrance exam",
           "name": "Kartik Sharma — NIMCET 2026 AIR 1",
         },
@@ -316,6 +320,7 @@ const Air1Story = () => {
           "@id": `${url}#image-patrika`,
           "@type": "ImageObject",
           "contentUrl": cldOptimize(PATRIKA_CLIPPING_IMAGE),
+          "url": cldOptimize(PATRIKA_CLIPPING_IMAGE),
           "description": "National newspaper coverage of ACME Academy's NIMCET 2026 AIR 1 achievement",
           "name": "Patrika Coverage — ACME Academy NIMCET 2026 AIR 1",
         },
