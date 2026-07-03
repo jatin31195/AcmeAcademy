@@ -146,7 +146,7 @@ const galleryImages = [
 // Academy-wide trust stats — the same figures used in TrustSection.jsx / About.jsx, reused here as sourced facts.
 const trustStats = [
   { icon: Users, value: "2000+", label: "Selections in Last 10 Years" },
-  { icon: Award, value: "100+", label: "Students in Top 100" },
+  { icon: Award, value: "100+", label: "Students of Two Digit Rankers in Last 10 Years" },
   { icon: TrendingUp, value: "92%+", label: "Selection Rate Every Year" },
 ];
 
