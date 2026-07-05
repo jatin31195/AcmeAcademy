@@ -53,9 +53,6 @@ const YOUTUBE_START_SECONDS = 381;
 const PATRIKA_ARTICLE_URL = "";
 const KARTIK_LINKEDIN_URL = "https://www.linkedin.com/in/kartik-sharma-4756362a1/";
 
-// Kartik's own voice note, placed in client/public so it's servable at this path as-is.
-const KARTIK_VOICE_AUDIO = "/WhatsApp%20Audio%202026-07-03%20at%208.10.52%20PM.mpeg";
-
 // Kartik's success-story video clip (1080×1920 portrait), hosted on Cloudinary.
 const KARTIK_SUCCESS_VIDEO =
   "https://res.cloudinary.com/dv69cqfru/video/upload/v1783092183/0703_1_cgt0is.mp4";
@@ -63,12 +60,23 @@ const KARTIK_SUCCESS_VIDEO =
 const KARTIK_SUCCESS_VIDEO_POSTER =
   "https://res.cloudinary.com/dv69cqfru/image/upload/v1783092934/Screenshot_2026-07-03_210401_jqcf1p.png";
 
+// Kartik's own voice, in video form (1080×1920 portrait), hosted on Cloudinary — replaces the old audio-only player.
+const KARTIK_VOICE_VIDEO =
+  "https://res.cloudinary.com/dv69cqfru/video/upload/v1783226482/0703_1_qjuo31.mp4";
+
 // Cloudinary's "v<timestamp>" path segment is the asset's real upload time —
 // reused as VideoObject.uploadDate instead of guessing a date.
-const KARTIK_SUCCESS_VIDEO_UPLOAD_DATE = (() => {
-  const match = KARTIK_SUCCESS_VIDEO.match(/\/upload\/v(\d+)\//);
+const cldUploadDate = (url) => {
+  const match = url.match(/\/upload\/v(\d+)\//);
   return match ? new Date(Number(match[1]) * 1000).toISOString() : undefined;
-})();
+};
+const KARTIK_SUCCESS_VIDEO_UPLOAD_DATE = cldUploadDate(KARTIK_SUCCESS_VIDEO);
+const KARTIK_VOICE_VIDEO_UPLOAD_DATE = cldUploadDate(KARTIK_VOICE_VIDEO);
+
+// Cloudinary auto-generates a JPG frame for any video asset when the same
+// public path is requested with a .jpg extension — used as this video's
+// poster/thumbnail since no separate poster image was supplied.
+const KARTIK_VOICE_VIDEO_POSTER = KARTIK_VOICE_VIDEO.replace(/\.mp4$/, ".jpg");
 
 const cldOptimize = (url, transform = "f_auto,q_auto") =>
   url.replace("/upload/", `/upload/${transform}/`);
@@ -163,18 +171,6 @@ const Air1Story = () => {
 
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const [videoPlaying, setVideoPlaying] = useState(false);
-  const [audioPlaying, setAudioPlaying] = useState(false);
-  const audioRef = useRef(null);
-
-  const toggleAudio = () => {
-    const audioEl = audioRef.current;
-    if (!audioEl) return;
-    if (audioPlaying) {
-      audioEl.pause();
-    } else {
-      audioEl.play().catch(() => {});
-    }
-  };
 
   const [successVideoPlaying, setSuccessVideoPlaying] = useState(false);
   const successVideoRef = useRef(null);
@@ -183,6 +179,19 @@ const Air1Story = () => {
     const videoEl = successVideoRef.current;
     if (!videoEl) return;
     if (successVideoPlaying) {
+      videoEl.pause();
+    } else {
+      videoEl.play().catch(() => {});
+    }
+  };
+
+  const [voiceVideoPlaying, setVoiceVideoPlaying] = useState(false);
+  const voiceVideoRef = useRef(null);
+
+  const toggleVoiceVideo = () => {
+    const videoEl = voiceVideoRef.current;
+    if (!videoEl) return;
+    if (voiceVideoPlaying) {
       videoEl.pause();
     } else {
       videoEl.play().catch(() => {});
@@ -237,16 +246,20 @@ const Air1Story = () => {
         {
           "@id": `${url}#article`,
           "@type": "Article",
-          "headline": "Kartik Sharma Secures AIR 1 in NIMCET 2026",
+          "headline": "ACME Academy's Kartik Sharma Secures AIR 1 in NIMCET 2026",
           "description":
-            "ACME Academy student Kartik Sharma secured All India Rank 1 in NIMCET 2026, topping the national merit list.",
+            "ACME Academy student Kartik Sharma secured All India Rank 1 in NIMCET 2026, topping the national merit list, crediting ACME Academy's mentorship and test series.",
           "keywords":
-            "NIMCET 2026 AIR 1, NIMCET AIR 1, NIMCET topper, NIMCET rank 1, Kartik Sharma NIMCET, NIMCET success story, ACME Academy AIR 1",
+            "ACME Academy AIR 1, ACME Academy NIMCET 2026 AIR 1, ACME Academy NIMCET topper, NIMCET 2026 AIR 1, NIMCET AIR 1, NIMCET topper, NIMCET rank 1, Kartik Sharma NIMCET, NIMCET success story",
           "datePublished": "2026-07-02T00:00:00+05:30",
           "dateModified": "2026-07-03T00:00:00+05:30",
           "about": { "@id": `${url}#person` },
           "image": { "@id": `${url}#image-poster` },
-          "video": [{ "@id": `${url}#video-interview` }, { "@id": `${url}#video-story` }],
+          "video": [
+            { "@id": `${url}#video-interview` },
+            { "@id": `${url}#video-story` },
+            { "@id": `${url}#video-voice` },
+          ],
           "mentions": [
             {
               "@type": "Thing",
@@ -301,6 +314,17 @@ const Air1Story = () => {
           "contentUrl": KARTIK_SUCCESS_VIDEO,
         },
         {
+          // uploadDate is read from the Cloudinary asset's own version timestamp, same as video-story.
+          "@id": `${url}#video-voice`,
+          "@type": "VideoObject",
+          "name": "Kartik Sharma — In His Own Voice",
+          "description":
+            "Kartik Sharma, ACME Academy student, speaks about his NIMCET 2026 AIR 1 success in his own voice.",
+          "thumbnailUrl": [cldOptimize(KARTIK_VOICE_VIDEO_POSTER)],
+          "uploadDate": KARTIK_VOICE_VIDEO_UPLOAD_DATE,
+          "contentUrl": KARTIK_VOICE_VIDEO,
+        },
+        {
           "@id": `${url}#image-poster`,
           "@type": "ImageObject",
           "contentUrl": cldOptimize(HERO_IMAGE),
@@ -341,12 +365,12 @@ const Air1Story = () => {
   return (
     <>
       <SEO
-        title="Kartik Sharma AIR 1 NIMCET 2026 | ACME Academy Topper Story"
-        description="Kartik Sharma, an ACME Academy student, secured AIR 1 in NIMCET 2026, India's top rank. Read his preparation journey, mentorship, and media coverage."
+        title="ACME Academy's AIR 1 in NIMCET 2026 | Kartik Sharma's Success Story"
+        description="ACME Academy produced AIR 1 in NIMCET 2026 — topper Kartik Sharma credits ACME Academy's mentorship, test series, and Quant lectures for his rank. Read his journey, in his own voice."
         url={url}
         image={cldSocialImage(HERO_IMAGE)}
         imageAlt="Kartik Sharma, ACME Academy student, AIR 1 in NIMCET 2026"
-        keywords="NIMCET 2026 AIR 1, NIMCET AIR 1, NIMCET topper, NIMCET rank 1, Kartik Sharma NIMCET, NIMCET success story, NIMCET preparation strategy, ACME Academy AIR 1"
+        keywords="ACME Academy AIR 1, ACME Academy NIMCET 2026 AIR 1, ACME Academy NIMCET topper, NIMCET 2026 AIR 1, NIMCET AIR 1, NIMCET topper, NIMCET rank 1, Kartik Sharma NIMCET, NIMCET success story, NIMCET preparation strategy"
         jsonLd={jsonLd}
         type="article"
         publishedTime="2026-07-02T00:00:00+05:30"
@@ -596,13 +620,13 @@ const Air1Story = () => {
               Published July 2, 2026 · Updated July 3, 2026
             </p>
             <div className="bg-white border border-gray-200 rounded-3xl shadow-lg p-6 sm:p-10">
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                {/* Left: success-story video (1080×1920 portrait), with a play/pause button
+              <div className="grid md:grid-cols-3 gap-8 items-center">
+                {/* 1: success-story video (1080×1920 portrait), with a play/pause button
                     anchored to its bottom-left corner. Poster image shows before playback.
                     object-contain (not cover) so the full frame stays visible at the shorter
                     height instead of being cropped. */}
                 <div
-                  className="relative w-full max-w-xs mx-auto md:max-w-sm rounded-2xl overflow-hidden border border-gray-200 shadow-md bg-black aspect-[3/4]"
+                  className="relative w-full max-w-xs mx-auto rounded-2xl overflow-hidden border border-gray-200 shadow-md bg-black aspect-[3/4]"
                   style={{ aspectRatio: "3 / 4" }}
                 >
                   <video
@@ -634,7 +658,45 @@ const Air1Story = () => {
                   </button>
                 </div>
 
-                {/* Right: story text + audio play button */}
+                {/* 2: Kartik's own-voice video, with a bottom play bar reading
+                    "Listen to Kartik in His Own Voice" — replaces the old audio-only player. */}
+                <div
+                  className="relative w-full max-w-xs mx-auto rounded-2xl overflow-hidden border border-gray-200 shadow-md bg-black aspect-[3/4]"
+                  style={{ aspectRatio: "3 / 4" }}
+                >
+                  <video
+                    ref={voiceVideoRef}
+                    src={KARTIK_VOICE_VIDEO}
+                    poster={KARTIK_VOICE_VIDEO_POSTER}
+                    className="absolute inset-0 w-full h-full object-contain"
+                    playsInline
+                    preload="metadata"
+                    onPlay={() => setVoiceVideoPlaying(true)}
+                    onPause={() => setVoiceVideoPlaying(false)}
+                    onEnded={() => setVoiceVideoPlaying(false)}
+                  />
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
+                  <button
+                    type="button"
+                    onClick={toggleVoiceVideo}
+                    className="absolute inset-x-0 bottom-0 z-10 flex items-center gap-3 px-4 py-3"
+                    aria-pressed={voiceVideoPlaying}
+                    aria-label={voiceVideoPlaying ? "Pause Kartik's voice video" : "Listen to Kartik in his own voice"}
+                  >
+                    <span className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0 shadow-lg ring-2 ring-white/80">
+                      {voiceVideoPlaying ? (
+                        <Pause className="w-4 h-4 text-white fill-white" />
+                      ) : (
+                        <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+                      )}
+                    </span>
+                    <span className="text-sm font-semibold text-white text-left drop-shadow">
+                      Listen to Kartik in His Own Voice
+                    </span>
+                  </button>
+                </div>
+
+                {/* 3: story text */}
                 <div className="text-center md:text-left">
                   <Quote className="w-10 h-10 text-primary/40 mb-4 mx-auto md:mx-0" />
                   <p className="text-gray-800 text-lg leading-relaxed font-serif italic">
@@ -648,37 +710,6 @@ const Air1Story = () => {
                     this result, and I'm truly thankful for his guidance."
                   </p>
                   <p className="font-semibold text-gray-900 mt-6">Kartik Sharma, AIR 1, NIMCET 2026</p>
-
-                  {/* Real audio element + custom play/pause button — visitors can hear Kartik's own voice note */}
-                  <div className="mt-6 pt-6 border-t border-gray-200 flex flex-col items-center md:items-start gap-3">
-                    <audio
-                      ref={audioRef}
-                      onPlay={() => setAudioPlaying(true)}
-                      onPause={() => setAudioPlaying(false)}
-                      onEnded={() => setAudioPlaying(false)}
-                      preload="none"
-                    >
-                      <source src={KARTIK_VOICE_AUDIO} type="audio/mpeg" />
-                    </audio>
-                    <button
-                      type="button"
-                      onClick={toggleAudio}
-                      className="inline-flex items-center gap-3 bg-white border border-gray-200 shadow-sm hover:border-primary/40 hover:shadow-md rounded-full pl-3 pr-5 py-2 transition-all"
-                      aria-pressed={audioPlaying}
-                      aria-label={audioPlaying ? "Pause Kartik's voice note" : "Play Kartik's voice note"}
-                    >
-                      <span className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0">
-                        {audioPlaying ? (
-                          <Pause className="w-4 h-4 text-white fill-white" />
-                        ) : (
-                          <Play className="w-4 h-4 text-white fill-white ml-0.5" />
-                        )}
-                      </span>
-                      <span className="text-sm font-semibold text-gray-800">
-                        {audioPlaying ? "Playing Kartik's voice note…" : "Listen to Kartik in His Own Voice"}
-                      </span>
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>
