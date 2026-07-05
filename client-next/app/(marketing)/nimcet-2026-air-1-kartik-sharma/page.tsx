@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Air1StoryContent } from "@/components/air1story/air1story-content";
 import { cldOptimize, cldSocialImage, cldResponsive, cldUploadDate } from "@/lib/cloudinary";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 const url = "https://www.acmeacademy.in/nimcet-2026-air-1-kartik-sharma";
 const HERO_IMAGE =
@@ -45,6 +46,8 @@ export const metadata: Metadata = {
     description:
       "ACME Academy produced AIR 1 in NIMCET 2026 — topper Kartik Sharma credits ACME Academy's mentorship, test series, and Quant lectures for his rank. Read his journey, in his own voice.",
     url,
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
     images: [cldSocialImage(HERO_IMAGE)],
     publishedTime: "2026-07-02T00:00:00+05:30",
     modifiedTime: "2026-07-03T00:00:00+05:30",
@@ -54,6 +57,7 @@ export const metadata: Metadata = {
     title: "ACME Academy's AIR 1 in NIMCET 2026 | Kartik Sharma's Success Story",
     description:
       "ACME Academy produced AIR 1 in NIMCET 2026 — topper Kartik Sharma credits ACME Academy's mentorship, test series, and Quant lectures for his rank. Read his journey, in his own voice.",
+    site: TWITTER_HANDLE,
     images: [cldSocialImage(HERO_IMAGE)],
   },
 };

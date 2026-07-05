@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins, Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import { DEFAULT_ROBOTS, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/index.html's Google Fonts <link> (Poppins + Inter).
 // next/font self-hosts them (no external request, no render-blocking CDN
@@ -38,9 +39,14 @@ const inter = Inter({
 // a real, visible parity regression (browser tab / search snippet) for every
 // page that already has its own complete, brand-inclusive title. Only the
 // root `default` (used when a page sets no title at all) is set here.
+export const viewport: Viewport = {
+  themeColor: "#0072CE",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.acmeacademy.in"),
   title: "ACME Academy - Best MCA Coaching in India | Online & Offline NIMCET Preparation",
+  robots: DEFAULT_ROBOTS,
   description:
     "ACME Academy is India's top MCA entrance coaching institute for NIMCET, CUET-PG, MAH-CET, JMI, and VIT MCA exams. Join 2000+ successful students. Learn online or offline with expert mentors.",
   keywords: [
@@ -87,7 +93,8 @@ export const metadata: Metadata = {
     description:
       "Learn from expert mentors for NIMCET, CUET-PG, MAH-CET & more. Join 2000+ successful MCA aspirants.",
     images: ["https://www.acmeacademy.in/logo.png"],
-    creator: "@acmeacademy",
+    site: TWITTER_HANDLE,
+    creator: TWITTER_HANDLE,
   },
 };
 

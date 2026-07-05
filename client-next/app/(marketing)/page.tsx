@@ -11,6 +11,7 @@ import FAQSection from "@/components/home/faq-section";
 import { faqs } from "@/lib/faq-data";
 import TrustSection from "@/components/home/trust-section";
 import TopVideos from "@/components/home/top-videos";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/Home.jsx. This file lives at
 // app/(marketing)/page.tsx (not app/page.tsx) so it picks up the
@@ -37,6 +38,8 @@ export const metadata: Metadata = {
     description:
       "Join ACME Academy – India's best and most trusted MCA entrance coaching platform for NIMCET, CUET, MAH-CET, and JAMIA. Explore test series, live classes, results, and free resources to ace your MCA entrance exams.",
     url: "/",
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
   twitter: {
@@ -44,6 +47,7 @@ export const metadata: Metadata = {
     title: "ACME Academy – India's Best MCA Coaching | NIMCET, CUET, MAH-CET, JMI",
     description:
       "Join ACME Academy – India's best and most trusted MCA entrance coaching platform for NIMCET, CUET, MAH-CET, and JAMIA. Explore test series, live classes, results, and free resources to ace your MCA entrance exams.",
+    site: TWITTER_HANDLE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
 };

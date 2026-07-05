@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/Courses.jsx — a full-height iframe embed of
 // the external courses storefront. No original <SEO> component, but the
@@ -16,12 +17,15 @@ export const metadata: Metadata = {
     title: "Courses - ACME Academy",
     description: "Explore ACME Academy's NIMCET, CUET-PG and MAH-CET MCA entrance preparation courses.",
     url: "/acme-courses",
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Courses - ACME Academy",
     description: "Explore ACME Academy's NIMCET, CUET-PG and MAH-CET MCA entrance preparation courses.",
+    site: TWITTER_HANDLE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
 };

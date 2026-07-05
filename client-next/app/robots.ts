@@ -26,6 +26,5 @@ export default function robots(): MetadataRoute.Robots {
       ],
     },
     sitemap: "https://www.acmeacademy.in/sitemap.xml",
-    host: "https://www.acmeacademy.in",
   };
 }

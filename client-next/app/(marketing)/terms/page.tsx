@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported verbatim from client/src/pages/TermsOfService.jsx. generateMetadata
 // is new (gap-fix, same rationale as the Privacy Policy page).
@@ -14,12 +15,15 @@ export const metadata: Metadata = {
     title: "Terms of Use and Service Agreement | ACME Academy",
     description: "The Terms of Use and Service Agreement governing your access to and use of ACME Academy's platform and services.",
     url: "/terms",
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Terms of Use | ACME Academy",
     description: "Terms of Use and Service Agreement for ACME Academy's platform and services.",
+    site: TWITTER_HANDLE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
 };

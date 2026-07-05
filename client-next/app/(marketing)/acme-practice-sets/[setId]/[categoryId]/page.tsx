@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import Script from "next/script";
 import { fetchPracticeSetsForSeo, buildPracticeSetsJsonLd, practiceSetsMetadataBase } from "@/lib/practice-sets-seo";
 import { PracticeSetsClient } from "@/components/practice-sets/practice-sets-client";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ setId: string; categoryId: string }> }): Promise<Metadata> {
   const { setId, categoryId } = await params;
@@ -10,8 +11,8 @@ export async function generateMetadata({ params }: { params: Promise<{ setId: st
   return {
     ...practiceSetsMetadataBase,
     alternates: { canonical },
-    openGraph: { type: "website", ...practiceSetsMetadataBase, url: canonical, images: ["https://www.acmeacademy.in/logo.png"] },
-    twitter: { card: "summary_large_image", ...practiceSetsMetadataBase, images: ["https://www.acmeacademy.in/logo.png"] },
+    openGraph: { type: "website", ...practiceSetsMetadataBase, url: canonical, siteName: SITE_NAME, locale: OG_LOCALE, images: ["https://www.acmeacademy.in/logo.png"] },
+    twitter: { card: "summary_large_image", ...practiceSetsMetadataBase, site: TWITTER_HANDLE, images: ["https://www.acmeacademy.in/logo.png"] },
   };
 }
 

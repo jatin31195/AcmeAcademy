@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { BASE_URL } from "@/lib/config";
 import { PYQListClient } from "@/components/pyq/pyq-list-client";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 type Pyq = { _id: string; title: string; exam: string; year: string; description?: string };
 
@@ -27,6 +28,8 @@ export const metadata: Metadata = {
     description:
       "Download and practice Previous Year Question Papers (PYQs) for NIMCET, CUET-PG, MAH-CET, JMI, BIT, and other MCA entrance exams. Prepare effectively with ACME Academy.",
     url: "/pyq",
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
   twitter: {
@@ -34,6 +37,7 @@ export const metadata: Metadata = {
     title: "Previous Year MCA Entrance Question Papers | ACME Academy",
     description:
       "Download and practice Previous Year Question Papers (PYQs) for NIMCET, CUET-PG, MAH-CET, JMI, BIT, and other MCA entrance exams. Prepare effectively with ACME Academy.",
+    site: TWITTER_HANDLE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
 };

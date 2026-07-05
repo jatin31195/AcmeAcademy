@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported verbatim from client/src/pages/PrivacyPolicy.jsx (content
 // identical, including the same section list). The original had no <SEO>
@@ -18,12 +19,15 @@ export const metadata: Metadata = {
     title: "Privacy Policy | ACME Academy",
     description: "Read ACME Academy's Privacy Policy to understand how we collect, use, store, and protect your personal information.",
     url: "/privacy",
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Privacy Policy | ACME Academy",
     description: "How ACME Academy collects, uses, and protects your personal information.",
+    site: TWITTER_HANDLE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
 };

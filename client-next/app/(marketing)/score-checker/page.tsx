@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ScoreCheckerContent } from "@/components/score-checker/score-checker-content";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/ScoreCheckerPage.jsx.
 export const metadata: Metadata = {
@@ -16,12 +17,15 @@ export const metadata: Metadata = {
     description:
       "Instantly check your CUET PG or NIMCET score. Upload NTA response sheet & answer key PDFs and get a downloadable score card from ACME Academy.",
     url: "/score-checker",
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Score Checker — CUET PG & NIMCET | ACME Academy",
     description: "Instantly check your CUET PG or NIMCET score and get a downloadable score card.",
+    site: TWITTER_HANDLE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
 };

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { ContactContent } from "@/components/contact/contact-content";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/Contact.jsx. Note: the original SEO `image`
 // prop was "https://www.acmeacademy.in/public/logo.png" — a pre-existing
@@ -23,6 +24,8 @@ export const metadata: Metadata = {
     description:
       "Contact ACME Academy — India's #1 MCA Entrance Coaching Institute for NIMCET, CUET, and MAH-CET. Call +91-8109977628 or +91-9516001679, Email: info@acmeacademy.com. Visit our Raipur and Kanpur centers for admissions and free counselling.",
     url: "/contact-acme-academy",
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
     images: ["https://www.acmeacademy.in/public/logo.png"],
   },
   twitter: {
@@ -30,6 +33,7 @@ export const metadata: Metadata = {
     title: "Contact ACME Academy | Best MCA Coaching in India (Raipur & Kanpur)",
     description:
       "Contact ACME Academy — India's #1 MCA Entrance Coaching Institute for NIMCET, CUET, and MAH-CET. Call +91-8109977628 or +91-9516001679, Email: info@acmeacademy.com. Visit our Raipur and Kanpur centers for admissions and free counselling.",
+    site: TWITTER_HANDLE,
     images: ["https://www.acmeacademy.in/public/logo.png"],
   },
 };

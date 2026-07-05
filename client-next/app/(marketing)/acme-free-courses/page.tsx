@@ -3,6 +3,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { BookOpen, ArrowRight } from "lucide-react";
 import { BASE_URL } from "@/lib/config";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/FreeCourses.jsx. That original declared
 // searchTerm/selectedCategory/selectedExam state and filtering logic, but the
@@ -44,6 +45,8 @@ export const metadata: Metadata = {
     description:
       "Access 100% free MCA self-study courses from ACME Academy — including notes, guides, and video lectures for NIMCET, CUET-PG, and MAH-CET. Learn at your own pace!",
     url: "/acme-free-courses",
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
   twitter: {
@@ -51,6 +54,7 @@ export const metadata: Metadata = {
     title: "Free MCA Self-Study Courses | NIMCET & CUET-PG Preparation | ACME Academy",
     description:
       "Access 100% free MCA self-study courses from ACME Academy — including notes, guides, and video lectures for NIMCET, CUET-PG, and MAH-CET. Learn at your own pace!",
+    site: TWITTER_HANDLE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
 };

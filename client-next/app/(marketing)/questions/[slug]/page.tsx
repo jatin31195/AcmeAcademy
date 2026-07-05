@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Script from "next/script";
 import { BASE_URL } from "@/lib/config";
 import { ViewSolutionButton } from "@/components/questions/view-solution-button";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/QuestionSEOPage.jsx — the flagship SEO fix of
 // this migration. The original fetched by slug in a useEffect *after* mount,
@@ -63,8 +64,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     description,
     keywords,
     alternates: { canonical: `/questions/${slug}` },
-    openGraph: { type: "website", title, description, url, images: [image] },
-    twitter: { card: "summary_large_image", title, description, images: [image] },
+    openGraph: { type: "website", title, description, url, siteName: SITE_NAME, locale: OG_LOCALE, images: [image] },
+    twitter: { card: "summary_large_image", title, description, site: TWITTER_HANDLE, images: [image] },
   };
 }
 

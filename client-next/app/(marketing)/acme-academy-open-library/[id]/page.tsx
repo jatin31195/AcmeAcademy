@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { BASE_URL } from "@/lib/config";
 import { LibraryContentBody, type Section } from "@/components/library/library-content-body";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/LibraryContent.jsx. The original did 3
 // sequential/cascading client fetches (course meta, then subjects, then one
@@ -72,8 +73,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     description,
     keywords: `${courseMeta.title}, MCA notes, MCA lectures, NIMCET preparation, CUET PG MCA materials, ACME Academy`,
     alternates: { canonical: `/acme-academy-open-library/${id}` },
-    openGraph: { type: "website", title, description, url, images: ["https://www.acmeacademy.in/logo.png"] },
-    twitter: { card: "summary_large_image", title, description, images: ["https://www.acmeacademy.in/logo.png"] },
+    openGraph: { type: "website", title, description, url, siteName: SITE_NAME, locale: OG_LOCALE, images: ["https://www.acmeacademy.in/logo.png"] },
+    twitter: { card: "summary_large_image", title, description, site: TWITTER_HANDLE, images: ["https://www.acmeacademy.in/logo.png"] },
   };
 }
 

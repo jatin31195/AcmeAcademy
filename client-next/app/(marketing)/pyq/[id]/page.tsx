@@ -5,6 +5,7 @@ import Script from "next/script";
 import { BASE_URL } from "@/lib/config";
 import { BackButton, FullscreenButton } from "@/components/pyq/pdf-reader-toolbar";
 import PdfViewerClient from "@/components/pyq/pdf-viewer-dynamic";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/PdfReader.jsx. That original had NO <SEO>
 // component at all — a gap identified in the Phase 1 audit — so
@@ -37,8 +38,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     title,
     description,
     alternates: { canonical: `/pyq/${id}` },
-    openGraph: { type: "website", title, description, url: `/pyq/${id}` },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: { type: "website", title, description, url: `/pyq/${id}`, siteName: SITE_NAME, locale: OG_LOCALE },
+    twitter: { card: "summary_large_image", title, description, site: TWITTER_HANDLE },
   };
 }
 

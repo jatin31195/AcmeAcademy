@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
 import { Reveal } from "@/components/motion/reveal";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/OpenLibrary.jsx. The single framer-motion
 // usage (the hero <motion.h1>) is isolated into the <Reveal> Motion Wrapper
@@ -23,6 +24,8 @@ export const metadata: Metadata = {
     description:
       "Access ACME Academy's free Open Library — get MCA entrance notes, free courses, and practice sets for NIMCET, CUET-PG, and other MCA exams. 100% free learning resources.",
     url: "/acme-academy-open-library",
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
   twitter: {
@@ -30,6 +33,7 @@ export const metadata: Metadata = {
     title: "Open Library | Free MCA Study Materials & Notes",
     description:
       "Access ACME Academy's free Open Library — get MCA entrance notes, free courses, and practice sets for NIMCET, CUET-PG, and other MCA exams. 100% free learning resources.",
+    site: TWITTER_HANDLE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
 };

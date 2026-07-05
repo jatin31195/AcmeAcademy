@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { AboutContent } from "@/components/about/about-content";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/About.jsx. See about-content.tsx for why the
 // visual body is one Client Component rather than split into many Motion
@@ -20,6 +21,8 @@ export const metadata: Metadata = {
     description:
       "ACME Academy is India's most trusted MCA entrance coaching institute for NIMCET, CUET-PG, and MAH-CET. With 2000+ selections, 10+ years of experience, and nationwide students, ACME leads MCA preparation both online and offline.",
     url: "/about",
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
   twitter: {
@@ -27,6 +30,7 @@ export const metadata: Metadata = {
     title: "About ACME Academy | Best MCA Coaching in India (Online & Offline)",
     description:
       "ACME Academy is India's most trusted MCA entrance coaching institute for NIMCET, CUET-PG, and MAH-CET. With 2000+ selections, 10+ years of experience, and nationwide students, ACME leads MCA preparation both online and offline.",
+    site: TWITTER_HANDLE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
 };

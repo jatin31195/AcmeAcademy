@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Reveal } from "@/components/motion/reveal";
 import { ExamPatternTabs } from "@/components/exam-pattern/exam-pattern-tabs";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/ExamPattern.jsx. Server shell (hero +
 // metadata + JSON-LD) + the <ExamPatternTabs> Client Island for the
@@ -21,6 +22,8 @@ export const metadata: Metadata = {
     description:
       "Explore detailed MCA exam patterns for NIMCET, CUET-PG, MAH-CET, JMI, and VIT MCA. Know the syllabus, marking scheme, duration, and question structure for 2025 entrance exams.",
     url: "/exam-pattern",
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
   twitter: {
@@ -28,6 +31,7 @@ export const metadata: Metadata = {
     title: "MCA Exam Patterns 2025 | NIMCET, CUET-PG, MAH-CET, JMI & VIT MCA",
     description:
       "Explore detailed MCA exam patterns for NIMCET, CUET-PG, MAH-CET, JMI, and VIT MCA. Know the syllabus, marking scheme, duration, and question structure for 2025 entrance exams.",
+    site: TWITTER_HANDLE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
 };

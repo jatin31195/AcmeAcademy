@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported verbatim from client/src/pages/RefundPolicy.jsx, including the
 // pre-existing garbled character in section 4 ("عدم attendance") — carried
@@ -17,12 +18,15 @@ export const metadata: Metadata = {
     title: "Refund and Cancellation Policy | ACME Academy",
     description: "ACME Academy's Refund and Cancellation Policy covering fee payments, cancellations, and refund eligibility.",
     url: "/refund",
+    siteName: SITE_NAME,
+    locale: OG_LOCALE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Refund Policy | ACME Academy",
     description: "Refund and Cancellation Policy covering fee payments and refund eligibility.",
+    site: TWITTER_HANDLE,
     images: ["https://www.acmeacademy.in/logo.png"],
   },
 };

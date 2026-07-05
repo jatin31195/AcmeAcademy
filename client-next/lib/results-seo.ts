@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { BASE_URL } from "@/lib/config";
 import { optimizeCloudinaryUrl, getResultLabel, getResultAltText, getAnchorId, PAST_GALLERY_SLUG, type ResultDoc } from "@/lib/results-helpers";
+import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Server-side metadata/JSON-LD builder for all 3 Results route variants.
 // Fetches the same "main" result set the original computed client-side for
@@ -38,8 +39,8 @@ export function buildResultsMetadata(exam: string, year: string, canonicalPath: 
     description,
     keywords: "NIMCET results, NIMCET AIR, ACME Academy results, MCA entrance results",
     alternates: { canonical: canonicalPath },
-    openGraph: { type: "website", title, description, url: canonicalPath, images: ["https://www.acmeacademy.in/logo.png"] },
-    twitter: { card: "summary_large_image", title, description, images: ["https://www.acmeacademy.in/logo.png"] },
+    openGraph: { type: "website", title, description, url: canonicalPath, siteName: SITE_NAME, locale: OG_LOCALE, images: ["https://www.acmeacademy.in/logo.png"] },
+    twitter: { card: "summary_large_image", title, description, site: TWITTER_HANDLE, images: ["https://www.acmeacademy.in/logo.png"] },
   };
 }
 
@@ -54,7 +55,7 @@ export function buildResultsJsonLd(mainResults: ResultDoc[], exam: string, year:
   // only the final crumb must match the page URL exactly, the Exam and
   // Year crumbs both point at the same canonicalUrl.
   const breadcrumbItems: { "@type": string; position: number; name: string; item: string }[] = [
-    { "@type": "ListItem", position: 1, name: "Home", item: "https://www.acmeacademy.in/home" },
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://www.acmeacademy.in/" },
     { "@type": "ListItem", position: 2, name: "Results", item: RESULTS_BASE_URL },
   ];
   if (isFilteredView) {
