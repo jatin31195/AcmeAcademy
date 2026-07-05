@@ -8,7 +8,9 @@ import { ResultsClient } from "@/components/results/results-client";
 // Results URL and the highest-value SEO target of the whole module.
 export async function generateMetadata({ params }: { params: Promise<{ exam: string; year: string }> }): Promise<Metadata> {
   const { exam, year } = await params;
-  return buildResultsMetadata(exam.toUpperCase(), year, `/acme-academy-results/${exam}/${year}`);
+  const examUpper = exam.toUpperCase();
+  const mainResults = await fetchMainResults(examUpper, year);
+  return buildResultsMetadata(examUpper, year, `/acme-academy-results/${exam}/${year}`, mainResults);
 }
 
 export default async function ResultsByExamYearPage({ params }: { params: Promise<{ exam: string; year: string }> }) {

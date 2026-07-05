@@ -9,7 +9,10 @@ import { ResultsClient } from "@/components/results/results-client";
 const DEFAULT_EXAM = "NIMCET";
 const DEFAULT_YEAR = "2025";
 
-export const metadata: Metadata = buildResultsMetadata(DEFAULT_EXAM, DEFAULT_YEAR, "/acme-academy-results");
+export async function generateMetadata(): Promise<Metadata> {
+  const mainResults = await fetchMainResults(DEFAULT_EXAM, DEFAULT_YEAR);
+  return buildResultsMetadata(DEFAULT_EXAM, DEFAULT_YEAR, "/acme-academy-results", mainResults);
+}
 
 export default async function ResultsIndexPage() {
   const mainResults = await fetchMainResults(DEFAULT_EXAM, DEFAULT_YEAR);

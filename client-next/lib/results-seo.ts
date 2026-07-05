@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
 import { BASE_URL } from "@/lib/config";
-import { optimizeCloudinaryUrl, getResultLabel, getResultAltText, getAnchorId, PAST_GALLERY_SLUG, type ResultDoc } from "@/lib/results-helpers";
+import {
+  optimizeCloudinaryUrl,
+  getResultLabel,
+  getResultAltText,
+  getAnchorId,
+  rankedToppers,
+  toppersList,
+  PAST_GALLERY_SLUG,
+  type ResultDoc,
+} from "@/lib/results-helpers";
 import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Server-side metadata/JSON-LD builder for all 3 Results route variants.
@@ -30,9 +39,34 @@ export async function fetchMainResults(exam: string, year: string): Promise<Resu
   }
 }
 
-export function buildResultsMetadata(exam: string, year: string, canonicalPath: string): Metadata {
-  const title = `${exam || "NIMCET"} ${year} Top Results | ACME Academy – Best MCA Coaching`;
-  const description = `See ACME Academy's top ${exam} ${year} results and AIR ranks. India's most trusted NIMCET coaching with proven selections every year.`;
+export function buildResultsMetadata(exam: string, year: string, canonicalPath: string, mainResults: ResultDoc[] = []): Metadata {
+  const examLabel = exam || "NIMCET";
+  const sorted = rankedToppers(mainResults);
+
+  let title = `${examLabel} ${year} Top Results | ACME Academy – Best MCA Coaching`;
+  let description = `See ACME Academy's top ${examLabel} ${year} results and AIR ranks. India's most trusted NIMCET coaching with proven selections every year.`;
+
+  // Weave in real topper names when available — never invented. The search
+  // intent here is "{exam} {year} results", so that phrase leads the title
+  // (not a single topper's name); real toppers are appended after a pipe.
+  // Description prefers the largest topper list that still fits Google's
+  // ~160-char snippet, always keeping the highest-ranked students first.
+  if (sorted.length) {
+    if (sorted.length >= 2) {
+      title = `${examLabel} ${year} Results | ${toppersList(sorted, examLabel, 2)} | ACME Academy`;
+    } else {
+      title = `${examLabel} ${year} Top Results | ${toppersList(sorted, examLabel, 1)} | ACME Academy`;
+    }
+
+    for (let count = Math.min(3, sorted.length); count >= 1; count--) {
+      const list = toppersList(sorted, examLabel, count);
+      const candidate = `View ACME Academy's ${examLabel} ${year} Results with ${list}, topper photos, ranks, scores, and successful MCA entrance selections.`;
+      if (candidate.length <= 160 || count === 1) {
+        description = candidate;
+        break;
+      }
+    }
+  }
 
   return {
     title,

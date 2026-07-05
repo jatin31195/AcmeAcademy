@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Script from "next/script";
-import { fetchPracticeSetsForSeo, buildPracticeSetsJsonLd, practiceSetsMetadataBase } from "@/lib/practice-sets-seo";
+import {
+  fetchPracticeSetsForSeo,
+  fetchPracticeTopicsForSeo,
+  fetchTopicQuestionCount,
+  buildPracticeSetsJsonLd,
+  buildPracticeTopicMetadata,
+} from "@/lib/practice-sets-seo";
 import { PracticeSetsClient } from "@/components/practice-sets/practice-sets-client";
-import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -11,13 +16,16 @@ export async function generateMetadata({
   params: Promise<{ setId: string; categoryId: string; topicName: string }>;
 }): Promise<Metadata> {
   const { setId, categoryId, topicName } = await params;
+  const decodedTopic = decodeURIComponent(topicName);
   const canonical = `/acme-practice-sets/${setId}/${categoryId}/${topicName}`;
-  return {
-    ...practiceSetsMetadataBase,
-    alternates: { canonical },
-    openGraph: { type: "website", ...practiceSetsMetadataBase, url: canonical, siteName: SITE_NAME, locale: OG_LOCALE, images: ["https://www.acmeacademy.in/logo.png"] },
-    twitter: { card: "summary_large_image", ...practiceSetsMetadataBase, site: TWITTER_HANDLE, images: ["https://www.acmeacademy.in/logo.png"] },
-  };
+  const [practiceSets, categories, questionCount] = await Promise.all([
+    fetchPracticeSetsForSeo(),
+    fetchPracticeTopicsForSeo(setId),
+    fetchTopicQuestionCount(categoryId, decodedTopic),
+  ]);
+  const set = practiceSets.find((s) => s._id === setId);
+  const category = categories.find((c) => c._id === categoryId);
+  return buildPracticeTopicMetadata(set, category, decodedTopic, questionCount, canonical);
 }
 
 export default async function PracticeSetsByTopicPage({

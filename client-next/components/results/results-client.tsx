@@ -9,7 +9,16 @@ import { Button } from "@/components/ui/button";
 import { Trophy, Loader2, Filter, Award, BookOpen } from "lucide-react";
 import PastGallery from "@/components/results/past-gallery";
 import { BASE_URL } from "@/lib/config";
-import { optimizeCloudinaryUrl, buildResultSrcSet, getResultLabel, getResultAltText, getAnchorId, PAST_GALLERY_SLUG, type ResultDoc } from "@/lib/results-helpers";
+import {
+  optimizeCloudinaryUrl,
+  buildResultSrcSet,
+  getResultLabel,
+  getResultAltText,
+  getAnchorId,
+  buildToppersIntro,
+  PAST_GALLERY_SLUG,
+  type ResultDoc,
+} from "@/lib/results-helpers";
 
 // Ported from client/src/pages/Results.jsx — the most complex page in the
 // migration. All filtering/sorting/URL-sync/cascading-fetch/dedup logic is
@@ -45,10 +54,22 @@ export function ResultsClient({
   const [selectedExam, setSelectedExam] = useState(initialExam);
   const [selectedYear, setSelectedYear] = useState(initialYear);
 
-  const text = [
+  const genericText = [
     "At ACME Academy, we don't just teach — we mentor, inspire, and transform.",
     "Our structured NIMCET programs, expert faculty, and proven strategies empower students to unlock their full potential.",
   ];
+
+  // Real, visible topper names in the first on-page paragraph (not just the
+  // <meta description>) — Google's snippet generation often prefers visible
+  // page text, so this keeps the rendered HTML and the metadata in sync for
+  // a specific exam+year view. Falls back to the generic brand copy for the
+  // unfiltered "All"/"PastGallery" views where no single result set applies.
+  // (Named distinctly from the `isFilteredView` computed below from
+  // `mainResults`, which also excludes "MIXED" — this one only needs to know
+  // whether a single exam+year is selected, ahead of that later memo.)
+  const hasSpecificResultsView = selectedYear !== "All" && selectedYear !== "PastGallery";
+  const toppersIntro = hasSpecificResultsView ? buildToppersIntro(results, selectedExam, selectedYear) : null;
+  const text = toppersIntro ? [toppersIntro, genericText[1]] : genericText;
 
   useEffect(() => {
     if (selectedYear === "All") router.push(`/acme-academy-results`);

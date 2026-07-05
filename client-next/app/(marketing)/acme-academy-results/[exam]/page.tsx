@@ -22,7 +22,8 @@ const DEFAULT_EXAM = "NIMCET";
 export async function generateMetadata({ params }: { params: Promise<{ exam: string }> }): Promise<Metadata> {
   const { exam: yearOrGallerySlug } = await params;
   const resolvedYear = yearOrGallerySlug === PAST_GALLERY_SLUG ? "PastGallery" : yearOrGallerySlug;
-  return buildResultsMetadata(DEFAULT_EXAM, resolvedYear, `/acme-academy-results/${yearOrGallerySlug}`);
+  const mainResults = await fetchMainResults(DEFAULT_EXAM, resolvedYear);
+  return buildResultsMetadata(DEFAULT_EXAM, resolvedYear, `/acme-academy-results/${yearOrGallerySlug}`, mainResults);
 }
 
 export default async function ResultsByYearPage({ params }: { params: Promise<{ exam: string }> }) {
