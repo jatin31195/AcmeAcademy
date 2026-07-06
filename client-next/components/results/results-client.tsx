@@ -123,7 +123,12 @@ export function ResultsClient({
         const finalYears = ["All", ...numericYears, "PastGallery"];
         setAvailableYears(finalYears);
 
-        if (!numericYears.includes(Number(selectedYear)) && numericYears.length > 0) {
+        if (
+          selectedYear !== "All" &&
+          selectedYear !== "PastGallery" &&
+          !numericYears.includes(Number(selectedYear)) &&
+          numericYears.length > 0
+        ) {
           setSelectedYear(String(numericYears[0]));
         }
       } catch (err) {
