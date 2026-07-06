@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import HeroSection from "@/components/home/hero-section";
 import ResultSection from "@/components/home/result-section";
-import ExploreMoreSection from "@/components/home/explore-more-section";
 import TestimonialsSection from "@/components/home/testimonials-section";
 import CoursesSection from "@/components/home/courses-section";
 import WhyChooseUs from "@/components/home/why-choose-us";
@@ -134,7 +133,6 @@ export default function HomePage() {
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50/40">
         <HeroSection />
         <ResultSection />
-        <ExploreMoreSection />
         <TrustSection />
         <TestimonialsSection />
         <CoursesSection />

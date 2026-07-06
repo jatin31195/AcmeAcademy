@@ -2,7 +2,7 @@ import { Workflow } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 
 // Ported from client/src/components/home/HowItWorks.jsx. Static content,
-// Server shell + <Reveal> Motion Wrapper (same rationale as ExploreMoreSection).
+// Server shell + <Reveal> Motion Wrapper (same rationale as WhyChooseUs).
 const steps = [
   { title: "Step 1: Enroll", desc: "Join the batch that matches your target exam and learning pace." },
   { title: "Step 2: Learn", desc: "Attend interactive live classes or offline sessions with expert mentors." },

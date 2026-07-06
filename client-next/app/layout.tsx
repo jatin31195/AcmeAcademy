@@ -60,6 +60,10 @@ export const metadata: Metadata = {
     "BIT MCA",
     "VIT MCA",
     "DU MCA",
+    "ACME Test Portal",
+    "ACME Academy Test Portal",
+    "ACME online test portal",
+    "ACME Academy online test series",
   ],
   authors: [{ name: "ACME Academy" }],
   alternates: {

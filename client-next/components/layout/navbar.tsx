@@ -4,8 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, LogOut, UserCircle } from "lucide-react";
+import { Menu, X, ChevronDown, LogOut } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
+
+// Public "Account" (Login/Signup) entry point is intentionally hidden from
+// the header for now — /login and /signup routes and their components are
+// untouched and may be surfaced again later. This external link replaces it.
+const TEST_PORTAL_URL = "https://web.classplusapp.com/login?orgCode=acmea";
 
 const navItems = [
   { name: "Home", path: "/" },
@@ -34,10 +39,8 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showAuthDropdown, setShowAuthDropdown] = useState(false);
   const [showStudentDropdown, setShowStudentDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const authDropdownRef = useRef<HTMLDivElement>(null);
   const studentDropdownRef = useRef<HTMLDivElement>(null);
 
   const pathname = usePathname();
@@ -56,8 +59,6 @@ const Navbar = () => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node))
         setShowDropdown(false);
-      if (authDropdownRef.current && !authDropdownRef.current.contains(e.target as Node))
-        setShowAuthDropdown(false);
       if (studentDropdownRef.current && !studentDropdownRef.current.contains(e.target as Node))
         setShowStudentDropdown(false);
     };
@@ -172,36 +173,15 @@ const Navbar = () => {
           {/* AUTH SECTION */}
           <div className="hidden lg:flex items-center ml-2 shrink-0">
             {!isLoggedIn ? (
-              /* ── Single "Account" button with Login/Signup dropdown ── */
-              <div ref={authDropdownRef} className="relative">
-                <button
-                  onClick={() => setShowAuthDropdown(!showAuthDropdown)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-[#0072CE] to-[#66CCFF] text-white shadow-md hover:opacity-90 transition-all"
-                >
-                  <UserCircle className="h-4 w-4" />
-                  Account
-                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showAuthDropdown ? "rotate-180" : ""}`} />
-                </button>
-
-                {showAuthDropdown && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white shadow-xl rounded-xl border border-gray-100 py-1.5 z-50">
-                    <Link
-                      href="/login"
-                      onClick={() => setShowAuthDropdown(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-[#0072CE] transition-colors"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      href="/signup"
-                      onClick={() => setShowAuthDropdown(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-[#0072CE] transition-colors"
-                    >
-                      Sign Up
-                    </Link>
-                  </div>
-                )}
-              </div>
+              <a
+                href={TEST_PORTAL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="ACME Test Portal - Online Test Portal for ACME Academy Students"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-[#0072CE] to-[#66CCFF] text-white shadow-md hover:opacity-90 transition-all"
+              >
+                ACME Test Portal
+              </a>
             ) : (
               /* ── Logged in user avatar dropdown ── */
               <div ref={dropdownRef} className="relative">
@@ -295,22 +275,16 @@ const Navbar = () => {
 
               <div className="border-t pt-2 space-y-1">
                 {!isLoggedIn ? (
-                  <>
-                    <Link
-                      href="/login"
-                      onClick={() => setIsOpen(false)}
-                      className="block px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      href="/signup"
-                      onClick={() => setIsOpen(false)}
-                      className="block px-4 py-2 text-center text-sm font-medium bg-gradient-to-r from-[#0072CE] to-[#66CCFF] text-white rounded-lg"
-                    >
-                      Sign Up
-                    </Link>
-                  </>
+                  <a
+                    href={TEST_PORTAL_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="ACME Test Portal - Online Test Portal for ACME Academy Students"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-4 py-2 text-center text-sm font-medium bg-gradient-to-r from-[#0072CE] to-[#66CCFF] text-white rounded-lg"
+                  >
+                    ACME Test Portal
+                  </a>
                 ) : (
                   <>
                     <Link

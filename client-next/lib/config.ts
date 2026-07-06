@@ -7,3 +7,14 @@ export const BASE_URL =
 // call site in the ported pages 1:1 during later phases.
 export const Flask_URL =
   process.env.NEXT_PUBLIC_FLASK_BACKEND || "http://localhost:5001";
+
+// Classplus (org: acmea) — used by lib/classplus.ts (Free Tests) and
+// lib/classplus-courses.ts (homepage Our Courses). Called server-side only,
+// so the hashkey never reaches the browser bundle. No hardcoded fallbacks —
+// values must come from .env.local (never committed); see
+// .env.local.example for the required keys.
+export const CLASSPLUS_TEST_LIST_URL = process.env.CLASSPLUS_TEST_LIST_URL || "";
+export const CLASSPLUS_HASHKEY = process.env.CLASSPLUS_HASHKEY || "";
+export const CLASSPLUS_COURSE_PREVIEW_BASE_URL = process.env.CLASSPLUS_COURSE_PREVIEW_BASE_URL || "";
+export const CLASSPLUS_COURSE_PREVIEW_URL = `${CLASSPLUS_COURSE_PREVIEW_BASE_URL}/${CLASSPLUS_HASHKEY}`;
+export const CLASSPLUS_STORE_ORIGIN = process.env.CLASSPLUS_STORE_ORIGIN || "";

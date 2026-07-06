@@ -48,6 +48,17 @@ const nextConfig: NextConfig = {
   // Hide the "X-Powered-By: Next.js" response header (minor hardening,
   // matches the spirit of Express's existing security-header middleware).
   poweredByHeader: false,
+
+  // Classplus's course-thumbnail CDN, needed for next/image to optimize the
+  // "Our Courses" section's live course thumbnails (lib/classplus-courses.ts).
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn-wl-assets.classplus.co",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

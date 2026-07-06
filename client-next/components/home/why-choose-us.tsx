@@ -2,7 +2,7 @@ import { PlayCircle, MessageCircle, BookOpen, BarChart, Users, type LucideIcon }
 import { Reveal } from "@/components/motion/reveal";
 
 // Ported from client/src/components/home/WhyChooseUs.jsx. Static content,
-// Server shell + <Reveal> Motion Wrapper (same rationale as ExploreMoreSection/HowItWorks).
+// Server shell + <Reveal> Motion Wrapper (same rationale as HowItWorks).
 const features: { icon: LucideIcon; title: string; desc: string }[] = [
   {
     icon: PlayCircle,

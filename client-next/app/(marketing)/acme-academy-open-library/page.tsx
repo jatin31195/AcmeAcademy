@@ -54,18 +54,25 @@ const jsonLd = {
   mainEntity: {
     "@type": "ItemList",
     name: "Free MCA Learning Resources",
-    numberOfItems: 2,
+    numberOfItems: 3,
     itemListElement: [
       {
         "@type": "ListItem",
         position: 1,
+        name: "ACME Academy Free Tests",
+        description: "Attempt free mock tests for NIMCET, CUET, MAH-CET, JAMIA, VIT MCA and other MCA entrance exams.",
+        url: "https://www.acmeacademy.in/acme-free-tests",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
         name: "Acme Free Self Study Courses",
         description: "Access self-paced MCA courses with notes, theory, and guides from ACME Academy.",
         url: "https://www.acmeacademy.in/acme-free-courses",
       },
       {
         "@type": "ListItem",
-        position: 2,
+        position: 3,
         name: "Practice Sets",
         description: "Solve interactive MCA practice sets and previous year exam questions for NIMCET and other entrances.",
         url: "https://www.acmeacademy.in/acme-practice-sets",
@@ -121,7 +128,34 @@ export default function OpenLibraryPage() {
 
         {/* Special Cards */}
         <section className="py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Link
+              href="/acme-free-tests"
+              className="relative group rounded-2xl overflow-hidden shadow-lg bg-white/70 backdrop-blur-md hover:shadow-2xl transition-all duration-500 p-8 flex flex-col justify-between text-gray-800 border border-gray-200"
+            >
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                width={842}
+                height={711}
+                className="absolute top-4 right-4 w-24 opacity-10 pointer-events-none"
+              />
+
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <Image src="/logo.png" alt="Logo" width={842} height={711} className="h-10 w-10" />
+                  <h2 className="text-2xl font-bold tracking-tight">ACME Academy Free Tests</h2>
+                </div>
+                <p className="text-gray-700/90 mb-6 leading-relaxed">
+                  Attempt free mock tests for NIMCET, CUET, MAH-CET, JAMIA, VIT MCA and other MCA entrance
+                  exams. Practice real exam-level questions completely free.
+                </p>
+                <span className="font-medium flex items-center gap-2 group-hover:translate-x-2 transition-transform duration-300">
+                  Explore Free Tests →
+                </span>
+              </div>
+            </Link>
+
             <Link
               href="/acme-free-courses"
               className="relative group rounded-2xl overflow-hidden shadow-lg bg-white/70 backdrop-blur-md hover:shadow-2xl transition-all duration-500 p-8 flex flex-col justify-between text-gray-800 border border-gray-200"
