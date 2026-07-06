@@ -69,6 +69,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/contact-acme-academy`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE_URL}/acme-courses`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/acme-free-courses`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${SITE_URL}/acme-free-tests`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/acme-practice-sets`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/acme-academy-open-library`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/acme-academy-results`, changeFrequency: "daily", priority: 0.9 },
