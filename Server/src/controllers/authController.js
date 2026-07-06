@@ -644,6 +644,12 @@ export const loginUser = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      // Backend runs on api.acmeacademy.in, frontend on www.acmeacademy.in —
+      // without a shared parent domain, this cookie is invisible to the
+      // frontend's middleware.ts (it checks request.cookies on its own
+      // origin), so protected-route redirects back to the target page after
+      // login never see the user as authenticated.
+      ...(process.env.NODE_ENV === "production" && { domain: ".acmeacademy.in" }),
     };
 
     res
@@ -653,7 +659,7 @@ export const loginUser = async (req, res) => {
       })
       .cookie("refreshToken", refreshToken, {
         ...cookieOptions,
-        maxAge: 30 * 24 * 60 * 60 * 1000, 
+        maxAge: 30 * 24 * 60 * 60 * 1000,
       })
       .status(200)
       .json({
@@ -705,6 +711,7 @@ export const refreshToken = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      ...(process.env.NODE_ENV === "production" && { domain: ".acmeacademy.in" }),
       maxAge: 15 * 60 * 1000,
     });
 
@@ -721,10 +728,11 @@ export const logoutUser = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-      path: "/", 
+      path: "/",
+      ...(process.env.NODE_ENV === "production" && { domain: ".acmeacademy.in" }),
     };
 
-    
+
     res
       .clearCookie("accessToken", cookieOptions)
       .clearCookie("refreshToken", cookieOptions)
