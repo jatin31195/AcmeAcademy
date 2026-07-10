@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import rankBannerImage from "@/assets/images/rank_banner.jpeg";
+import kartikSharmaImage from "@/assets/images/kartik_sharma.jpeg";
+import patrikaImage from "@/assets/images/patrika.jpeg";
 import { Air1StoryContent } from "@/components/air1story/air1story-content";
-import { cldOptimize, cldSocialImage, cldResponsive, cldUploadDate } from "@/lib/cloudinary";
+import { cldOptimize, cldResponsive, cldUploadDate } from "@/lib/cloudinary";
 import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 const url = "https://www.acmeacademy.in/nimcet-2026-air-1-kartik-sharma";
-const HERO_IMAGE =
-  "https://res.cloudinary.com/dv69cqfru/image/upload/v1783062384/WhatsApp_Image_2026-07-03_at_12.08.09_AM_zglzkd.jpg";
-const PORTRAIT_IMAGE =
-  "https://res.cloudinary.com/dv69cqfru/image/upload/v1783062383/WhatsApp_Image_2026-07-03_at_12.08.08_AM_1_pij8nx.jpg";
-const PATRIKA_CLIPPING_IMAGE =
-  "https://res.cloudinary.com/dv69cqfru/image/upload/v1783062384/WhatsApp_Image_2026-07-03_at_12.08.07_AM_vrshq3.jpg";
+const HERO_IMAGE = rankBannerImage.src;
+const PORTRAIT_IMAGE = kartikSharmaImage.src;
+const PATRIKA_CLIPPING_IMAGE = patrikaImage.src;
+const HERO_IMAGE_URL = new URL(HERO_IMAGE, "https://www.acmeacademy.in").toString();
 const YOUTUBE_VIDEO_ID = "BpV5Y93HVzE";
 const YOUTUBE_START_SECONDS = 381;
 const KARTIK_LINKEDIN_URL = "https://www.linkedin.com/in/kartik-sharma-4756362a1/";
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
     url,
     siteName: SITE_NAME,
     locale: OG_LOCALE,
-    images: [cldSocialImage(HERO_IMAGE)],
+    images: [HERO_IMAGE_URL],
     publishedTime: "2026-07-02T00:00:00+05:30",
     modifiedTime: "2026-07-03T00:00:00+05:30",
   },
@@ -58,7 +59,7 @@ export const metadata: Metadata = {
     description:
       "ACME Academy produced AIR 1 in NIMCET 2026 — topper Kartik Sharma credits ACME Academy's mentorship, test series, and Quant lectures for his rank. Read his journey, in his own voice.",
     site: TWITTER_HANDLE,
-    images: [cldSocialImage(HERO_IMAGE)],
+    images: [HERO_IMAGE_URL],
   },
 };
 

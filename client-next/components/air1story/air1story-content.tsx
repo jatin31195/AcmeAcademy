@@ -30,6 +30,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import rankBannerImage from "@/assets/images/rank_banner.jpeg";
+import kartikSharmaImage from "@/assets/images/kartik_sharma.jpeg";
+import patrikaImage from "@/assets/images/patrika.jpeg";
 import { cldOptimize, cldResponsive } from "@/lib/cloudinary";
 
 // Ported from client/src/pages/Air1Story.jsx. Same rationale as About/Contact:
@@ -39,12 +42,9 @@ import { cldOptimize, cldResponsive } from "@/lib/cloudinary";
 // there is fully static/deterministic, same values this file used to compute
 // client-side via useMemo).
 
-export const HERO_IMAGE =
-  "https://res.cloudinary.com/dv69cqfru/image/upload/v1783062384/WhatsApp_Image_2026-07-03_at_12.08.09_AM_zglzkd.jpg";
-export const PORTRAIT_IMAGE =
-  "https://res.cloudinary.com/dv69cqfru/image/upload/v1783062383/WhatsApp_Image_2026-07-03_at_12.08.08_AM_1_pij8nx.jpg";
-export const PATRIKA_CLIPPING_IMAGE =
-  "https://res.cloudinary.com/dv69cqfru/image/upload/v1783062384/WhatsApp_Image_2026-07-03_at_12.08.07_AM_vrshq3.jpg";
+export const HERO_IMAGE = rankBannerImage.src;
+export const PORTRAIT_IMAGE = kartikSharmaImage.src;
+export const PATRIKA_CLIPPING_IMAGE = patrikaImage.src;
 
 export const YOUTUBE_VIDEO_ID = "BpV5Y93HVzE";
 const YOUTUBE_START_SECONDS = 381;

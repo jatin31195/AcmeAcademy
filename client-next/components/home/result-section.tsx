@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Bell } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import rankBannerImage from "@/assets/images/rank_banner.jpeg";
 import axios from "axios";
 import { BASE_URL } from "@/lib/config";
 
@@ -14,8 +15,7 @@ import { BASE_URL } from "@/lib/config";
 // URLs with dimensions unknown at build time (next/image would need a
 // guessed width/height that could distort them).
 
-const AIR1_POSTER =
-  "https://res.cloudinary.com/dv69cqfru/image/upload/f_auto,q_auto,w_800/v1783062384/WhatsApp_Image_2026-07-03_at_12.08.09_AM_zglzkd.jpg";
+const AIR1_POSTER = rankBannerImage.src;
 
 type ResultImage = { photoUrl: string; name?: string; rank?: string | number; exam?: string; year?: string | number };
 type Notice = { _id: string; title: string; link: string; tag: string };

@@ -19,6 +19,7 @@ export type FreeTestFolder = {
   id: string;
   name: string;
   category: "Ongoing" | "Completed";
+  folderCount: number;
   testCount: number;
 };
 
@@ -42,6 +43,7 @@ type RawClassplusItem = {
   testUrl?: unknown;
   webUrl?: unknown;
   testCount?: unknown;
+  folderCount?: unknown;
 };
 
 function mapItem(raw: RawClassplusItem): FreeTestsItem | null {
@@ -50,12 +52,15 @@ function mapItem(raw: RawClassplusItem): FreeTestsItem | null {
 
   if (raw.type === "folder" || raw.isFolder === true) {
     if (typeof raw._id !== "string" || !raw._id) return null;
+    const folderCount = typeof raw.folderCount === "number" ? raw.folderCount : 0;
+    const testCount = typeof raw.testCount === "number" ? raw.testCount : 0;
     return {
       kind: "folder",
       id: raw._id,
       name: raw.name,
       category,
-      testCount: typeof raw.testCount === "number" ? raw.testCount : 0,
+      folderCount,
+      testCount,
     };
   }
 

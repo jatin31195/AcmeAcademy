@@ -2,7 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, CalendarDays, ClipboardList, AlertTriangle, RefreshCcw, Folder, ArrowLeft } from "lucide-react";
+import {
+  Search,
+  CalendarDays,
+  ClipboardList,
+  AlertTriangle,
+  RefreshCcw,
+  Folder,
+  ArrowLeft,
+  BookOpen,
+  BarChart3,
+  Sparkles,
+  Target,
+  Clock3,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -24,6 +37,22 @@ function categoryBadgeClass(category: "Ongoing" | "Completed") {
     : "bg-gray-500/10 text-gray-600 border-gray-500/20 shrink-0";
 }
 
+function getFolderSummary(folderCount: number, testCount: number) {
+  const folderLabel = `${folderCount} folder${folderCount === 1 ? "" : "s"}`;
+  const testLabel = `${testCount} test${testCount === 1 ? "" : "s"}`;
+
+  if (folderCount > 0 && testCount > 0) {
+    return `${folderLabel} and ${testLabel} inside this folder.`;
+  }
+  if (folderCount > 0) {
+    return `${folderLabel} inside this folder.`;
+  }
+  if (testCount > 0) {
+    return `${testLabel} inside this folder.`;
+  }
+  return "0 items inside this folder.";
+}
+
 export function FreeTestsClient({
   initialData,
   pageSize,
@@ -39,7 +68,9 @@ export function FreeTestsClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
+  const [folderPreviewCounts, setFolderPreviewCounts] = useState<Record<string, { folderCount: number; testCount: number }>>({});
   const isFirstRun = useRef(true);
+  const { items, total } = data;
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
@@ -94,7 +125,49 @@ export function FreeTestsClient({
     return () => controller.abort();
   }, [debouncedSearch, page, pageSize, retryKey, folder]);
 
-  const { items, total } = data;
+  useEffect(() => {
+    const pendingFolders = items.filter(
+      (item): item is Extract<typeof items[number], { kind: "folder" }> => item.kind === "folder" && !folderPreviewCounts[item.id],
+    );
+
+    if (pendingFolders.length === 0) return;
+
+    const controllers = pendingFolders.map((item) => {
+      const params = new URLSearchParams({
+        limit: "1000",
+        offset: "0",
+        search: "",
+        folderId: item.id,
+      });
+
+      const controller = new AbortController();
+      fetch(`/api/free-tests?${params.toString()}`, { signal: controller.signal })
+        .then((res) => {
+          if (!res.ok) throw new Error("Folder preview request failed");
+          return res.json();
+        })
+        .then((result: FreeTestsResult) => {
+          const childItems = Array.isArray(result.items) ? result.items : [];
+          const folderCount = childItems.filter((child) => child.kind === "folder").length;
+          const testCount = childItems.filter((child) => child.kind === "test").length;
+
+          setFolderPreviewCounts((prev) => {
+            if (prev[item.id]?.folderCount === folderCount && prev[item.id]?.testCount === testCount) {
+              return prev;
+            }
+            return { ...prev, [item.id]: { folderCount, testCount } };
+          });
+        })
+        .catch(() => undefined);
+
+      return controller;
+    });
+
+    return () => {
+      controllers.forEach((controller) => controller.abort());
+    };
+  }, [items, folderPreviewCounts]);
+
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   // Folders shown before individual tests, stable within each group.
   const sortedItems = [...items].sort((a, b) => {
@@ -144,6 +217,37 @@ export function FreeTestsClient({
         </div>
       </section>
 
+      <section className="py-10 bg-white/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10">
+          <h2 id="free-tests-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+            Free NIMCET, CUET PG &amp; MAH-CET Mock Tests
+          </h2>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
+              <Sparkles className="h-4 w-4" /> ACME Free Test Series for serious NIMCET aspirants
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              Practice the <span className="text-primary">best NIMCET test series</span> with free mock tests and detailed analysis.
+            </h2>
+            <p className="text-lg text-muted-foreground leading-8">
+              ACME Academy&apos;s free test series helps students prepare for NIMCET, CUET PG, and MAH-CET with realistic mock tests, topic-wise practice, and instant solutions.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 p-7 text-white shadow-2xl">
+            <h3 className="text-xl font-semibold mb-4">Why students trust ACME</h3>
+            <ul className="space-y-4 text-sm text-slate-200">
+              <li className="flex gap-3"><Target className="h-5 w-5 mt-0.5 text-cyan-300" /> Real exam-style questions for NIMCET and MCA entrance preparation.</li>
+              <li className="flex gap-3"><BarChart3 className="h-5 w-5 mt-0.5 text-cyan-300" /> Performance insights that help identify weak areas quickly.</li>
+              <li className="flex gap-3"><Clock3 className="h-5 w-5 mt-0.5 text-cyan-300" /> Timed mock tests to improve speed and confidence.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
       {/* Tests */}
       <section id="free-tests" aria-labelledby="free-tests-heading" className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -154,17 +258,7 @@ export function FreeTestsClient({
               </Button>
               <h2 className="text-xl font-bold text-gray-800">{folder.name}</h2>
             </div>
-          ) : (
-            <div className="text-center max-w-3xl mx-auto mb-10">
-              <h2 id="free-tests-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                Free NIMCET, CUET PG &amp; MAH-CET Mock Tests
-              </h2>
-              <p className="text-muted-foreground">
-                Practice free online mock tests for NIMCET, CUET PG, and MAH-CET MCA entrance exams. New tests
-                are added regularly — attempt them instantly and start preparing right away, completely free.
-              </p>
-            </div>
-          )}
+          ) : null}
 
           {loading && <p className="text-center text-muted-foreground py-8">Loading tests...</p>}
 
@@ -190,38 +284,59 @@ export function FreeTestsClient({
           {!loading && !error && items.length > 0 && (
             <>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-                {sortedItems.map((item, index) =>
-                  item.kind === "folder" ? (
-                    <button
-                      key={`folder-${item.id}`}
-                      type="button"
-                      onClick={() => openFolder(item.id, item.name)}
-                      aria-label={`View ${item.testCount} test${item.testCount === 1 ? "" : "s"} inside ${item.name}`}
-                      className="relative h-full w-full text-left appearance-none bg-transparent border-0 p-0 m-0 cursor-pointer group pt-3"
-                    >
-                      {/* Folder tab, sits above the card body to read as a physical folder */}
-                      <div className="absolute top-0 left-6 w-24 h-5 rounded-t-lg bg-amber-300 border-2 border-b-0 border-amber-400 group-hover:bg-amber-200 transition-colors" />
-                      <Card className="relative bg-gradient-to-br from-amber-200 to-amber-100 border-2 border-amber-400 rounded-lg rounded-tl-none shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-105 h-full flex flex-col">
-                        <CardHeader>
-                          <div className="flex justify-between items-start gap-2">
-                            <div className="flex items-center gap-3">
-                              <Folder className="h-9 w-9 text-amber-600 shrink-0" strokeWidth={1.75} fill="currentColor" fillOpacity={0.15} />
-                              <CardTitle className="text-lg text-amber-900 drop-shadow-none">{item.name}</CardTitle>
+                {sortedItems.map((item, index) => {
+                  if (item.kind === "folder") {
+                    const previewCounts = folderPreviewCounts[item.id];
+                    const folderCount = previewCounts?.folderCount ?? item.folderCount;
+                    const testCount = previewCounts?.testCount ?? item.testCount;
+                    const folderLabel = `${folderCount} folder${folderCount === 1 ? "" : "s"}`;
+                    const testLabel = `${testCount} test${testCount === 1 ? "" : "s"}`;
+                    const summaryLabel = folderCount > 0 && testCount > 0
+                      ? `${folderLabel} and ${testLabel} inside this folder.`
+                      : folderCount > 0
+                        ? `${folderLabel} inside this folder.`
+                        : testCount > 0
+                          ? `${testLabel} inside this folder.`
+                          : "0 items inside this folder.";
+
+                    return (
+                      <button
+                        key={`folder-${item.id}`}
+                        type="button"
+                        onClick={() => openFolder(item.id, item.name)}
+                        aria-label={folderCount > 0 && testCount > 0
+                          ? `View ${folderLabel} and ${testLabel} inside ${item.name}`
+                          : folderCount > 0
+                            ? `View ${folderLabel} inside ${item.name}`
+                            : testCount > 0
+                              ? `View ${testLabel} inside ${item.name}`
+                              : `View contents inside ${item.name}`}
+                        className="relative h-full w-full text-left appearance-none bg-transparent border-0 p-0 m-0 cursor-pointer group pt-3"
+                      >
+                        {/* Folder tab, sits above the card body to read as a physical folder */}
+                        <div className="absolute top-0 left-6 w-24 h-5 rounded-t-lg bg-amber-300 border-2 border-b-0 border-amber-400 group-hover:bg-amber-200 transition-colors" />
+                        <Card className="relative bg-gradient-to-br from-amber-200 to-amber-100 border-2 border-amber-400 rounded-lg rounded-tl-none shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-105 h-full flex flex-col">
+                          <CardHeader>
+                            <div className="flex justify-between items-start gap-2">
+                              <div className="flex items-center gap-3">
+                                <Folder className="h-9 w-9 text-amber-600 shrink-0" strokeWidth={1.75} fill="currentColor" fillOpacity={0.15} />
+                                <CardTitle className="text-lg text-amber-900 drop-shadow-none">{item.name}</CardTitle>
+                              </div>
+                              <Badge className={categoryBadgeClass(item.category)}>{item.category}</Badge>
                             </div>
-                            <Badge className={categoryBadgeClass(item.category)}>{item.category}</Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="flex flex-col flex-1">
-                          <p className="text-sm text-amber-800/80 flex-1 mb-6">
-                            {item.testCount} test{item.testCount === 1 ? "" : "s"} inside this folder.
-                          </p>
-                          <span className="font-semibold flex items-center gap-2 text-amber-700 mt-auto">
-                            View Tests →
-                          </span>
-                        </CardContent>
-                      </Card>
-                    </button>
-                  ) : (
+                          </CardHeader>
+                          <CardContent className="flex flex-col flex-1">
+                            <p className="text-sm text-amber-800/80 flex-1 mb-6">{summaryLabel}</p>
+                            <span className="font-semibold flex items-center gap-2 text-amber-700 mt-auto">
+                              View Tests →
+                            </span>
+                          </CardContent>
+                        </Card>
+                      </button>
+                    );
+                  }
+
+                  return (
                     <article key={item.attemptUrl} aria-labelledby={`test-title-${index}`} className="h-full">
                       <Card className="glass hover-glow transition-all duration-300 hover:scale-105 h-full flex flex-col">
                         <CardHeader>
@@ -261,8 +376,18 @@ export function FreeTestsClient({
                         </CardContent>
                       </Card>
                     </article>
-                  )
-                )}
+                  );
+                })}
+              </div>
+
+              <div className="mt-16 rounded-3xl border border-slate-200 bg-slate-50 p-8 shadow-sm">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Why ACME test series is trusted by serious MCA aspirants</h3>
+                <p className="text-muted-foreground leading-8">
+                  ACME Academy has built its reputation by helping students prepare with discipline, structure, and real exam exposure. Our free test series is not a random collection of questions; it is a carefully planned learning system that helps students sharpen their preparation for NIMCET, MCA entrance, and related online assessments. Students benefit from previous year pattern awareness, topic-level revision, full-length mock tests, instant solutions, and performance analytics that make every test count.
+                </p>
+                <p className="text-muted-foreground leading-8 mt-4">
+                  The best part is that students can begin with free tests, measure their level, and then move into a more focused preparation routine without feeling overwhelmed. By combining free mock tests, full-length tests, and detailed insights, ACME makes it easier for students to improve rank potential and gain confidence before the final exam.
+                </p>
               </div>
 
               {totalPages > 1 && (
