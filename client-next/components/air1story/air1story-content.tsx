@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -33,7 +33,6 @@ import { Button } from "@/components/ui/button";
 import rankBannerImage from "@/assets/images/rank_banner.jpeg";
 import kartikSharmaImage from "@/assets/images/kartik_sharma.jpeg";
 import patrikaImage from "@/assets/images/patrika.jpeg";
-import { cldOptimize, cldResponsive } from "@/lib/cloudinary";
 
 // Ported from client/src/pages/Air1Story.jsx. Same rationale as About/Contact:
 // pervasive framer-motion + heavy local state (lightbox, two video players,
@@ -112,42 +111,6 @@ function Counter({ end, duration = 1600 }: { end: number; duration?: number }) {
   return count;
 }
 
-function ProgressiveImage({
-  src,
-  srcSet,
-  sizes,
-  alt,
-  className = "",
-  loading,
-  fetchPriority,
-  style,
-}: {
-  src: string;
-  srcSet?: string;
-  sizes?: string;
-  alt: string;
-  className?: string;
-  loading?: "lazy" | "eager";
-  fetchPriority?: "high" | "low" | "auto";
-  style?: CSSProperties;
-}) {
-  const [loaded, setLoaded] = useState(false);
-  return (
-    // eslint-disable-next-line @next/next/no-img-element -- external Cloudinary URLs with responsive srcSet, ported as-is
-    <img
-      src={src}
-      srcSet={srcSet}
-      sizes={sizes}
-      alt={alt}
-      loading={loading}
-      fetchPriority={fetchPriority}
-      style={style}
-      onLoad={() => setLoaded(true)}
-      className={`${className} transition-opacity duration-700 ${loaded ? "opacity-100" : "opacity-0"}`}
-    />
-  );
-}
-
 export function Air1StoryContent() {
   const reduceMotion = useReducedMotion();
 
@@ -200,7 +163,7 @@ export function Air1StoryContent() {
   }, [lightboxIndex]);
 
   const current = lightboxIndex !== null ? galleryImages[lightboxIndex] : null;
-  const currentLarge = current ? cldOptimize(current.src, "f_auto,q_auto,w_1600") : null;
+  const currentLarge = current ? current.src : null;
 
   const youtubeThumbnail = `https://i.ytimg.com/vi/${YOUTUBE_VIDEO_ID}/hqdefault.jpg`;
   const youtubeEmbedUrl = `https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?start=${YOUTUBE_START_SECONDS}&autoplay=1`;
@@ -316,8 +279,9 @@ export function Air1StoryContent() {
                   className="relative block w-full cursor-zoom-in rounded-[2rem] overflow-hidden ring-4 ring-yellow-300/40 shadow-2xl"
                   aria-label="View full-size photo of Kartik Sharma"
                 >
-                  <ProgressiveImage
-                    {...cldResponsive(PORTRAIT_IMAGE, [400, 600, 800])}
+                  {/* eslint-disable-next-line @next/next/no-img-element -- fixed aspect-ratio crop from a local static asset */}
+                  <img
+                    src={PORTRAIT_IMAGE}
                     alt="Kartik Sharma, ACME Academy student, AIR 1 in NIMCET 2026"
                     fetchPriority="high"
                     style={{ aspectRatio: "4 / 5" }}
@@ -700,8 +664,9 @@ export function Air1StoryContent() {
                         className="shrink-0 cursor-zoom-in"
                         aria-label="View full-size photo of Kartik Sharma"
                       >
-                        <ProgressiveImage
-                          {...cldResponsive(PORTRAIT_IMAGE, [200, 300])}
+                        {/* eslint-disable-next-line @next/next/no-img-element -- small avatar crop from a local static asset */}
+                        <img
+                          src={PORTRAIT_IMAGE}
                           alt="Kartik Sharma, ACME Academy student, AIR 1 in NIMCET 2026"
                           loading="lazy"
                           className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-2 ring-primary/20 mx-auto"
@@ -733,8 +698,9 @@ export function Air1StoryContent() {
                       className="block w-full cursor-zoom-in rounded-2xl overflow-hidden shadow-xl border border-gray-200"
                       aria-label="View full-size AIR 1 poster"
                     >
-                      <ProgressiveImage
-                        {...cldResponsive(HERO_IMAGE, [400, 600])}
+                      {/* eslint-disable-next-line @next/next/no-img-element -- fixed aspect-ratio crop from a local static asset */}
+                      <img
+                        src={HERO_IMAGE}
                         alt="ACME Academy NIMCET 2026 AIR 1 achievement poster featuring Kartik Sharma"
                         loading="lazy"
                         style={{ aspectRatio: "1 / 1" }}
@@ -759,8 +725,9 @@ export function Air1StoryContent() {
                       className="block w-full cursor-zoom-in bg-white rounded-2xl shadow-xl border border-gray-200 p-2"
                       aria-label="View full-size Patrika newspaper coverage"
                     >
-                      <ProgressiveImage
-                        {...cldResponsive(PATRIKA_CLIPPING_IMAGE, [400, 600])}
+                      {/* eslint-disable-next-line @next/next/no-img-element -- fixed aspect-ratio crop from a local static asset */}
+                      <img
+                        src={PATRIKA_CLIPPING_IMAGE}
                         alt="Patrika newspaper clipping covering ACME Academy's NIMCET 2026 AIR 1 result"
                         loading="lazy"
                         style={{ aspectRatio: "1568 / 1003" }}
@@ -864,7 +831,7 @@ export function Air1StoryContent() {
               onClick={(e) => e.stopPropagation()}
               className="max-w-full max-h-[90vh] flex flex-col items-center"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- external Cloudinary URL, ported as-is */}
+              {/* eslint-disable-next-line @next/next/no-img-element -- lightbox needs the raw local asset URL, not next/image */}
               <img src={currentLarge ?? undefined} alt={current.alt} className="max-w-full max-h-[75vh] rounded-xl shadow-2xl" />
               <figcaption className="text-white/80 text-sm mt-3 text-center">{current.caption}</figcaption>
               <p className="text-white/50 text-xs mt-1">

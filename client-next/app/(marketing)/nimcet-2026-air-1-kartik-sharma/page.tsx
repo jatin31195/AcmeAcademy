@@ -4,7 +4,7 @@ import rankBannerImage from "@/assets/images/rank_banner.jpeg";
 import kartikSharmaImage from "@/assets/images/kartik_sharma.jpeg";
 import patrikaImage from "@/assets/images/patrika.jpeg";
 import { Air1StoryContent } from "@/components/air1story/air1story-content";
-import { cldOptimize, cldResponsive, cldUploadDate } from "@/lib/cloudinary";
+import { cldOptimize, cldUploadDate } from "@/lib/cloudinary";
 import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 const url = "https://www.acmeacademy.in/nimcet-2026-air-1-kartik-sharma";
@@ -150,24 +150,24 @@ const jsonLd = {
     {
       "@id": `${url}#image-poster`,
       "@type": "ImageObject",
-      contentUrl: cldOptimize(HERO_IMAGE),
-      url: cldOptimize(HERO_IMAGE),
+      contentUrl: HERO_IMAGE,
+      url: HERO_IMAGE,
       description: "ACME Academy NIMCET 2026 AIR 1 achievement poster — Kartik Sharma",
       name: "NIMCET 2026 AIR 1 — Kartik Sharma",
     },
     {
       "@id": `${url}#image-portrait`,
       "@type": "ImageObject",
-      contentUrl: cldOptimize(PORTRAIT_IMAGE),
-      url: cldOptimize(PORTRAIT_IMAGE),
+      contentUrl: PORTRAIT_IMAGE,
+      url: PORTRAIT_IMAGE,
       description: "Kartik Sharma, ACME Academy student, AIR 1 in NIMCET 2026 entrance exam",
       name: "Kartik Sharma — NIMCET 2026 AIR 1",
     },
     {
       "@id": `${url}#image-patrika`,
       "@type": "ImageObject",
-      contentUrl: cldOptimize(PATRIKA_CLIPPING_IMAGE),
-      url: cldOptimize(PATRIKA_CLIPPING_IMAGE),
+      contentUrl: PATRIKA_CLIPPING_IMAGE,
+      url: PATRIKA_CLIPPING_IMAGE,
       description: "National newspaper coverage of ACME Academy's NIMCET 2026 AIR 1 achievement",
       name: "Patrika Coverage — ACME Academy NIMCET 2026 AIR 1",
     },
@@ -183,11 +183,10 @@ const jsonLd = {
 };
 
 export default function Air1StoryPage() {
-  const heroImg = cldResponsive(HERO_IMAGE);
   return (
     <>
       <Script id="ld-air1story" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <link rel="preload" as="image" href={heroImg.src} imageSrcSet={heroImg.srcSet} fetchPriority="high" />
+      <link rel="preload" as="image" href={HERO_IMAGE} fetchPriority="high" />
       <Air1StoryContent />
     </>
   );
