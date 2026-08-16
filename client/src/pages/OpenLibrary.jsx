@@ -3,6 +3,7 @@ import logo from "/logo.png";
 import { BASE_URL } from "../config";
 import { motion } from "framer-motion";
 import SEO from "../components/SEO";
+import AppDownloadSection from "@/components/home/AppDownloadSection";
 
 const OpenLibrary = () => {
   return (
@@ -146,6 +147,7 @@ const OpenLibrary = () => {
 
         </div>
       </section>
+      <AppDownloadSection />
     </div>
     </>
   );

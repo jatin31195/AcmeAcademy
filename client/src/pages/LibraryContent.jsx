@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import { ArrowLeft, FileText, Youtube, BookOpen, Flag, StickyNote, Play, Lock } from "lucide-react";
 import AcmePlayer from "./AcmePlayer";
+import AppDownloadSection from "@/components/home/AppDownloadSection";
 import axios from "axios";
 import { BASE_URL } from "../config";
 import SEO from "../components/SEO";
@@ -439,6 +440,8 @@ export default function LibraryContent() {
           </div>
         </div>
       )}
+      
+      <AppDownloadSection />
     </div>
     </>
   );

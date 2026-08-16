@@ -194,14 +194,17 @@ const milestones = [
         "name": "Dr. Kartikey Pandey",
         "jobTitle": "Director & Mathematics Mentor",
         "alumniOf": "NIT Raipur",
-        "sameAs": "https://www.linkedin.com/in/kartikey-pandey"
+        "sameAs": [
+          "https://in.linkedin.com/in/dr-kartikey-pandey-98a23497"
+        ]
       },
       "description": "ACME Academy offers India's best online and offline MCA coaching with 10+ years of experience and 2000+ selections in NITs, DU, JNU, BHU, JMI, and HCU.",
       "slogan": "Transforming Aspirations into Achievements",
       "sameAs": [
         "https://www.instagram.com/acmeacademy.in",
         "https://www.facebook.com/acmeacademy.in",
-        "https://www.youtube.com/@acmeacademy"
+        "https://www.youtube.com/@acmeacademy",
+        "https://in.linkedin.com/company/acme-academy"
       ],
       "address": [
         {

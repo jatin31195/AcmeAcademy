@@ -198,7 +198,8 @@ const  jsonLd={
       "sameAs": [
         "https://www.instagram.com/acmeacademy.in",
         "https://www.facebook.com/acmeacademy.in",
-        "https://www.youtube.com/@acmeacademy"
+        "https://www.youtube.com/@acmeacademy",
+        "https://in.linkedin.com/company/acme-academy"
       ],
       "contactPoint": [
         {

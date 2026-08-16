@@ -9,9 +9,12 @@ import HowItWorks from "@/components/home/HowItWorks";
 import FAQSection from "@/components/home/FAQSection";
 import TrustSection from "@/components/home/TrustSection";
 import TopVideos from "@/components/home/TopVideos";
+import AppDownloadSection from "@/components/home/AppDownloadSection";
+import { createAcmeJsonLd } from "@/lib/seo-constants";
 import JSConfetti from "js-confetti";
 
 import SEO from "../components/SEO";
+const jsonLd = createAcmeJsonLd("EducationalOrganization");
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "EducationalOrganization",
@@ -22,7 +25,8 @@ const jsonLd = {
     "https://www.facebook.com/acmeacademynimcetmcacoaching",
     "https://www.youtube.com/c/ACMEACADEMYMCAENTRANCEACADEMYNIMCETAIMCA",
     "https://www.instagram.com/acmeacademy.in/",
-    "https://t.me/Acme_Academy"
+    "https://t.me/Acme_Academy",
+    "https://in.linkedin.com/company/acme-academy"
   ],
   "description": "India’s most trusted MCA Entrance Coaching platform for NIMCET, CUET, MAH-CET, and JMI exams.",
   "founder": {
@@ -34,7 +38,10 @@ const jsonLd = {
       "name": "National Institute of Technology, Raipur"
     },
     "qualification": "MCA, Ph.D. Scholar",
-    "image": "https://www.acmeacademy.in/assets/KP.png"
+    "image": "https://www.acmeacademy.in/assets/KP.png",
+    "sameAs": [
+      "https://in.linkedin.com/in/dr-kartikey-pandey-98a23497"
+    ]
   },
   "contactPoint": [
     {
@@ -107,6 +114,7 @@ function Home() {
 
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50/40">
       <HeroSection />
+      <AppDownloadSection />
 
       <ResultSection />
       <ExploreMoreSection />
