@@ -31,7 +31,7 @@ const AppDownloadSection = () => {
 
   return (
     <section className="py-16 bg-gradient-to-r from-blue-50 via-white to-blue-50">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -45,9 +45,6 @@ const AppDownloadSection = () => {
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
               Download Our App
             </h2>
-            <p className="text-gray-600 text-base sm:text-lg max-w-xl mx-auto">
-              Get access to live classes, practice tests, and study materials anytime, anywhere on your device.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
