@@ -61,15 +61,34 @@ const AppDownloadSection = () => {
   };
 
   return (
-    <section className="py-12 bg-white">
-      <div className="max-w-2xl mx-auto px-4">
+    <section className="py-16 bg-gradient-to-r from-blue-50 via-white to-blue-50">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial="hidden"
-          whileInView="visible"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          variants={containerVariants}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+          transition={{ duration: 0.6 }}
+          className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 sm:p-10"
         >
+          <div className="text-center mb-10">
+            <p className="text-xs sm:text-sm font-semibold tracking-widest text-blue-600 uppercase mb-3">
+              📱 Get The ACME App
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+              Download Our App
+            </h2>
+            <p className="text-gray-600 text-base sm:text-lg max-w-xl mx-auto">
+              Get access to live classes, practice tests, and study materials anytime, anywhere on your device.
+            </p>
+          </div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={containerVariants}
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+          >
           {apps.map((app, index) => {
             const IconComponent = app.icon;
             return (
@@ -96,6 +115,7 @@ const AppDownloadSection = () => {
               </motion.a>
             );
           })}
+          </motion.div>
         </motion.div>
       </div>
     </section>
