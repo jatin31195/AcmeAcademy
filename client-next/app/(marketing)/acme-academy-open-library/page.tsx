@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
 import { Reveal } from "@/components/motion/reveal";
+import AppDownloadSection from "@/components/home/app-download-section";
 import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/OpenLibrary.jsx. The single framer-motion
@@ -210,6 +211,8 @@ export default function OpenLibraryPage() {
             </Link>
           </div>
         </section>
+
+        <AppDownloadSection />
       </div>
     </>
   );

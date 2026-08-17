@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { BASE_URL } from "@/lib/config";
 import { LibraryContentBody, type Section } from "@/components/library/library-content-body";
+import AppDownloadSection from "@/components/home/app-download-section";
 import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/LibraryContent.jsx. The original did 3
@@ -144,6 +145,7 @@ export default async function LibraryContentPage({ params }: { params: Promise<{
     <>
       <Script id="ld-library-course" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <LibraryContentBody initialSections={sections} courseTitle={courseMeta.title} courseDescription={courseMeta.description} />
+      <AppDownloadSection />
     </>
   );
 }

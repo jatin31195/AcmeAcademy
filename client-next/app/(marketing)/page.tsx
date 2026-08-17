@@ -10,6 +10,7 @@ import FAQSection from "@/components/home/faq-section";
 import { faqs } from "@/lib/faq-data";
 import TrustSection from "@/components/home/trust-section";
 import TopVideos from "@/components/home/top-videos";
+import AppDownloadSection from "@/components/home/app-download-section";
 import { SITE_NAME, OG_LOCALE, TWITTER_HANDLE } from "@/lib/seo";
 
 // Ported from client/src/pages/Home.jsx. This file lives at
@@ -62,6 +63,7 @@ const jsonLd = {
     "https://www.youtube.com/c/ACMEACADEMYMCAENTRANCEACADEMYNIMCETAIMCA",
     "https://www.instagram.com/acmeacademy.in/",
     "https://t.me/Acme_Academy",
+    "https://in.linkedin.com/company/acme-academy",
   ],
   description: "India's most trusted MCA Entrance Coaching platform for NIMCET, CUET, MAH-CET, and JMI exams.",
   founder: {
@@ -74,6 +76,9 @@ const jsonLd = {
     },
     qualification: "MCA, Ph.D. Scholar",
     image: "https://www.acmeacademy.in/assets/KP.png",
+    sameAs: [
+      "https://in.linkedin.com/in/dr-kartikey-pandey-98a23497",
+    ],
   },
   contactPoint: [
     {
@@ -132,6 +137,7 @@ export default function HomePage() {
 
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50/40">
         <HeroSection />
+        <AppDownloadSection />
         <ResultSection />
         <TrustSection />
         <TestimonialsSection />
